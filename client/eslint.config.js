@@ -23,6 +23,7 @@ export default defineConfig([
       "@typescript-eslint/no-unused-vars": "off",
       "react-hooks/refs": "off",
       "react-hooks/static-components": "off",
+      "react-hooks/set-state-in-effect": "off",
     },
   },
 ]);

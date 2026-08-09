@@ -23,6 +23,7 @@ export const FooterColumn = ({ title, items }: FooterColumnProps) => {
       <Stack spacing={0.5}>
         {items.map((item) => (
           <Link
+            key={item.text}
             href={item.href}
             color="inherit"
             underline={item.href ? "hover" : "none"}

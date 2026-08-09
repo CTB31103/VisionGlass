@@ -9,6 +9,7 @@ import {
   PageNotFound,
   Quote,
   Reviews,
+  ServicesPage,
   Team,
 } from "../pages";
 import { FooterLayout, HeaderLayout } from "@/components";
@@ -23,6 +24,7 @@ export const RootRouter = () => {
           <Route index path={ROUTES.HOME} element={<Home />} />
           <Route path={ROUTES.ABOUT} element={<About />} />
           <Route path={ROUTES.CONTACT} element={<Contact />} />
+          <Route path={ROUTES.SERVICES} element={<ServicesPage />} />
           <Route path={ROUTES.QUOTES} element={<Quote />} />
 
           <Route path={ROUTES.LOGIN} element={<Login />} />
@@ -39,3 +41,9 @@ export const RootRouter = () => {
     </Routes>
   );
 };
+
+// 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
+
+// git remote set-url origin https://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@://github.com
+//
+// https://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@github.com/CTB31103/VisionAutoGlass.git

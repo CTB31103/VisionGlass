@@ -9,11 +9,12 @@ export const THeading = ({
   align,
   bungee,
   thin,
-}: PropsWithChildren<TProps & { thin?: boolean }>) => {
+  large,
+}: PropsWithChildren<TProps & { thin?: boolean; large?: boolean }>) => {
   return (
     <Text
       fontWeight={"bold"}
-      fontSize={TEXT_SIZES.large}
+      fontSize={large ? TEXT_SIZES.largest : TEXT_SIZES.large}
       textAlign={align}
       className={clsx(
         bungee ? (thin ? "bungee-outline-thin" : "bungee-outline") : "",

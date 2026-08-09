@@ -5,3 +5,4 @@ export * from "./useWindowDimensions";
 export * from "./useScreenSize";
 export * from "./useExactScreenSizeValues";
 export * from "./useScrollDirection";
+export * from "./usePagePosition";

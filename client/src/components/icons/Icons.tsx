@@ -9,6 +9,8 @@ import StarBorderIcon from "@mui/icons-material/StarBorder";
 import type { SvgIconTypeMap } from "@mui/material";
 import type { OverridableComponent } from "@mui/material/OverridableComponent";
 
+import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
+
 export const Icons = {
   ChevronDown: KeyboardArrowDownIcon,
   ChevronLeft: KeyboardArrowLeftIcon,
@@ -18,6 +20,8 @@ export const Icons = {
   StarFill: StarIcon,
   StarHalf: StarHalfIcon,
   StarOutline: StarBorderIcon,
+
+  Medal: WorkspacePremiumIcon,
 };
 
 export type IconType = OverridableComponent<SvgIconTypeMap<object, "svg">> & {

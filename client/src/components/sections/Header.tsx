@@ -1,5 +1,5 @@
 import { IMAGES } from "@/assets";
-import { useScrollDirection } from "@/hooks";
+import { usePagePosition, useScrollDirection, useTimeoutEffect } from "@/hooks";
 import { useUserStore } from "@/stores";
 import { Text } from "@chakra-ui/react";
 
@@ -13,6 +13,7 @@ import { HeaderNavLinks } from "./HeaderNavLinks";
 export const Header = () => {
   const isLoggedIn = useUserStore((state) => state.loggedIn);
   const direction = useScrollDirection();
+  const { top } = usePagePosition({ allowableRange: 50 });
 
   const isGoingDown = direction === "down";
 
@@ -20,12 +21,22 @@ export const Header = () => {
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
+  const [expanded, setExpanded] = useState(true);
+
+  useTimeoutEffect(
+    () => {
+      setExpanded(!isGoingDown || top);
+    },
+    [isGoingDown, top],
+    50,
+  );
+
   return (
-    <Stack className={clsx(`sticky top-0 w-full z-10`)}>
+    <Stack className={clsx(`sticky top-0 w-full z-5`)}>
       <div
         className={clsx(
           "duration-500! transition-[max-height]! overflow-hidden",
-          isGoingDown ? "max-h-0" : "max-h-40",
+          expanded ? "max-h-40" : "max-h-0",
         )}
       >
         <Stack
@@ -56,6 +67,7 @@ export const Header = () => {
               position: "absolute",
               top: 0,
               left: 0,
+              zIndex: 1,
               width: "100%",
               height: "100%",
               paddingInline: 2,
@@ -171,7 +183,8 @@ export const Header = () => {
         <div
           className={clsx(
             "origin-top duration-500! transition-[max-height]! overflow-hidden",
-            isGoingDown ? "max-h-0" : "max-h-40",
+            // isGoingDown && !top ? "max-h-0" : "max-h-40",
+            expanded ? "max-h-40" : "max-h-0",
           )}
         >
           <HeaderNavLinks

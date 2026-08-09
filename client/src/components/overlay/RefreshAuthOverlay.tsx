@@ -142,6 +142,7 @@ export const RefreshAuthOverlay = () => {
           animate={{ translateY: 0 }}
           exit={{ translateY: "100%" }}
           transition={{ bounce: 0, duration: 0.25 }}
+          style={{ zIndex: 10 }}
         >
           <Center className="relative h-full">
             <Stack>

@@ -8,3 +8,4 @@ export * from "./quote";
 export * from "./reviews";
 export * from "./team";
 export * from "./pageNotFound";
+export * from "./services";

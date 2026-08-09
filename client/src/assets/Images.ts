@@ -33,12 +33,21 @@ import WindshieldReplacement from "./media/WindshieldReplacement.webp";
 import Jeep from "./media/Jeep.png";
 import Stone from "./media/Stone.png";
 import Carnival from "./media/Carnival.png";
+import CartoonInstaller from "./media/CartoonInstaller.png";
 
 import ServiceWR from "./media/Service_WR.png";
 import ServiceADAS from "./media/Service_ADAS.png";
 import ServiceAG from "./media/Service_AG.png";
 import ServiceMB from "./media/Service_MB.png";
+import Service_MB_Rect from "./media/Service_MB_Rect.png";
 import ServiceCC from "./media/Service_CC.png";
+
+import IconsCarInsurance from "./media/icons-car-insurance.png";
+import IconsTimer from "./media/icons-timer.png";
+import IconsWarranty from "./media/icons-warranty.png";
+import IconsTechnician from "./media/icons-technician.png";
+import IconsDeliveryVan from "./media/icons-delivery-van.png";
+import IconsOEM from "./media/icons-oem.png";
 
 export const IMAGES_V1 = {
   CarDamageLRSide,
@@ -77,10 +86,18 @@ export const IMAGES = {
   WindshieldReplacement,
   Jeep,
   Stone,
+  CartoonInstaller,
   ServiceWR,
   ServiceADAS,
   ServiceAG,
   ServiceMB,
+  Service_MB_Rect,
   ServiceCC,
   Carnival,
+  IconsCarInsurance,
+  IconsTimer,
+  IconsWarranty,
+  IconsTechnician,
+  IconsDeliveryVan,
+  IconsOEM,
 };
