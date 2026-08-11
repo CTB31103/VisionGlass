@@ -7,6 +7,7 @@ export type InputProps = {
   required?: boolean;
   optional?: boolean;
   orientation?: "horizontal" | "vertical";
+  disabled?: boolean;
 
   secure?: boolean;
 };

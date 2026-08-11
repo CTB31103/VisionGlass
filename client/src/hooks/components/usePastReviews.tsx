@@ -1,5 +1,5 @@
 import type { StarRating } from "@/components";
-import React, { useState } from "react";
+import { useState } from "react";
 
 export const usePastReviews = () => {
   const allReviews: { name: string; desc: string; stars: StarRating }[] = [
@@ -57,6 +57,7 @@ export const usePastReviews = () => {
   };
 
   return {
+    allReviews,
     review: allReviews[index],
     onNext,
     onPrev,

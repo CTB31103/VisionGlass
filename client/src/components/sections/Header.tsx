@@ -12,22 +12,33 @@ import { HeaderNavLinks } from "./HeaderNavLinks";
 
 export const Header = () => {
   const isLoggedIn = useUserStore((state) => state.loggedIn);
-  const direction = useScrollDirection();
-  const { top } = usePagePosition({ allowableRange: 50 });
-
-  const isGoingDown = direction === "down";
 
   const anchorRef = useRef<null | HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
   const close = () => setOpen(false);
 
   const [expanded, setExpanded] = useState(true);
+  const direction = useScrollDirection();
+  const { top } = usePagePosition({ allowableRange: 0 });
+
+  const isGoingDown = direction === "down";
 
   useTimeoutEffect(
     () => {
-      setExpanded(!isGoingDown || top);
+      if (!top) return;
+      if (isGoingDown) return;
+      setExpanded(top);
     },
-    [isGoingDown, top],
+    [top],
+    50,
+  );
+
+  useTimeoutEffect(
+    () => {
+      if (!isGoingDown) return;
+      setExpanded(false);
+    },
+    [isGoingDown],
     50,
   );
 

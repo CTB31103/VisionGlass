@@ -6,3 +6,4 @@ export * from "./useScreenSize";
 export * from "./useExactScreenSizeValues";
 export * from "./useScrollDirection";
 export * from "./usePagePosition";
+export * from "./useHoverable";

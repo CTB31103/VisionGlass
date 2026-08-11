@@ -36,10 +36,11 @@ export const FairsSection = () => {
       <Stack
         sx={{
           p: 5,
-          bgcolor: CSS.colors.grey,
+          bgcolor: CSS.colors.white,
           borderRadius: 5,
           alignItems: "center",
           justifyContent: "center",
+          zIndex: 1,
         }}
         spacing={2}
       >

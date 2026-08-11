@@ -10,7 +10,12 @@ import type { SvgIconTypeMap } from "@mui/material";
 import type { OverridableComponent } from "@mui/material/OverridableComponent";
 
 import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
+import CheckIcon from "@mui/icons-material/Check";
+import PlayArrowIcon from "@mui/icons-material/PlayArrow";
+import PauseIcon from "@mui/icons-material/Pause";
 
+import FastForwardIcon from "@mui/icons-material/FastForward";
+import FastRewindIcon from "@mui/icons-material/FastRewind";
 export const Icons = {
   ChevronDown: KeyboardArrowDownIcon,
   ChevronLeft: KeyboardArrowLeftIcon,
@@ -22,6 +27,13 @@ export const Icons = {
   StarOutline: StarBorderIcon,
 
   Medal: WorkspacePremiumIcon,
+  Checkmark: CheckIcon,
+
+  Play: PlayArrowIcon,
+  Pause: PauseIcon,
+
+  FastForwardIcon,
+  FastRewindIcon,
 };
 
 export type IconType = OverridableComponent<SvgIconTypeMap<object, "svg">> & {

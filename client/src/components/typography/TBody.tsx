@@ -12,10 +12,13 @@ export const TBody = ({
   medium,
   bold,
   innerHtml,
+  smaller,
+  color,
 }: PropsWithChildren<
   TProps & {
     large?: boolean;
     medium?: boolean;
+    smaller?: boolean;
   }
 >) => {
   return (
@@ -25,7 +28,9 @@ export const TBody = ({
           ? TEXT_SIZES.medium2
           : medium
             ? TEXT_SIZES.medium1
-            : TEXT_SIZES.small
+            : smaller
+              ? TEXT_SIZES.smaller
+              : TEXT_SIZES.small
       }
       textAlign={align}
       className={clsx(
@@ -39,6 +44,7 @@ export const TBody = ({
             }
           : undefined
       }
+      color={color}
     >
       {children}
     </Text>

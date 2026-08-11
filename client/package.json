@@ -16,6 +16,7 @@
     "@mui/icons-material": "^9.0.1",
     "@mui/material": "^9.0.1",
     "@tailwindcss/vite": "^4.3.0",
+    "auto-parts-db": "^2.0.0",
     "clsx": "^2.1.1",
     "immer": "^11.1.8",
     "konva": "^10.3.0",

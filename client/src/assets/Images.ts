@@ -30,6 +30,7 @@ import Google5SReviews from "./media/Google5SReviews.png";
 import Google5SMedal from "./media/Google5SMedal.png";
 import BorderChevron from "./media/BorderChevron.png";
 import WindshieldReplacement from "./media/WindshieldReplacement.webp";
+import WindshieldReplacement2 from "./media/WindshieldReplacement2.png";
 import Jeep from "./media/Jeep.png";
 import Stone from "./media/Stone.png";
 import Carnival from "./media/Carnival.png";
@@ -48,6 +49,14 @@ import IconsWarranty from "./media/icons-warranty.png";
 import IconsTechnician from "./media/icons-technician.png";
 import IconsDeliveryVan from "./media/icons-delivery-van.png";
 import IconsOEM from "./media/icons-oem.png";
+
+import VehicleDamageFront from "./media/VehicleDamageFront.webp";
+import VehicleDamageBack from "./media/VehicleDamageRear.webp";
+import VehicleDamageSide from "./media/VehicleDamageSide.webp";
+
+import VGHoodies from "./media/VGHoodies.png";
+import SlantedShape from "./media/SlantedShape.png";
+import SlantedVGStand from "./media/SlantedVGStand.png";
 
 export const IMAGES_V1 = {
   CarDamageLRSide,
@@ -84,6 +93,7 @@ export const IMAGES = {
   Google5SMedal,
   BorderChevron,
   WindshieldReplacement,
+  WindshieldReplacement2,
   Jeep,
   Stone,
   CartoonInstaller,
@@ -100,4 +110,10 @@ export const IMAGES = {
   IconsTechnician,
   IconsDeliveryVan,
   IconsOEM,
+  VehicleDamageFront,
+  VehicleDamageBack,
+  VehicleDamageSide,
+  VGHoodies,
+  SlantedShape,
+  SlantedVGStand,
 };

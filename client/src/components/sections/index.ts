@@ -7,3 +7,4 @@ export * from "./OurServices";
 export * from "./StarRow";
 export * from "./PastReviews";
 export * from "./ServiceAreas";
+export * from "./HeroImage";

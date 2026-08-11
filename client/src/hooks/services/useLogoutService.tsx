@@ -4,7 +4,7 @@ import { useAccessKeyStore, useUserStore } from "@/stores";
 import { useApi } from "../api";
 
 export const useLogoutService = () => {
-  const { clearCooke } = useCookieService();
+  const { clearCookie } = useCookieService();
   const {
     userRoutes: { logout: logoutApi },
   } = useApi();
@@ -12,8 +12,8 @@ export const useLogoutService = () => {
   const logoutUserStore = useUserStore((state) => state.logout);
   const logout = async () => {
     await logoutApi();
-    clearCooke(TOKEN_KEYS.ACCESS_KEY);
-    clearCooke(TOKEN_KEYS.REFRESH_KEY);
+    clearCookie(TOKEN_KEYS.ACCESS_KEY);
+    clearCookie(TOKEN_KEYS.REFRESH_KEY);
     setAccessKey(null);
     logoutUserStore();
   };

@@ -1,5 +1,5 @@
 import { CSS, ROUTES } from "@/Constants";
-import { Service, SERVICES } from "@/interfaces";
+import { SERVICES } from "@/interfaces";
 import {
   FormControl,
   InputLabel,
@@ -10,18 +10,26 @@ import {
   TextField,
   type SelectChangeEvent,
 } from "@mui/material";
-import { useState } from "react";
 import { ActionButton } from "../buttons";
 import { Text } from "@chakra-ui/react";
-import { useNavigationService } from "@/hooks";
+import { useNavigationService, useRequestCallbackShortForm } from "@/hooks";
 
 export const RequestCallbackShortForm = () => {
   const { toQuote } = useNavigationService();
 
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [service, setService] = useState(Service.Windshield);
+  const {
+    firstName,
+    setFirstName,
+
+    lastName,
+    setLastName,
+
+    phone,
+    setPhone,
+
+    service,
+    setService,
+  } = useRequestCallbackShortForm();
 
   return (
     <Stack

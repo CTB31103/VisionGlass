@@ -1,18 +1,24 @@
 import { Link, Stack } from "@mui/material";
-import React from "react";
 import { TBody } from "../typography";
 import { CSS } from "@/Constants";
 import { useDimensions } from "@/hooks";
-import { IMAGES } from "@/assets";
 import clsx from "clsx";
 
 type ServiceCardProps = {
-  title: string;
+  title?: string;
+  innerTitle?: string;
   href?: string;
   url?: string;
+  smallText?: boolean;
 };
 
-export const ServiceCard = ({ title, href, url }: ServiceCardProps) => {
+export const ServiceCard = ({
+  title,
+  innerTitle,
+  href,
+  url,
+  smallText,
+}: ServiceCardProps) => {
   const [rootRef, dimensions] = useDimensions();
 
   return (
@@ -20,8 +26,9 @@ export const ServiceCard = ({ title, href, url }: ServiceCardProps) => {
       <Stack
         ref={rootRef}
         className={clsx(
-          "hover:-translate-y-2.5 transition-[translate] duration-75",
-          "border-2! border-black! hover:border-4!",
+          "transition-[translate] duration-75",
+          "border-2! border-black!",
+          href ? "hover:-translate-y-2.5 hover:border-4!" : "",
         )}
         sx={{
           borderRadius: 5,
@@ -40,8 +47,13 @@ export const ServiceCard = ({ title, href, url }: ServiceCardProps) => {
             justifyContent: "center",
           }}
         >
-          <Stack sx={{ width: "60%" }}>
-            <TBody align="center" medium bungee>
+          <Stack sx={{ width: "80%" }}>
+            <TBody
+              innerHtml={innerTitle}
+              align="center"
+              medium={!smallText}
+              bungee
+            >
               {title}
             </TBody>
           </Stack>
