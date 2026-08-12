@@ -3,3 +3,4 @@ export * from "./Divider";
 export * from "./Triangle";
 export * from "./types";
 export * from "./CurveText";
+export * from "./BackgroundShape";

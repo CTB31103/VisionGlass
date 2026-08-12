@@ -5,6 +5,8 @@ import { TextField } from "@mui/material";
 type TextInputProps = InputProps & {
   value: string;
   setValue: (value: string) => void;
+  multiline?: boolean;
+  rows?: number;
 };
 
 export const TextInput = (props: TextInputProps) => {
@@ -16,6 +18,8 @@ export const TextInput = (props: TextInputProps) => {
     label: parentlabel,
     optional,
     required,
+    multiline,
+    rows,
   } = props;
 
   const label = `${parentlabel}${optional ? ` (optional)` : ``}`;
@@ -30,6 +34,8 @@ export const TextInput = (props: TextInputProps) => {
         label={label}
         type={secure ? "password" : "text"}
         required={required}
+        multiline={multiline}
+        rows={rows}
       />
     </InputField>
   );

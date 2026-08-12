@@ -138,34 +138,34 @@ export const Header = () => {
                 }}
               >
                 <MenuItem onClick={close}>
-                  <Link href={ROUTES.SERVICE_AREAS + "#NY"}>New York</Link>
+                  <Link href={ROUTES.CONTACT}>New York</Link>
                 </MenuItem>
                 <Divider />
                 <MenuItem onClick={close}>
-                  <Link href={ROUTES.SERVICE_AREAS}>South Carolina</Link>
+                  <Link href={ROUTES.CONTACT}>South Carolina</Link>
                 </MenuItem>
                 <Divider />
                 <MenuItem onClick={close}>
-                  <Link href={ROUTES.SERVICE_AREAS}>Kentucky</Link>
+                  <Link href={ROUTES.CONTACT}>Kentucky</Link>
                 </MenuItem>
                 <Divider />
                 <MenuItem onClick={close}>
-                  <Link href={ROUTES.SERVICE_AREAS}>Massachusetts</Link>
+                  <Link href={ROUTES.CONTACT}>Massachusetts</Link>
                 </MenuItem>
                 <Divider />
                 <MenuItem onClick={close}>
-                  <Link href={ROUTES.SERVICE_AREAS}>Connecticut</Link>
+                  <Link href={ROUTES.CONTACT}>Connecticut</Link>
                 </MenuItem>
                 <Divider />
                 <MenuItem onClick={close}>
-                  <Link href={ROUTES.SERVICE_AREAS}>Florida</Link>
+                  <Link href={ROUTES.CONTACT}>Florida</Link>
                 </MenuItem>
               </Menu>
             </Stack>
 
             <Stack spacing={1} sx={{ alignItems: "end", zIndex: 1 }}>
               <QuoteButton text="Quote Me Now" />
-              <Link href={ROUTES.CONTACT}>
+              <Link href={ROUTES.TELEPHONE}>
                 <Text fontSize={20} className="bungee-outline-thin">
                   (716) 336-7222
                 </Text>

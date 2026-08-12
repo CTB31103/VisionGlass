@@ -1,5 +1,4 @@
 import { Link, Stack } from "@mui/material";
-import React from "react";
 import { TBody } from "../typography";
 import { ROUTES } from "@/Constants";
 
@@ -25,7 +24,7 @@ export const ServiceAreasColumn = ({
         </Stack>
       ))}
       {viewMore && (
-        <Link href={ROUTES.SERVICE_AREAS}>
+        <Link href={ROUTES.CONTACT}>
           <TBody medium>View More</TBody>
         </Link>
       )}

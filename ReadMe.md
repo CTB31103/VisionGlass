@@ -10,3 +10,7 @@ Start Command:
 Stop Command:
 
 - `brew services stop mongodb-community`
+
+Google Cloud ReCaptcha
+https://console.cloud.google.com/security/recaptcha/keys
+enabled: reCAPTCHA Enterprise API

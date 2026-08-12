@@ -57,6 +57,8 @@ import VehicleDamageSide from "./media/VehicleDamageSide.webp";
 import VGHoodies from "./media/VGHoodies.png";
 import SlantedShape from "./media/SlantedShape.png";
 import SlantedVGStand from "./media/SlantedVGStand.png";
+import BluePhone from "./media/BluePhone.jpg";
+import CoolCarFront from "./media/CoolCarFront.png";
 
 export const IMAGES_V1 = {
   CarDamageLRSide,
@@ -116,4 +118,6 @@ export const IMAGES = {
   VGHoodies,
   SlantedShape,
   SlantedVGStand,
+  BluePhone,
+  CoolCarFront,
 };

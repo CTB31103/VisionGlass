@@ -8,3 +8,4 @@ export * from "./StarRow";
 export * from "./PastReviews";
 export * from "./ServiceAreas";
 export * from "./HeroImage";
+export * from "./ServiceAreaColumns";

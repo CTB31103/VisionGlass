@@ -1,5 +1,5 @@
 import { IMAGES } from "@/assets";
-import { TBody, THeading } from "@/components";
+import { BackgroundShape, TBody, THeading } from "@/components";
 import { Stack } from "@mui/material";
 
 export const OurStory = () => {
@@ -66,28 +66,9 @@ export const OurStory = () => {
             alt="Vision Glass Pop Up Stand"
           />
 
-          <Stack
-            sx={{
-              position: "absolute",
-              top: "50%",
-              left: "50%",
-              transform: `translate(-40%, -40%)`,
-              width: "100%",
-              height: "100%",
-              alignItems: "center",
-              justifyContent: "center",
-              zIndex: 0,
-              pointerEvents: "all",
-
-              transition: "transform .15s ease-in",
-
-              "&:hover": {
-                transform: `translate(-45%, -45%)`,
-              },
-            }}
-          >
+          <BackgroundShape>
             <img src={IMAGES.SlantedShape} alt="Vision Glass Pop Up Stand" />
-          </Stack>
+          </BackgroundShape>
         </Stack>
       </Stack>
     </Stack>

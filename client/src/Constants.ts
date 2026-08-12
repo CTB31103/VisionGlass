@@ -3,6 +3,8 @@ export const CONSTANTS = {
     hostname: () => import.meta.env.VITE_API_HOSTNAME as string,
     isHttps: () => import.meta.env.VITE_HTTPS === "true",
     key: () => import.meta.env.VITE_API_KEY as string,
+
+    recaptcha: () => import.meta.env.VITE_GOOGLE_CAPTCHA_SITE_KEY || "",
   },
 };
 
@@ -48,7 +50,6 @@ export const ROUTES = {
   FAIRS: "/fairs",
 
   SERVICES: "/services",
-  SERVICE_AREAS: "/services/areas",
   SERVICE_WR: "/services/windshields",
   SERVICE_AG: "/services/autoglass",
   SERVICE_ADAS: "/services/adas",
@@ -61,4 +62,6 @@ export const ROUTES = {
   CUSTOMERS: "/customers",
   TEAM: "/team",
   REVIEWS: "/reviews",
+
+  TELEPHONE: "tel:+17163367222",
 };

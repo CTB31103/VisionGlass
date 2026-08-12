@@ -9,10 +9,12 @@ import {
 import { CSS } from "@/Constants";
 import { usePastReviews } from "@/hooks";
 import { Button, Paper, Stack } from "@mui/material";
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 export const OurReviews = () => {
   const { allReviews } = usePastReviews();
+  const timeoutRef = useRef(0);
+  const [fade, setFade] = useState(false);
   const [fast, setFast] = useState(false);
   const [paused, setPaused] = useState(false);
   const [forward, setForward] = useState(true);
@@ -27,12 +29,17 @@ export const OurReviews = () => {
   const setDirection = (
     regularDir: boolean = true,
     fasterSpeed: boolean = false,
-  ): void => (
-    setPaused(true),
-    setForward(regularDir),
-    setFast(fasterSpeed),
-    setPaused(false)
-  );
+  ): void => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setPaused(true);
+    setFade(true);
+    timeoutRef.current = setTimeout(() => {
+      setForward(regularDir);
+      setFast(fasterSpeed);
+      setPaused(false);
+      setFade(false);
+    }, 250);
+  };
 
   return (
     <Stack
@@ -72,6 +79,9 @@ export const OurReviews = () => {
             color: CSS.colors.black,
             animationPlayState: paused ? "paused" : "running",
             cursor: "pointer",
+
+            opacity: fade ? 0 : 1,
+            transition: "opacity .25s linear",
           }}
           spacing={4}
         >
@@ -80,13 +90,7 @@ export const OurReviews = () => {
               key={i}
               sx={{
                 width: "50vw",
-                bgcolor:
-                  i === 0
-                    ? "cyan"
-                    : i % allReviews.length === 0
-                      ? "red"
-                      : CSS.colors.grey,
-
+                bgcolor: CSS.colors.grey,
                 border: 1,
                 borderColor: CSS.colors.black,
                 borderRadius: 5,

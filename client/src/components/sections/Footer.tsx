@@ -3,11 +3,14 @@ import { IMAGES } from "@/assets";
 import { ServiceAreas } from "./ServiceAreas";
 import { Stack } from "@mui/material";
 import { FooterColumn } from "./FooterColumn";
+import { useLocation } from "react-router";
 
 export const Footer = () => {
+  const { pathname } = useLocation();
+  const isContact = pathname.includes(ROUTES.CONTACT);
   return (
     <Stack>
-      <ServiceAreas />
+      {!isContact && <ServiceAreas />}
 
       <Stack
         direction={"row"}
