@@ -75,7 +75,7 @@ export const OurReviews = () => {
             width: "max-content",
             transform: `translateX(calc(-50% - calc(var(--mui-spacing) * 1)))`,
             animation: `scroll ${fast ? "25" : "120"}s linear infinite`,
-            animationDirection: forward ? "normal" : "reverse",
+            animationDirection: !forward ? "normal" : "reverse",
             color: CSS.colors.black,
             animationPlayState: paused ? "paused" : "running",
             cursor: "pointer",

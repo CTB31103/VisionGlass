@@ -9,3 +9,7 @@ export * from "./PastReviews";
 export * from "./ServiceAreas";
 export * from "./HeroImage";
 export * from "./ServiceAreaColumns";
+export * from "./LargePictureWithCardSection";
+export * from "./OtherServicesSections";
+export * from "./TextImageRowColumns";
+export * from "./WhenToReplaceSection";

@@ -42,6 +42,11 @@ import ServiceAG from "./media/Service_AG.png";
 import ServiceMB from "./media/Service_MB.png";
 import Service_MB_Rect from "./media/Service_MB_Rect.png";
 import ServiceCC from "./media/Service_CC.png";
+import AutoGlassReplace from "./media/auto-glass-replace.png";
+import Chip1 from "./media/chip-1.png";
+import Chip2 from "./media/chip-2.png";
+import Chip3 from "./media/chip-3.webp";
+import Repair1 from "./media/repair1.webp";
 
 import IconsCarInsurance from "./media/icons-car-insurance.png";
 import IconsTimer from "./media/icons-timer.png";
@@ -59,6 +64,17 @@ import SlantedShape from "./media/SlantedShape.png";
 import SlantedVGStand from "./media/SlantedVGStand.png";
 import BluePhone from "./media/BluePhone.jpg";
 import CoolCarFront from "./media/CoolCarFront.png";
+import SlantedCrackedWindshield from "./media/SlantedCrackedWindshield.png";
+
+import ADAS1 from "./media/adas-1.jpg";
+import ADAS2 from "./media/adas-2.jpg";
+import ADAS3 from "./media/adas-3.jpeg";
+
+import IconsCarCollisionAvoid from "./media/icons-car-collision-avoid.png";
+import IconsCarCollisionBraking from "./media/icons-car-collision-braking.png";
+import IconsCarCruise from "./media/icons-car-cruise.png";
+import IconsCarLaneDeparture from "./media/icons-car-lane-departure.png";
+import IconsCarLaneKeep from "./media/icons-car-lane-keep.png";
 
 export const IMAGES_V1 = {
   CarDamageLRSide,
@@ -105,6 +121,7 @@ export const IMAGES = {
   ServiceMB,
   Service_MB_Rect,
   ServiceCC,
+  SlantedCrackedWindshield,
   Carnival,
   IconsCarInsurance,
   IconsTimer,
@@ -120,4 +137,17 @@ export const IMAGES = {
   SlantedVGStand,
   BluePhone,
   CoolCarFront,
+  AutoGlassReplace,
+  ADAS1,
+  ADAS2,
+  ADAS3,
+  IconsCarCollisionAvoid,
+  IconsCarCollisionBraking,
+  IconsCarCruise,
+  IconsCarLaneDeparture,
+  IconsCarLaneKeep,
+  Chip1,
+  Chip2,
+  Chip3,
+  Repair1,
 };

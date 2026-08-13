@@ -10,6 +10,7 @@ export const THeading = ({
   bungee,
   thin,
   large,
+  innerHtml,
 }: PropsWithChildren<TProps & { thin?: boolean; large?: boolean }>) => {
   return (
     <Text
@@ -19,6 +20,13 @@ export const THeading = ({
       className={clsx(
         bungee ? (thin ? "bungee-outline-thin" : "bungee-outline") : "",
       )}
+      dangerouslySetInnerHTML={
+        innerHtml
+          ? {
+              __html: innerHtml,
+            }
+          : undefined
+      }
     >
       {children}
     </Text>

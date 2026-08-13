@@ -1,11 +1,12 @@
 import { CSS } from "@/Constants";
 import { useDimensions } from "@/hooks";
 import { Stack } from "@mui/material";
-import { type PropsWithChildren } from "react";
+import { type PropsWithChildren, type ReactNode } from "react";
 import { TBody } from "./TBody";
 
-type NumberedItemProps = {
-  number: number;
+export type NumberedItemProps = {
+  Icon?: ReactNode;
+  number?: number;
   active?: boolean;
   smallNumber?: boolean;
   text?: string;
@@ -13,6 +14,7 @@ type NumberedItemProps = {
 };
 
 export const NumberedItem = ({
+  Icon,
   number,
   smallNumber,
   active,
@@ -40,13 +42,15 @@ export const NumberedItem = ({
           p: 2,
         }}
       >
-        <TBody
-          color={active ? CSS.colors.blue : undefined}
-          medium={!smallNumber}
-          bold
-        >
-          {number}
-        </TBody>
+        {Icon ?? (
+          <TBody
+            color={active ? CSS.colors.blue : undefined}
+            smaller={smallNumber}
+            bold
+          >
+            {number}
+          </TBody>
+        )}
       </Stack>
       {children ?? <TBody>{text}</TBody>}
     </Stack>

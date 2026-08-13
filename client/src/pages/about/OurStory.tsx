@@ -1,5 +1,10 @@
 import { IMAGES } from "@/assets";
-import { BackgroundShape, TBody, THeading } from "@/components";
+import {
+  BackgroundShape,
+  SlantedImageShape,
+  TBody,
+  THeading,
+} from "@/components";
 import { Stack } from "@mui/material";
 
 export const OurStory = () => {
@@ -45,7 +50,12 @@ export const OurStory = () => {
         </TBody>
       </Stack>
 
-      <Stack
+      <SlantedImageShape
+        imageSrc={IMAGES.SlantedCrackedWindshield}
+        alt="Vision Glass Pop Up Stand"
+      />
+
+      {/* <Stack
         sx={{
           flex: 1,
           alignItems: "center",
@@ -63,14 +73,14 @@ export const OurStory = () => {
           <img
             style={{ zIndex: 1, pointerEvents: "none" }}
             src={IMAGES.SlantedVGStand}
-            alt="Vision Glass Pop Up Stand"
+            
           />
 
           <BackgroundShape>
-            <img src={IMAGES.SlantedShape} alt="Vision Glass Pop Up Stand" />
+            <img src={IMAGES.SlantedShape} alt="Background-Shader" />
           </BackgroundShape>
         </Stack>
-      </Stack>
+      </Stack> */}
     </Stack>
   );
 };

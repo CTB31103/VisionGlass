@@ -18,7 +18,7 @@ export const HeroImageWithForm = ({
         backgroundImage: `url(${src})`,
         backgroundRepeat: "no-repeat",
         backgroundSize: "cover",
-        paddingBlock: 4,
+        paddingBlock: 8,
         width: "100%",
         alignItems: "center",
       }}

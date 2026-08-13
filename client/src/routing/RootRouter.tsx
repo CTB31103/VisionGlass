@@ -9,7 +9,12 @@ import {
   PageNotFound,
   Quote,
   Reviews,
+  ServicesADAS,
+  ServicesAutoGlass,
+  ServicesCrackChip,
+  ServicesMobile,
   ServicesPage,
+  ServicesWindshieldReplacements,
   Team,
 } from "../pages";
 import { FooterLayout, HeaderLayout } from "@/components";
@@ -24,8 +29,17 @@ export const RootRouter = () => {
           <Route index path={ROUTES.HOME} element={<Home />} />
           <Route path={ROUTES.ABOUT} element={<About />} />
           <Route path={ROUTES.CONTACT} element={<Contact />} />
-          <Route path={ROUTES.SERVICES} element={<ServicesPage />} />
           <Route path={ROUTES.QUOTES} element={<Quote />} />
+
+          <Route path={ROUTES.SERVICES} element={<ServicesPage />} />
+          <Route
+            path={ROUTES.SERVICE_WR}
+            element={<ServicesWindshieldReplacements />}
+          />
+          <Route path={ROUTES.SERVICE_ADAS} element={<ServicesADAS />} />
+          <Route path={ROUTES.SERVICE_AG} element={<ServicesAutoGlass />} />
+          <Route path={ROUTES.SERVICE_CC} element={<ServicesCrackChip />} />
+          <Route path={ROUTES.SERVICE_MB} element={<ServicesMobile />} />
 
           <Route path={ROUTES.LOGIN} element={<Login />} />
 
@@ -41,9 +55,3 @@ export const RootRouter = () => {
     </Routes>
   );
 };
-
-// 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
-
-// git remote set-url origin https://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@://github.com
-//
-// https://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@github.com/CTB31103/VisionAutoGlass.git

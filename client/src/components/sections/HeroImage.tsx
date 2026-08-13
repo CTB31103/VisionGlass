@@ -13,6 +13,7 @@ export const HeroImage = ({
         backgroundImage: `url(${src})`,
         backgroundRepeat: "no-repeat",
         backgroundSize: "cover",
+        backgroundPosition: "center center",
         paddingBlock: 4,
         width: "100%",
         alignItems: "center",

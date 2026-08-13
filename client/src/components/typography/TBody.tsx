@@ -4,6 +4,14 @@ import { TEXT_SIZES } from "./textSizes";
 import type { TProps } from "./TProps";
 import clsx from "clsx";
 
+export type TBodyProps = PropsWithChildren<
+  TProps & {
+    large?: boolean;
+    medium?: boolean;
+    smaller?: boolean;
+  }
+>;
+
 export const TBody = ({
   children,
   align,
@@ -14,13 +22,7 @@ export const TBody = ({
   innerHtml,
   smaller,
   color,
-}: PropsWithChildren<
-  TProps & {
-    large?: boolean;
-    medium?: boolean;
-    smaller?: boolean;
-  }
->) => {
+}: TBodyProps) => {
   return (
     <Text
       fontSize={

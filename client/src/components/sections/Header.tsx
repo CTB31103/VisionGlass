@@ -9,6 +9,7 @@ import { QuoteButton } from "../buttons";
 import { CSS, ROUTES } from "@/Constants";
 import { useRef, useState } from "react";
 import { HeaderNavLinks } from "./HeaderNavLinks";
+import { SERVICE_ROUTES, SERVICES } from "@/interfaces";
 
 export const Header = () => {
   const isLoggedIn = useUserStore((state) => state.loggedIn);
@@ -62,7 +63,7 @@ export const Header = () => {
             borderBottomColor: CSS.colors.black,
           }}
         >
-          <Link href={ROUTES.HOME} variant="inherit" sx={{ zIndex: 1 }}>
+          <Link href={ROUTES.HOME} variant="inherit" sx={{ zIndex: 2 }}>
             <img
               src={IMAGES.LogoSmall}
               alt="Vision Glass: How Big Is Your Crack?"
@@ -178,7 +179,19 @@ export const Header = () => {
       <HeaderNavLinks
         links={[
           { text: "Home", linkPath: ROUTES.HOME },
-          { text: "Services", linkPath: ROUTES.SERVICES, left: true },
+          {
+            text: "Services",
+            linkPath: ROUTES.SERVICES,
+            left: true,
+            menuOptions: [
+              { title: `All Services`, linkPath: ROUTES.SERVICES },
+            ].concat(
+              SERVICES.map((s, i) => ({
+                title: s,
+                linkPath: SERVICE_ROUTES[i],
+              })),
+            ),
+          },
           {
             text: "Get A Quote",
             linkPath: ROUTES.QUOTES,

@@ -9,3 +9,8 @@ export * from "./reviews";
 export * from "./team";
 export * from "./pageNotFound";
 export * from "./services";
+export * from "./servicesWindshieldReplacement";
+export * from "./servicesADAS";
+export * from "./servicesAutoGlass";
+export * from "./servicesCrackChip";
+export * from "./servicesMobile";

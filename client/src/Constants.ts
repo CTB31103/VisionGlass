@@ -53,7 +53,7 @@ export const ROUTES = {
   SERVICE_WR: "/services/windshields",
   SERVICE_AG: "/services/autoglass",
   SERVICE_ADAS: "/services/adas",
-  SERVICE_CC: "/services/chips",
+  SERVICE_CC: "/services/crack-and-chip",
   SERVICE_MB: "/services/mobile",
 
   LOGIN: "/login",

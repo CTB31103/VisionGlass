@@ -1,18 +1,36 @@
+import { useHoverable } from "@/hooks";
 import { Stack } from "@mui/material";
-import { type PropsWithChildren } from "react";
+import { useEffect, type PropsWithChildren, type ReactNode } from "react";
 
 export const BackgroundShape = ({
   children,
   percentage = -40,
   activePercentage = -45,
-}: PropsWithChildren<{ percentage?: number; activePercentage?: number }>) => {
+  HoverTarget,
+}: PropsWithChildren<{
+  percentage?: number;
+  activePercentage?: number;
+  HoverTarget?: (props: {
+    register: {
+      onMouseEnter: () => void;
+      onMouseLeave: () => void;
+    };
+  }) => ReactNode;
+}>) => {
+  const { isHovered, register } = useHoverable();
+
+  useEffect(() => {
+    console.log(`Hovering Background`);
+    console.log(`Hovered: ${isHovered}`);
+    console.log(``);
+  }, [isHovered]);
   return (
     <Stack
       sx={{
         position: "absolute",
         top: "50%",
         left: "50%",
-        transform: `translate(${percentage}%, ${percentage}%)`,
+        transform: `translate(${isHovered ? activePercentage : percentage}%, ${isHovered ? activePercentage : percentage}%)`,
         width: "100%",
         height: "100%",
         alignItems: "center",
@@ -22,12 +40,14 @@ export const BackgroundShape = ({
 
         transition: "transform .15s ease-in",
 
-        "&:hover": {
-          transform: `translate(${activePercentage}%, ${activePercentage}%)`,
-        },
+        "&:hover": HoverTarget
+          ? undefined
+          : {
+              transform: `translate(${activePercentage}%, ${activePercentage}%)`,
+            },
       }}
     >
-      {children}
+      {HoverTarget ? <HoverTarget register={register} /> : children}
     </Stack>
   );
 };

@@ -1,11 +1,11 @@
 import { IMAGES } from "@/assets";
 import {
   ActionButton,
-  BackgroundShape,
+  SquareImageShape,
   TextInput,
   THeading,
 } from "@/components";
-import { CONSTANTS, CSS } from "@/Constants";
+import { CONSTANTS } from "@/Constants";
 import { Stack } from "@mui/material";
 import ReCAPTCHA from "react-google-recaptcha";
 
@@ -16,46 +16,11 @@ export const ContactForm = () => {
       sx={{ paddingInline: 8, paddingBlock: 16 }}
       spacing={8}
     >
-      <Stack
-        sx={{
-          // width: "100%",
-          // minHeight: "80%",
-          width: "100%",
-          position: "relative",
-          flex: 0.6,
-
-          pr: 8,
-
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
-        <img
-          style={{
-            width: "75%",
-            height: "75%",
-            objectFit: "cover",
-            borderTopLeftRadius: 50,
-            borderBottomRightRadius: 50,
-            zIndex: 1,
-            pointerEvents: "none",
-          }}
-          src={IMAGES.CoolCarFront}
+      <Stack sx={{ flex: 0.6 }}>
+        <SquareImageShape
+          imageSrc={IMAGES.CoolCarFront}
           alt="Camaro Auto Glass"
         />
-        <BackgroundShape>
-          <Stack sx={{ width: "75%", height: "75%", pr: 8 }}>
-            <Stack
-              sx={{
-                width: "100%",
-                height: "100%",
-                bgcolor: CSS.colors.grey,
-                borderTopLeftRadius: 50,
-                borderBottomRightRadius: 50,
-              }}
-            ></Stack>
-          </Stack>
-        </BackgroundShape>
       </Stack>
 
       <Stack sx={{ flex: 0.4, alignItems: "center" }} spacing={4}>
