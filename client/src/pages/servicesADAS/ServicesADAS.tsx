@@ -13,9 +13,12 @@ import {
   THeading,
 } from "@/components";
 import { ROUTES } from "@/Constants";
+import { useScreenSize } from "@/hooks";
 import { Link, Stack } from "@mui/material";
 
 export const ServicesADAS = () => {
+  const { lessThanEqualTo: sizeUnder } = useScreenSize();
+
   const typesOfADAS = [
     {
       title: `Lane Keep Assist (LKA)`,
@@ -52,7 +55,7 @@ export const ServicesADAS = () => {
   return (
     <FullPage screen>
       <HeroImage src={IMAGES.ADAS1}>
-        <Stack sx={{ paddingInline: 8 }} spacing={4}>
+        <Stack sx={{ paddingInline: sizeUnder.xs ? 2 : 8 }} spacing={4}>
           <Stack>
             <THeading large bungee>
               ADAS Windshield Camera Calibration
@@ -84,14 +87,17 @@ that the system is functioning within its recommended parameters. By entrusting 
 can enjoy peace of mind on the road and minimize the risk of accidents caused by faulty calibration.`,
         ]}
         imageSrc={IMAGES.ADAS2}
+        reverse={sizeUnder.md}
+        translateX={sizeUnder.xs ? 5 : 0}
       />
 
       <LargePictureWithCardSection imageSrc={IMAGES.WindshieldReplacement}>
         <THeading>Types of ADAS</THeading>
 
         <Stack spacing={2}>
-          {typesOfADAS.map((adasType) => (
+          {typesOfADAS.map((adasType, i) => (
             <NumberedItem
+              key={i}
               Icon={
                 <Stack sx={{ position: "relative" }}>
                   <Icons.Checkmark
@@ -144,7 +150,7 @@ can enjoy peace of mind on the road and minimize the risk of accidents caused by
         btn={{
           text: `Get Quoted Now`,
           href: ROUTES.QUOTES,
-          align: "end",
+          align: sizeUnder.sm ? "center" : "end",
         }}
       />
 

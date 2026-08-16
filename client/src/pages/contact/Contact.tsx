@@ -10,12 +10,15 @@ import { ROUTES } from "@/Constants";
 import { ShopLocations } from "./ShopLocations";
 import { MobileServiceAreas } from "./MobileServiceAreas";
 import { ContactForm } from "./ContactForm";
+import { useScreenSize } from "@/hooks";
 
 export const Contact = () => {
+  const { lessThanEqualTo: sizeUnder } = useScreenSize();
+
   return (
     <FullPage screen>
       <HeroImageWithForm src={IMAGES.BluePhone}>
-        <Stack sx={{ pl: 8 }} spacing={4}>
+        <Stack sx={{ pl: sizeUnder.sm ? 0 : 8 }} spacing={4}>
           <Stack>
             <THeading bungee large align="center">
               Ready to Repair?

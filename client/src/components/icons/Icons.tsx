@@ -16,7 +16,16 @@ import PauseIcon from "@mui/icons-material/Pause";
 
 import FastForwardIcon from "@mui/icons-material/FastForward";
 import FastRewindIcon from "@mui/icons-material/FastRewind";
+
+import MenuIcon from "@mui/icons-material/Menu";
+import LocationPinIcon from "@mui/icons-material/LocationPin";
+import PhoneIcon from "@mui/icons-material/Phone";
+
+import CloseIcon from "@mui/icons-material/Close";
+
 export const Icons = {
+  Close: CloseIcon,
+
   ChevronDown: KeyboardArrowDownIcon,
   ChevronLeft: KeyboardArrowLeftIcon,
   ChevronRight: KeyboardArrowRightIcon,
@@ -34,6 +43,9 @@ export const Icons = {
 
   FastForwardIcon,
   FastRewindIcon,
+  Menu: MenuIcon,
+  Location: LocationPinIcon,
+  Phone: PhoneIcon,
 };
 
 export type IconType = OverridableComponent<SvgIconTypeMap<object, "svg">> & {

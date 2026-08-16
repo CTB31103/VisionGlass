@@ -6,7 +6,7 @@ import {
   type HeaderHorizontalTextProps,
 } from "./HeaderHorizontalText";
 
-type HeaderNavLinksProps = {
+export type HeaderNavLinksProps = {
   links: Omit<HeaderHorizontalTextProps, "small">[];
   bgcolor?: string;
   small?: boolean;

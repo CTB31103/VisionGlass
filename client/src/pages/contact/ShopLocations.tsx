@@ -2,9 +2,13 @@ import { TBody, THeading } from "@/components";
 import { Stack } from "@mui/material";
 import { useState } from "react";
 import { NumberedContactItem } from "./NumberedContactItem";
+import { useDimensions, useScreenSize } from "@/hooks";
 
 export const ShopLocations = () => {
+  const { lessThanEqualTo: sizeUnder } = useScreenSize();
+
   const [activeLocation, setActiveLocation] = useState(0);
+  const [squareRef, squareDims] = useDimensions();
 
   const locations: {
     title: string;
@@ -33,57 +37,73 @@ export const ShopLocations = () => {
   ];
 
   return (
-    <Stack direction={"row"}>
+    <Stack
+      direction={sizeUnder.md ? "column-reverse" : "row"}
+      spacing={sizeUnder.md ? 2 : undefined}
+      sx={{
+        paddingInline: sizeUnder.md ? 4 : sizeUnder.md ? 4 : 8,
+        paddingBlock: sizeUnder.md ? 4 : sizeUnder.md ? 8 : 16,
+      }}
+    >
       <Stack
         sx={{
           width: "100%",
-          paddingInline: 8,
-          paddingBlock: 16,
         }}
-        spacing={4}
+        spacing={sizeUnder.xs ? 4 : sizeUnder.md ? 2 : 4}
       >
         <Stack spacing={0} sx={{ alignItems: "start" }}>
           <THeading align="center">Our Shop Locations</THeading>
           <TBody align="center">Availble in shop by appointment only</TBody>
         </Stack>
 
-        {locations.map((loc, i) => (
-          <NumberedContactItem
-            key={i}
-            number={i + 1}
-            {...loc}
-            active={i === activeLocation}
-            onClick={() => setActiveLocation(i)}
-          />
-        ))}
+        <Stack
+          sx={{
+            paddingInline: sizeUnder.xs ? 0 : sizeUnder.md ? 4 : undefined,
+          }}
+          spacing={sizeUnder.xs ? 4 : sizeUnder.md ? 2 : 4}
+        >
+          {locations.map((loc, i) => (
+            <NumberedContactItem
+              key={i}
+              number={i + 1}
+              {...loc}
+              active={i === activeLocation}
+              onClick={() => setActiveLocation(i)}
+            />
+          ))}
+        </Stack>
       </Stack>
 
       <Stack
         sx={{
-          width: "100%",
           alignItems: "center",
           justifyContent: "center",
-          paddingInline: 4,
-          paddingBlock: 8,
           position: "relative",
+          width: "100%",
         }}
       >
-        <iframe
-          src={locations[activeLocation].src}
-          width="100%"
-          height="100%"
-          style={{
-            borderWidth: 0,
-            borderTopLeftRadius: 25,
-            borderBottomRightRadius: 25,
-            position: "sticky",
-            top: 0,
-            maxHeight: "65vh",
+        <Stack
+          ref={squareRef}
+          sx={{
+            width: "100%",
+            height: squareDims.width,
+            maxWidth: sizeUnder.xs ? "100%" : sizeUnder.md ? "50vw" : "100%",
           }}
-          allowFullScreen
-          loading="lazy"
-          referrerPolicy="strict-origin-when-cross-origin"
-        ></iframe>
+        >
+          <iframe
+            src={locations[activeLocation].src}
+            width="100%"
+            height="100%"
+            style={{
+              borderWidth: 0,
+              borderTopLeftRadius: 25,
+              borderBottomRightRadius: 25,
+            }}
+            allowFullScreen
+            loading="lazy"
+            referrerPolicy="strict-origin-when-cross-origin"
+          ></iframe>
+        </Stack>
       </Stack>
     </Stack>
   );

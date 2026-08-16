@@ -2,6 +2,7 @@ import { Link, Stack } from "@mui/material";
 import { SlantedImageShape, SquareImageShape } from "../shapes";
 import { TBody, THeading, type TBodyProps } from "../typography";
 import { ActionButton } from "../buttons";
+import { useScreenSize } from "@/hooks";
 
 type TextImageRowColumnsProps = {
   header: string;
@@ -12,6 +13,8 @@ type TextImageRowColumnsProps = {
   slantedImageAlt?: string;
   imageSrc?: string;
   imageAlt?: string;
+
+  translateX?: number;
 
   btn?: {
     text: string;
@@ -29,23 +32,33 @@ export const TextImageRowColumns = ({
   slantedImageAlt,
   imageSrc,
   imageAlt,
+  translateX,
   btn,
 }: TextImageRowColumnsProps) => {
+  const { lessThanEqualTo: sizeUnder } = useScreenSize();
   return (
     <Stack
-      direction={reverse ? "row-reverse" : "row"}
+      direction={
+        sizeUnder.md
+          ? reverse
+            ? "column-reverse"
+            : "column"
+          : reverse
+            ? "row-reverse"
+            : "row"
+      }
       sx={{
-        paddingInline: 8,
+        paddingInline: sizeUnder.md ? 4 : 8,
+        paddingBlock: sizeUnder.md ? 8 : 16,
       }}
-      spacing={4}
+      spacing={sizeUnder.xs ? 6 : sizeUnder.md ? 8 : 4}
     >
       <Stack
         sx={{
           flex: 1,
           alignItems: "center",
-          paddingBlock: 16,
         }}
-        spacing={4}
+        spacing={sizeUnder.sm ? 2 : 4}
       >
         <THeading align="center">{header}</THeading>
         <Stack spacing={2}>
@@ -69,16 +82,36 @@ export const TextImageRowColumns = ({
         )}
       </Stack>
 
-      <Stack sx={{ flex: 1, paddingBlock: 8 }}>
-        {imageSrc && <SquareImageShape imageSrc={imageSrc} alt={imageAlt} />}
+      <Stack
+        sx={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Stack
+          sx={{
+            position: "relative",
+            width: sizeUnder.xxs
+              ? "100%"
+              : sizeUnder.xs
+                ? "90%"
+                : sizeUnder.md
+                  ? "50%"
+                  : "75%",
+            transform: translateX ? `translateX(-${translateX}%)` : "",
+          }}
+        >
+          {imageSrc && <SquareImageShape imageSrc={imageSrc} alt={imageAlt} />}
 
-        {slantedImageSrc && (
-          <SlantedImageShape
-            reverse={reverse}
-            imageSrc={slantedImageSrc}
-            alt={slantedImageAlt}
-          />
-        )}
+          {slantedImageSrc && (
+            <SlantedImageShape
+              reverse={reverse}
+              imageSrc={slantedImageSrc}
+              alt={slantedImageAlt}
+            />
+          )}
+        </Stack>
       </Stack>
     </Stack>
   );

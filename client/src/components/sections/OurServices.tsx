@@ -2,12 +2,15 @@ import { Stack } from "@mui/material";
 import { THeading } from "../typography";
 import { ServiceCard } from "../cards";
 import { SERVICE_IMAGES, SERVICE_ROUTES, SERVICES } from "@/interfaces";
+import { useScreenSize } from "@/hooks";
 
 type OurServicesProps = {
   bungee?: boolean;
 };
 
 export const OurServices = ({ bungee }: OurServicesProps) => {
+  const { lessThanEqualTo: sizeUnder } = useScreenSize();
+
   const services = SERVICES.map((serv, i) => ({
     service: serv,
     href: SERVICE_ROUTES[i],
@@ -15,7 +18,10 @@ export const OurServices = ({ bungee }: OurServicesProps) => {
   }));
 
   return (
-    <Stack spacing={4} sx={{ alignItems: "center", justifyContent: "start" }}>
+    <Stack
+      spacing={sizeUnder.sm ? 2 : 4}
+      sx={{ alignItems: "center", justifyContent: "start", zIndex: 2 }}
+    >
       <THeading bungee={bungee} thin>
         Our Services
       </THeading>
@@ -29,11 +35,14 @@ export const OurServices = ({ bungee }: OurServicesProps) => {
           justifyContent: "center",
 
           gap: 2,
-          rowGap: 4,
+          rowGap: sizeUnder.sm ? 2 : 4,
         }}
       >
         {services.map((service) => (
-          <Stack key={service.service} sx={{ width: "30%" }}>
+          <Stack
+            key={service.service}
+            sx={{ width: sizeUnder.xs ? "80%" : "30%" }}
+          >
             <ServiceCard
               title={service.service}
               href={service.href}

@@ -1,8 +1,8 @@
 import { Text } from "@chakra-ui/react";
 import { type PropsWithChildren } from "react";
-import { TEXT_SIZES } from "./textSizes";
 import type { TProps } from "./TProps";
 import clsx from "clsx";
+import { useTextSizingService } from "@/hooks";
 
 export type TBodyProps = PropsWithChildren<
   TProps & {
@@ -23,16 +23,17 @@ export const TBody = ({
   smaller,
   color,
 }: TBodyProps) => {
+  const TextSizes = useTextSizingService();
   return (
     <Text
       fontSize={
         large
-          ? TEXT_SIZES.medium2
+          ? TextSizes.medium2
           : medium
-            ? TEXT_SIZES.medium1
+            ? TextSizes.medium1
             : smaller
-              ? TEXT_SIZES.smaller
-              : TEXT_SIZES.small
+              ? TextSizes.smaller
+              : TextSizes.small
       }
       textAlign={align}
       className={clsx(
@@ -47,6 +48,7 @@ export const TBody = ({
           : undefined
       }
       color={color}
+      textWrap={"wrap"}
     >
       {children}
     </Text>

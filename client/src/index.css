@@ -53,3 +53,9 @@ body {
   color: var(--color-white);
   -webkit-text-stroke: 1px var(--color-black);
 }
+
+@media screen and (max-width: 600px) {
+  body {
+    font-size: 9px;
+  }
+}

@@ -49,68 +49,69 @@ type UseDimensionsResponse = [
   setChangeCount: React.Dispatch<React.SetStateAction<number>>;
 };
 
-export const useDimensions = (): UseDimensionsResponse => {
-  const elementRef = useRef<HTMLDivElement>(null);
+export const useDimensions: () => UseDimensionsResponse =
+  (): UseDimensionsResponse => {
+    const elementRef = useRef<HTMLDivElement>(null);
 
-  const [dimensions, setDimensions] =
-    useState<IScreenDimensions>(DEFAULT_DIMENSIONS);
-  const [count, setCount] = useState(0);
+    const [dimensions, setDimensions] =
+      useState<IScreenDimensions>(DEFAULT_DIMENSIONS);
+    const [count, setCount] = useState(0);
 
-  const onScroll = throttle(() => {
-    updateDimensions();
-  }, 10);
-
-  const getObserver = () =>
-    new ResizeObserver((_entries) => {
-      // Only interested in the first entry for the observed element
+    const onScroll = throttle(() => {
       updateDimensions();
-    });
+    }, 10);
 
-  const updateDimensions = () => {
-    if (!elementRef.current) return;
+    const getObserver = () =>
+      new ResizeObserver((_entries) => {
+        // Only interested in the first entry for the observed element
+        updateDimensions();
+      });
 
-    const boundingRect = elementRef.current.getBoundingClientRect();
-    const { top, left, width, height, x, y } = boundingRect;
+    const updateDimensions = () => {
+      if (!elementRef.current) return;
 
-    setDimensions({ width, height, x, y, screenX: left, screenY: top });
-    setCount((prev) => prev + 1);
-  };
+      const boundingRect = elementRef.current.getBoundingClientRect();
+      const { top, left, width, height, x, y } = boundingRect;
 
-  useEffect(() => {
-    const observer = getObserver();
+      setDimensions({ width, height, x, y, screenX: left, screenY: top });
+      setCount((prev) => prev + 1);
+    };
 
-    if (elementRef.current) {
-      observer.observe(elementRef.current);
-    }
+    useEffect(() => {
+      const observer = getObserver();
 
-    // Cleanup on component unmount
-    return () => {
       if (elementRef.current) {
-        observer.unobserve(elementRef.current);
+        observer.observe(elementRef.current);
       }
-    };
-  }, [elementRef.current]);
 
-  useEffect(() => {
-    window.addEventListener("scroll", onScroll, true);
+      // Cleanup on component unmount
+      return () => {
+        if (elementRef.current) {
+          observer.unobserve(elementRef.current);
+        }
+      };
+    }, [elementRef.current]);
 
-    return () => {
-      window.removeEventListener("scroll", onScroll, true);
-    };
-  }, []);
+    useEffect(() => {
+      window.addEventListener("scroll", onScroll, true);
 
-  const res = [
-    elementRef,
-    dimensions,
-    setDimensions,
-    count,
-  ] as UseDimensionsResponse;
+      return () => {
+        window.removeEventListener("scroll", onScroll, true);
+      };
+    }, []);
 
-  res.ref = elementRef;
-  res.dims = dimensions;
-  res.setDims = setDimensions;
-  res.changeCount = count;
-  res.setChangeCount = setCount;
+    const res = [
+      elementRef,
+      dimensions,
+      setDimensions,
+      count,
+    ] as UseDimensionsResponse;
 
-  return res;
-};
+    res.ref = elementRef;
+    res.dims = dimensions;
+    res.setDims = setDimensions;
+    res.changeCount = count;
+    res.setChangeCount = setCount;
+
+    return res;
+  };

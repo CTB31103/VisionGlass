@@ -1,6 +1,7 @@
 import { Stack } from "@mui/material";
 import { BackgroundShape } from "./BackgroundShape";
 import { IMAGES } from "@/assets";
+import { useScreenSize } from "@/hooks";
 
 type SlantedImageShapeProps = {
   imageSrc?: string;
@@ -13,6 +14,7 @@ export const SlantedImageShape = ({
   alt,
   reverse,
 }: SlantedImageShapeProps) => {
+  const { lessThanEqualTo: sizeUnder } = useScreenSize();
   return (
     <Stack
       sx={{
@@ -26,7 +28,7 @@ export const SlantedImageShape = ({
     >
       <Stack
         sx={{
-          width: "90%",
+          width: sizeUnder.xs ? "100%" : "90%",
           position: "relative",
           alignItems: "center",
           justifyContent: "center",

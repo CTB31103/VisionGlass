@@ -3,27 +3,49 @@ import {
   FullPage,
   HeroImageWithForm,
   OurServices,
-  TEXT_SIZES,
+  StoneBackground,
+  THeading,
 } from "@/components";
-import { Text } from "@chakra-ui/react";
 import { Stack } from "@mui/material";
 import { GoToGlass } from "./GoToGlass";
 import { FairsSection } from "./FairsSection";
 import { ReviewsSection } from "./ReviewsSection";
+import { useScreenSize, useTextSizingService } from "@/hooks";
 
 export const Home = () => {
+  const { lessThanEqualTo: sizeUnder } = useScreenSize();
+  const TextSize = useTextSizingService();
   return (
     <FullPage screen className="relative">
       <HeroImageWithForm src={IMAGES.WindshieldReplacement}>
-        <Text fontSize={TEXT_SIZES.large} className="bungee-outline">
-          If its <span style={{ fontSize: TEXT_SIZES.largest }}>CHIPPED</span>
-          <br />
-          If its <span style={{ fontSize: TEXT_SIZES.largest }}>CRACKED</span>
-          <br />
-          <span style={{ fontSize: TEXT_SIZES.largest }}>VISION GLASS</span>
-          <br />
-          has <span style={{ fontSize: TEXT_SIZES.largest }}>YOUR BACK</span>
-        </Text>
+        <Stack
+          sx={{
+            width: sizeUnder.sm ? "100%" : undefined,
+            paddingInline: sizeUnder.sm ? 1 : 4,
+            pt: sizeUnder.sm ? 4 : undefined,
+          }}
+        >
+          <THeading
+            align={sizeUnder.sm ? "center" : "start"}
+            bungee
+            innerHtml={`If its <span style="font-size: ${TextSize.largest}px">CHIPPED</span>`}
+          />
+          <THeading
+            align={sizeUnder.sm ? "center" : "start"}
+            bungee
+            innerHtml={`If its <span style="font-size: ${TextSize.largest}px">CRACKED</span>`}
+          />
+          <THeading
+            align={sizeUnder.sm ? "center" : "start"}
+            bungee
+            innerHtml={`<span style="font-size: ${TextSize.largest}px">VISION GLASS</span>`}
+          />
+          <THeading
+            align={sizeUnder.sm ? "center" : "start"}
+            bungee
+            innerHtml={`has<span style="font-size: ${TextSize.largest}px">YOUR BACK</span>`}
+          />
+        </Stack>
       </HeroImageWithForm>
 
       <GoToGlass />
@@ -31,16 +53,15 @@ export const Home = () => {
       <Stack
         sx={{
           width: "100%",
-          minHeight: "90vh",
 
-          backgroundImage: `url(${IMAGES.Stone})`,
-          backgroundRepeat: "no-repeat",
-          backgroundSize: "cover",
+          position: "relative",
 
-          paddingBlock: 8,
-          paddingInline: 16,
+          paddingBlock: sizeUnder.sm ? 4 : 8,
+          paddingInline: sizeUnder.sm ? 2 : sizeUnder.md ? 4 : 16,
         }}
       >
+        <StoneBackground />
+
         <OurServices bungee />
       </Stack>
 

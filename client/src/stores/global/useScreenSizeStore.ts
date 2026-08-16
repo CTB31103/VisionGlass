@@ -1,6 +1,6 @@
 import { create } from "zustand";
 
-type IScreenSize = "xs" | "sm" | "md" | "lg" | "xl";
+type IScreenSize = "xxs" | "xs" | "sm" | "md" | "lg" | "xl";
 
 type IScreenSizeStore = {
   size: IScreenSize;

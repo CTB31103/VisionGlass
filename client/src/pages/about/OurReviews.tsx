@@ -1,17 +1,18 @@
 import {
-  BorderButton,
-  Icons,
+  PlayButtons,
   StarRow,
   TBody,
   THeading,
   type StarRating,
 } from "@/components";
 import { CSS } from "@/Constants";
-import { usePastReviews } from "@/hooks";
-import { Button, Paper, Stack } from "@mui/material";
+import { usePastReviews, useScreenSize } from "@/hooks";
+import { Paper, Stack } from "@mui/material";
 import { useRef, useState } from "react";
 
 export const OurReviews = () => {
+  const { lessThanEqualTo: sizeUnder } = useScreenSize();
+
   const { allReviews } = usePastReviews();
   const timeoutRef = useRef(0);
   const [fade, setFade] = useState(false);
@@ -45,10 +46,10 @@ export const OurReviews = () => {
     <Stack
       sx={{
         alignItems: "center",
-        paddingBlock: 8,
-        paddingInline: 4,
+        paddingBlock: sizeUnder.sm ? 4 : 8,
+        paddingInline: sizeUnder.sm ? 2 : 4,
       }}
-      spacing={4}
+      spacing={sizeUnder.sm ? 2 : 4}
     >
       <style>
         {`
@@ -89,7 +90,7 @@ export const OurReviews = () => {
             <Paper
               key={i}
               sx={{
-                width: "50vw",
+                width: sizeUnder.sm ? "85vw" : "50vw",
                 bgcolor: CSS.colors.grey,
                 border: 1,
                 borderColor: CSS.colors.black,
@@ -114,36 +115,14 @@ export const OurReviews = () => {
         </Stack>
       </Stack>
 
-      <Stack
-        sx={{ alignItems: "center", justifyContent: "center" }}
-        spacing={2}
-        direction={"row"}
-      >
-        <BorderButton onClick={() => setDirection(false, true)} color="blue">
-          <Icons.FastRewindIcon />
-        </BorderButton>
-        <BorderButton onClick={() => setDirection(false, false)} color="blue">
-          <Icons.ChevronLeft />
-        </BorderButton>
-        <Button
-          onClick={() => setPaused((prev) => !prev)}
-          variant="outlined"
-          sx={{
-            borderWidth: 1,
-            borderColor: CSS.colors.blue,
-            p: 2,
-            borderRadius: 50,
-          }}
-        >
-          {paused ? <Icons.Pause /> : <Icons.Play />}
-        </Button>
-        <BorderButton onClick={() => setDirection(true, false)} color="blue">
-          <Icons.ChevronRight />
-        </BorderButton>
-        <BorderButton onClick={() => setDirection(true, true)} color="blue">
-          <Icons.FastForwardIcon />
-        </BorderButton>
-      </Stack>
+      <PlayButtons
+        onFastBackward={() => setDirection(false, true)}
+        onFastForward={() => setDirection(true, true)}
+        onNext={() => setDirection(true, false)}
+        onPlay={() => setPaused((prev) => !prev)}
+        onPrev={() => setDirection(false, false)}
+        paused={paused}
+      />
     </Stack>
   );
 };

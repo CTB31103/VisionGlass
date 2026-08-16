@@ -1,26 +1,24 @@
 import { IMAGES } from "@/assets";
-import {
-  BackgroundShape,
-  SlantedImageShape,
-  TBody,
-  THeading,
-} from "@/components";
+import { SlantedImageShape, TBody, THeading } from "@/components";
+import { useScreenSize } from "@/hooks";
 import { Stack } from "@mui/material";
 
 export const OurStory = () => {
+  const { lessThanEqualTo: sizeUnder } = useScreenSize();
   return (
     <Stack
-      direction={"row"}
+      direction={sizeUnder.md ? "column-reverse" : "row"}
       sx={{
-        paddingInline: 8,
+        paddingInline: sizeUnder.md ? 4 : 8,
+        pt: sizeUnder.md ? 8 : undefined,
       }}
-      spacing={8}
+      spacing={sizeUnder.md ? 0 : 8}
     >
       <Stack
         sx={{
           flex: 1,
           alignItems: "center",
-          paddingBlock: 16,
+          paddingBlock: sizeUnder.md ? 8 : 16,
         }}
         spacing={2}
       >

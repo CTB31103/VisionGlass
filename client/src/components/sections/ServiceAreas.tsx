@@ -2,23 +2,29 @@ import { Link, Stack } from "@mui/material";
 import { TBody, THeading } from "../typography";
 import { ActionButton } from "../buttons";
 import { ROUTES } from "@/Constants";
-import { useServiceAreas } from "@/hooks";
+import { useScreenSize, useServiceAreas } from "@/hooks";
 import { ServiceAreaColumns } from "./ServiceAreaColumns";
 
 export const ServiceAreas = () => {
   const { short } = useServiceAreas();
+  const { lessThanEqualTo: sizeUnder } = useScreenSize();
   return (
     <Stack
       spacing={2}
-      sx={{ paddingInline: 10, paddingBlock: 3, justifyContent: "center" }}
+      sx={{
+        paddingInline: sizeUnder.sm ? 2.5 : sizeUnder.md ? 5 : 10,
+        paddingBlock: 3,
+        justifyContent: "center",
+      }}
     >
       <Stack
-        direction={"row"}
+        direction={sizeUnder.sm ? "column" : "row"}
         sx={{
           width: "100%",
-          alignItems: "center",
-          justifyContent: "space-between",
+          alignItems: sizeUnder.sm ? "start" : "center",
+          justifyContent: sizeUnder.sm ? undefined : "space-between",
         }}
+        spacing={sizeUnder.sm ? 1 : undefined}
       >
         <Stack>
           <THeading>Service Areas</THeading>
@@ -27,14 +33,18 @@ export const ServiceAreas = () => {
           </TBody>
         </Stack>
 
+        {/* <Stack> */}
         <Link
           href={ROUTES.CONTACT}
           variant="inherit"
-          sx={{ outline: "none" }}
+          sx={{ outline: "none", width: sizeUnder.xs ? "100%" : undefined }}
           underline="none"
         >
-          <ActionButton color="red">See All Areas</ActionButton>
+          <ActionButton fullWidth={sizeUnder.xs} color="red">
+            See All Areas
+          </ActionButton>
         </Link>
+        {/* </Stack> */}
       </Stack>
 
       <ServiceAreaColumns areas={short} />

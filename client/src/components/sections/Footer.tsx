@@ -4,8 +4,10 @@ import { ServiceAreas } from "./ServiceAreas";
 import { Stack } from "@mui/material";
 import { FooterColumn } from "./FooterColumn";
 import { useLocation } from "react-router";
+import { useScreenSize } from "@/hooks";
 
 export const Footer = () => {
+  const { lessThanEqualTo: sizeUnder } = useScreenSize();
   const { pathname } = useLocation();
   const isContact = pathname.includes(ROUTES.CONTACT);
   return (
@@ -13,22 +15,23 @@ export const Footer = () => {
       {!isContact && <ServiceAreas />}
 
       <Stack
-        direction={"row"}
+        direction={sizeUnder.sm ? "column" : "row"}
         sx={{
           paddingBlock: 4,
-          paddingInline: 8,
+          paddingInline: sizeUnder.md ? 2 : 8,
           alignItems: "center",
-          justifyContent: "space-between",
+          justifyContent: sizeUnder.sm ? "center" : "space-between",
           bgcolor: CSS.colors.blue,
         }}
+        spacing={sizeUnder.sm ? 4 : 0}
       >
         <Stack
           sx={{
-            p: 4,
+            p: sizeUnder.md ? 1 : 4,
             borderRadius: "25vw",
             bgcolor: CSS.colors.white,
-            width: "20vw",
-            height: "20vw",
+            width: sizeUnder.xs ? "50vw" : sizeUnder.sm ? "30vw" : "20vw",
+            height: sizeUnder.xs ? "50vw" : sizeUnder.sm ? "30vw" : "20vw",
 
             alignItems: "center",
             justifyContent: "center",
@@ -44,9 +47,12 @@ export const Footer = () => {
         </Stack>
 
         <Stack
-          direction={"row"}
-          sx={{ alignItems: "start", justifyContent: "end" }}
-          spacing={4}
+          direction={sizeUnder.xs ? "column" : "row"}
+          sx={{
+            alignItems: sizeUnder.xs ? "center" : "start",
+            justifyContent: sizeUnder.xs ? "start" : "end",
+          }}
+          spacing={sizeUnder.md ? 2 : 4}
         >
           <FooterColumn
             title="Services"

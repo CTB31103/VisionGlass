@@ -50,6 +50,7 @@ export const HeaderHorizontalText = ({
         direction={"row"}
         sx={{ alignItems: "center" }}
         spacing={1}
+        onClick={() => (menuOptions ? setOpen((prev) => !prev) : {})}
         onMouseEnter={() => setOpen(true)}
         onMouseDown={() => setOpen(false)}
       >

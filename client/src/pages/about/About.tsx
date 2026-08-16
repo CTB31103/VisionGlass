@@ -5,8 +5,10 @@ import { CSS, ROUTES } from "@/Constants";
 import { OurReviews } from "./OurReviews";
 import { WhyChooseUs } from "./WhyChooseUs";
 import { OurStory } from "./OurStory";
+import { useScreenSize } from "@/hooks";
 
 export const About = () => {
+  const { lessThanEqualTo: sizeUnder } = useScreenSize();
   return (
     <FullPage screen>
       <HeroImage src={IMAGES.VGHoodies}>
@@ -14,6 +16,8 @@ export const About = () => {
           sx={{
             alignItems: "center",
             justifyContent: "center",
+            paddingInline: sizeUnder.sm ? 1 : undefined,
+            paddingBlock: sizeUnder.sm ? 4 : undefined,
           }}
           spacing={2}
         >

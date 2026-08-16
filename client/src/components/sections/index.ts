@@ -13,3 +13,4 @@ export * from "./LargePictureWithCardSection";
 export * from "./OtherServicesSections";
 export * from "./TextImageRowColumns";
 export * from "./WhenToReplaceSection";
+export * from "./StoneBackground";

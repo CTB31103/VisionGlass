@@ -1,4 +1,5 @@
 import { CSS } from "@/Constants";
+import { useScreenSize } from "@/hooks";
 import { Stack } from "@mui/material";
 import { type PropsWithChildren } from "react";
 
@@ -12,11 +13,11 @@ export const LargePictureWithCardSection = ({
   reverse?: boolean;
   small?: boolean;
 }>) => {
+  const { lessThanEqualTo: sizeUnder } = useScreenSize();
   return (
     <Stack
       sx={{
-        minHeight: "70vh",
-        padding: 8,
+        padding: sizeUnder.md ? 4 : 8,
 
         backgroundImage: `url(${imageSrc})`,
         backgroundRepeat: "no-repeat",
@@ -29,12 +30,20 @@ export const LargePictureWithCardSection = ({
       <Stack
         sx={{
           bgcolor: CSS.colors.white,
-          p: 5,
+          p: sizeUnder.sm ? 2.5 : 5,
           alignItems: "center",
 
           borderTopLeftRadius: 25,
           borderBottomRightRadius: 25,
-          maxWidth: small ? "40%" : "55%",
+          maxWidth: sizeUnder.xs
+            ? undefined
+            : sizeUnder.md
+              ? small
+                ? "50%"
+                : "65%"
+              : small
+                ? "40%"
+                : "55%",
         }}
         spacing={4}
       >

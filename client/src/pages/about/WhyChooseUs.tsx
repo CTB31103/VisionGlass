@@ -6,12 +6,16 @@ import {
   THeading,
 } from "@/components";
 import { ROUTES } from "@/Constants";
+import { useScreenSize } from "@/hooks";
 import { Link, Stack } from "@mui/material";
 
 export const WhyChooseUs = () => {
+  const { lessThanEqualTo: sizeUnder } = useScreenSize();
   return (
     <LargePictureWithCardSection imageSrc={IMAGES.WindshieldReplacement2}>
-      <THeading>Why Choose Us</THeading>
+      <THeading align={sizeUnder.sm ? "center" : undefined}>
+        Why Choose Us
+      </THeading>
 
       <Stack spacing={2}>
         <CheckmarkItem text="We work with insurance to lower your costs" />

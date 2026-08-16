@@ -1,9 +1,12 @@
 import { IMAGES } from "@/assets";
 import { TextImageRowColumns } from "@/components";
+import { useScreenSize } from "@/hooks";
 
 export const WindshieldDangers = () => {
+  const { lessThanEqualTo: sizeUnder } = useScreenSize();
   return (
     <TextImageRowColumns
+      reverse={sizeUnder.md}
       header="The Dangers of a Damaged Windshield"
       body={[
         `Driving with a cracked or broken windshield can pose serious safety

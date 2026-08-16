@@ -4,17 +4,25 @@ import {
   HeroImageWithForm,
   NumberedItem,
   OurServices,
+  StoneBackground,
   TBody,
   THeading,
 } from "@/components";
 import { Stack } from "@mui/material";
 import { WhyChooseUs } from "./WhyChooseUs";
+import { useScreenSize } from "@/hooks";
 
 export const ServicesPage = () => {
+  const { lessThanEqualTo: sizeUnder } = useScreenSize();
   return (
     <FullPage screen className="relative">
       <HeroImageWithForm src={IMAGES.Service_MB_Rect}>
-        <Stack sx={{ paddingInline: 4 }}>
+        <Stack
+          sx={{
+            paddingInline: sizeUnder.sm ? 1 : 4,
+            pt: sizeUnder.sm ? 4 : undefined,
+          }}
+        >
           <Stack spacing={0}>
             <THeading large thin bungee align="center">
               Full-Service
@@ -35,10 +43,9 @@ export const ServicesPage = () => {
       <Stack
         sx={{
           width: "100%",
-          minHeight: "90vh",
 
-          paddingBlock: 8,
-          paddingInline: 16,
+          paddingBlock: sizeUnder.sm ? 4 : 8,
+          paddingInline: sizeUnder.sm ? 2 : sizeUnder.md ? 4 : 16,
         }}
       >
         <OurServices />
@@ -48,31 +55,34 @@ export const ServicesPage = () => {
         sx={{
           width: "100%",
 
-          backgroundImage: `url(${IMAGES.Stone})`,
-          backgroundRepeat: "no-repeat",
-          backgroundSize: "cover",
+          position: "relative",
 
-          paddingBlock: 8,
-          paddingInline: 16,
+          paddingBlock: sizeUnder.sm ? 4 : 8,
+          paddingInline: sizeUnder.sm ? 2 : sizeUnder.md ? 4 : 16,
         }}
       >
+        <StoneBackground />
+
         <WhyChooseUs />
       </Stack>
 
       <Stack
-        direction={"row"}
-        spacing={8}
+        direction={sizeUnder.sm ? "column" : "row"}
+        spacing={sizeUnder.sm ? 2 : 8}
         sx={{
-          minHeight: "70vh",
-          p: 8,
+          p: sizeUnder.md ? 4 : 8,
         }}
       >
-        <Stack sx={{ flex: 1 }}>
-          <img src={IMAGES.CartoonInstaller} alt="Windshield installation" />
+        <Stack sx={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+          <Stack sx={{ width: sizeUnder.sm ? "75%" : "100%" }}>
+            <img src={IMAGES.CartoonInstaller} alt="Windshield installation" />
+          </Stack>
         </Stack>
 
         <Stack spacing={2} sx={{ flex: 1, minHeight: "100%" }}>
-          <THeading>How does mobile glass service work?</THeading>
+          <THeading align={sizeUnder.sm ? "center" : undefined}>
+            How does mobile glass service work?
+          </THeading>
 
           <Stack
             spacing={1}

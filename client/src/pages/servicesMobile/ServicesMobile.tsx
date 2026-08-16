@@ -9,16 +9,25 @@ import {
   WhenToReplaceSection,
 } from "@/components";
 import { ROUTES } from "@/Constants";
+import { useScreenSize } from "@/hooks";
 import { Link, Stack } from "@mui/material";
 
 export const ServicesMobile = () => {
+  const { lessThanEqualTo: sizeUnder } = useScreenSize();
+
   return (
     <FullPage screen>
       <HeroImage src={IMAGES.Service_MB_Rect}>
-        <Stack sx={{ paddingInline: 8, maxWidth: "66%" }} spacing={4}>
+        <Stack
+          sx={{
+            paddingInline: sizeUnder.xs ? 2 : 8,
+            maxWidth: sizeUnder.md ? "100%" : "66%",
+          }}
+          spacing={4}
+        >
           <Stack>
             <THeading large bungee>
-              On The Go Installation
+              On The Go {sizeUnder.sm ? "Installs" : "Installation"}
             </THeading>
             <THeading bungee thin>
               Convenient mobile installation services - we come to you
@@ -40,6 +49,8 @@ export const ServicesMobile = () => {
           `With years of combined experience in the auto glass industry, our team is equipped with the latest technology and techniques to ensure a perfect fit every time. From residential to commercial vehicles, we've seen it all - and know how to handle even the most complex installations on the go. By choosing us for your mobile installation needs, you can trust that your vehicle's safety features will be restored with precision and care, giving you peace of mind on the road.`,
         ]}
         imageSrc={IMAGES.WindshieldReplacement}
+        reverse={sizeUnder.md}
+        translateX={sizeUnder.xs ? 5 : 0}
       />
 
       <WhenToReplaceSection />

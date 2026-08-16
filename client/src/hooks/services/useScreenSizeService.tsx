@@ -8,10 +8,11 @@ export const useScreenSizeService = () => {
 
   useEffect(() => {
     if (width >= 1536) return setSize("xl");
-    if (width >= 1200) return setSize("lg");
-    if (width >= 900) return setSize("md");
+    if (width >= 1000) return setSize("lg");
+    if (width >= 800) return setSize("md");
     if (width >= 600) return setSize("sm");
-    return setSize("xs");
+    if (width >= 350) return setSize("xs");
+    return setSize("xxs");
   }, [width]);
 
   useEffect(() => {

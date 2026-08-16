@@ -23,10 +23,6 @@ export const StarRow = ({ filled = 5 }: StarRowProps) => {
             const isDecimal = filledIndexBased.toString().includes(".5");
             const indexGreaterThan = i > filledIndexBased;
 
-            console.log(`i: ${i}`);
-            console.log(`filled: ${filledIndexBased}`);
-            console.log(``);
-
             if (indexGreaterThan) {
               if (isDecimal && i - 1 < filledIndexBased) return Icons.StarHalf;
               return rNode;

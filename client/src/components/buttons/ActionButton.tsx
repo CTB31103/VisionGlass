@@ -1,4 +1,4 @@
-import { Button, Heading } from "@chakra-ui/react";
+import { Button } from "@chakra-ui/react";
 import { type PropsWithChildren } from "react";
 import type { ButtonColor } from "./types";
 import {
@@ -6,38 +6,39 @@ import {
   buttonColorCSS,
   buttonTextColorCSS,
 } from "./utils";
-import { useScreenSize } from "@/hooks";
+import { TBody } from "../typography";
 
 type ActionButtonProps = {
+  fullWidth?: boolean;
+  autoHeight?: boolean;
+  lg?: boolean;
   color?: ButtonColor;
   onClick?: () => void;
 };
 
 export const ActionButton = ({
+  fullWidth,
+  autoHeight,
   children,
+  lg,
   color: propColor = "none",
   onClick,
 }: PropsWithChildren<ActionButtonProps>) => {
-  const { lessThanEqualTo } = useScreenSize();
   return (
     <Button
-      className="active:scale-100 hover:scale-105 hover:shadow-2xl transition-transform duration-75 p-10"
-      // size={lessThanEqualTo.sm ? "xl" : "2xl"}
-      size={"lg"}
+      className="active:scale-100 hover:scale-105 hover:shadow-2xl transition-transform duration-75"
+      size={lg ? "2xl" : "lg"}
+      h={autoHeight ? "auto" : undefined}
+      w={fullWidth ? "100%" : undefined}
       borderWidth={1.5}
       borderColor={buttonBorderColorCSS(propColor)}
       bg={buttonColorCSS(propColor)}
       color={buttonTextColorCSS(propColor)}
       onClick={onClick}
     >
-      <Heading
-        className="bungee-outline-thin"
-        textWrap={"wrap"}
-        fontSize={20}
-        fontWeight={"black"}
-      >
+      <TBody bungee medium>
         {children}
-      </Heading>
+      </TBody>
     </Button>
   );
 };

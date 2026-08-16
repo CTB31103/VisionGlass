@@ -1,8 +1,8 @@
 import type { PropsWithChildren } from "react";
-import { TEXT_SIZES } from "./textSizes";
 import { Text } from "@chakra-ui/react";
 import type { TProps } from "./TProps";
 import clsx from "clsx";
+import { useTextSizingService } from "@/hooks";
 
 export const THeading = ({
   children,
@@ -12,10 +12,11 @@ export const THeading = ({
   large,
   innerHtml,
 }: PropsWithChildren<TProps & { thin?: boolean; large?: boolean }>) => {
+  const TextSize = useTextSizingService();
   return (
     <Text
       fontWeight={"bold"}
-      fontSize={large ? TEXT_SIZES.largest : TEXT_SIZES.large}
+      fontSize={large ? TextSize.largest : TextSize.large}
       textAlign={align}
       className={clsx(
         bungee ? (thin ? "bungee-outline-thin" : "bungee-outline") : "",

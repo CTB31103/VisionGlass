@@ -1,5 +1,5 @@
 import { CSS } from "@/Constants";
-import { useDimensions } from "@/hooks";
+import { useDimensions, useScreenSize } from "@/hooks";
 import { Stack } from "@mui/material";
 import { TBody } from "./TBody";
 import { Icons } from "../icons";
@@ -10,9 +10,10 @@ type CheckmarkItemProps = {
 };
 
 export const CheckmarkItem = ({ text }: CheckmarkItemProps) => {
+  const { lessThanEqualTo: sizeUnder } = useScreenSize();
   const [squareRef, squareDims] = useDimensions();
   return (
-    <Stack direction={"row"} spacing={4}>
+    <Stack direction={"row"} spacing={sizeUnder.md ? 2 : 4}>
       <Stack
         ref={squareRef}
         sx={{

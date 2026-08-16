@@ -6,10 +6,11 @@ export const Service = {
   AutoGlass: "Auto Glass Replacement",
   ADAS: "ADAS Calibration",
   ChipRepair: "Crack & Chip Repair",
-  Mobile: "Mobile Installations",
+  Mobile: "Mobile Installs",
 };
 
 export const SERVICES = Array.from(Object.values(Service));
+export const SELECTABLE_SERVICES = SERVICES.slice(0, 4);
 export const SERVICE_ROUTES = [
   ROUTES.SERVICE_WR,
   ROUTES.SERVICE_AG,

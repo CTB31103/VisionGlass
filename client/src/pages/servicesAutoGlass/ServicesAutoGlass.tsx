@@ -9,13 +9,22 @@ import {
   WhenToReplaceSection,
 } from "@/components";
 import { ROUTES } from "@/Constants";
+import { useScreenSize } from "@/hooks";
 import { Link, Stack } from "@mui/material";
 
 export const ServicesAutoGlass = () => {
+  const { lessThanEqualTo: sizeUnder } = useScreenSize();
+
   return (
     <FullPage screen>
       <HeroImage src={IMAGES.AutoGlassReplace}>
-        <Stack sx={{ paddingInline: 8, maxWidth: "75%" }} spacing={4}>
+        <Stack
+          sx={{
+            paddingInline: sizeUnder.xs ? 2 : 8,
+            maxWidth: sizeUnder.xs ? "100%" : "75%",
+          }}
+          spacing={4}
+        >
           <Stack>
             <THeading large bungee>
               Auto Glass Replacement Solutions
@@ -44,6 +53,7 @@ export const ServicesAutoGlass = () => {
           href: ROUTES.QUOTES,
         }}
         imageSrc={IMAGES.ServiceAG}
+        reverse={sizeUnder.sm}
       />
 
       <WhenToReplaceSection />

@@ -1,5 +1,5 @@
 import { CSS } from "@/Constants";
-import { useDimensions } from "@/hooks";
+import { useDimensions, useScreenSize } from "@/hooks";
 import { Stack } from "@mui/material";
 import { type PropsWithChildren, type ReactNode } from "react";
 import { TBody } from "./TBody";
@@ -9,6 +9,7 @@ export type NumberedItemProps = {
   number?: number;
   active?: boolean;
   smallNumber?: boolean;
+  centered?: boolean;
   text?: string;
   onClick?: () => void;
 };
@@ -17,18 +18,23 @@ export const NumberedItem = ({
   Icon,
   number,
   smallNumber,
+  centered,
   active,
   text,
   children,
   onClick,
 }: PropsWithChildren<NumberedItemProps>) => {
+  const { lessThanEqualTo: sizeUnder } = useScreenSize();
   const [squareRef, squareDims] = useDimensions();
   return (
     <Stack
-      direction={"row"}
-      spacing={4}
+      direction={centered ? "column" : "row"}
+      spacing={sizeUnder.xs ? 1 : 2}
       onClick={onClick}
-      sx={{ cursor: onClick ? "pointer" : undefined }}
+      sx={{
+        cursor: onClick ? "pointer" : undefined,
+        alignItems: centered ? "center" : undefined,
+      }}
     >
       <Stack
         ref={squareRef}
@@ -39,7 +45,7 @@ export const NumberedItem = ({
           alignItems: "center",
           justifyContent: "center",
           height: squareDims.width,
-          p: 2,
+          p: sizeUnder.md ? 1.5 : 2,
         }}
       >
         {Icon ?? (
@@ -52,7 +58,7 @@ export const NumberedItem = ({
           </TBody>
         )}
       </Stack>
-      {children ?? <TBody>{text}</TBody>}
+      {children ?? <TBody medium={sizeUnder.sm}>{text}</TBody>}
     </Stack>
   );
 };

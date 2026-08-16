@@ -1,6 +1,7 @@
 import { Link, Stack } from "@mui/material";
 import { TBody } from "../typography";
 import { CSS } from "@/Constants";
+import { useScreenSize } from "@/hooks";
 
 type FooterItemProps = {
   text: string;
@@ -14,9 +15,22 @@ type FooterColumnProps = {
 };
 
 export const FooterColumn = ({ title, items }: FooterColumnProps) => {
+  const { lessThanEqualTo: sizeUnder } = useScreenSize();
   return (
-    <Stack spacing={2} sx={{ color: CSS.colors.white }}>
-      <TBody bungee medium>
+    <Stack
+      spacing={sizeUnder.md ? 1 : 2}
+      sx={{
+        color: CSS.colors.white,
+        width: sizeUnder.xs
+          ? "100%"
+          : sizeUnder.sm
+            ? "33%"
+            : sizeUnder.md
+              ? "25%"
+              : undefined,
+      }}
+    >
+      <TBody bungee medium large align={sizeUnder.sm ? "center" : undefined}>
         {title}
       </TBody>
 
@@ -29,7 +43,12 @@ export const FooterColumn = ({ title, items }: FooterColumnProps) => {
             underline={item.href ? "hover" : "none"}
             onClick={(e) => (item.href === undefined ? e.preventDefault() : {})}
           >
-            <TBody medium bold innerHtml={item.text}></TBody>
+            <TBody
+              align={sizeUnder.sm ? "center" : undefined}
+              medium
+              bold={!sizeUnder.md}
+              innerHtml={item.text}
+            ></TBody>
           </Link>
         ))}
       </Stack>

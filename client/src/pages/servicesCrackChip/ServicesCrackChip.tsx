@@ -11,9 +11,12 @@ import {
   THeading,
 } from "@/components";
 import { ROUTES } from "@/Constants";
+import { useScreenSize } from "@/hooks";
 import { Link, Stack } from "@mui/material";
 
 export const ServicesCrackChip = () => {
+  const { lessThanEqualTo: sizeUnder } = useScreenSize();
+
   const whenCanRepairs = [
     `Your damage is smaller than a quarter`,
     `The crack has not started to grow, or 'spider'`,
@@ -22,7 +25,13 @@ export const ServicesCrackChip = () => {
   return (
     <FullPage screen>
       <HeroImage src={IMAGES.Chip2}>
-        <Stack sx={{ paddingInline: 8, maxWidth: "75%" }} spacing={4}>
+        <Stack
+          sx={{
+            paddingInline: sizeUnder.xs ? 2 : 8,
+            maxWidth: sizeUnder.xs ? "100%" : "75%",
+          }}
+          spacing={4}
+        >
           <Stack>
             <THeading large bungee>
               Crack & Chip Repair
@@ -56,6 +65,8 @@ avoiding unnecessary waste.`,
           text: `Schedule Today`,
           href: ROUTES.QUOTES,
         }}
+        reverse={sizeUnder.md}
+        translateX={sizeUnder.xs ? 5 : 0}
       />
 
       <LargePictureWithCardSection small reverse imageSrc={IMAGES.Repair1}>

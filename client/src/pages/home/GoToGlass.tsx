@@ -1,16 +1,22 @@
 import { IMAGES } from "@/assets";
 import { TBody, THeading } from "@/components";
+import { useScreenSize } from "@/hooks";
 import { Stack } from "@mui/material";
 
 export const GoToGlass = () => {
+  const { lessThanEqualTo: sizeUnder } = useScreenSize();
   return (
-    <Stack direction={"row"} sx={{}}>
+    <Stack
+      direction={sizeUnder.sm ? "column-reverse" : "row"}
+      sx={{}}
+      spacing={0}
+    >
       <Stack
         sx={{
-          width: "50%",
+          width: "100%",
           alignItems: "center",
-          paddingInline: 8,
-          paddingBlock: 16,
+          paddingInline: sizeUnder.sm ? 2 : sizeUnder.md ? 4 : 8,
+          paddingBlock: sizeUnder.sm ? 4 : sizeUnder.md ? 8 : 16,
         }}
         spacing={1}
       >
@@ -59,20 +65,28 @@ export const GoToGlass = () => {
       <Stack
         sx={{
           position: "relative",
-          width: "50%",
+          width: "100%",
         }}
       >
         <Stack
-          sx={{
-            position: "absolute",
-            top: 0,
-            right: "-30%",
-            width: "70vw",
-            height: "100%",
+          sx={
+            sizeUnder.sm
+              ? {
+                  width: "100%",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }
+              : {
+                  position: "absolute",
+                  top: 0,
+                  right: "-30%",
+                  width: "70vw",
+                  height: "100%",
 
-            alignItems: "end",
-            justifyContent: "center",
-          }}
+                  alignItems: "end",
+                  justifyContent: "center",
+                }
+          }
         >
           <img
             style={{ width: "100%" }}

@@ -7,11 +7,13 @@ import {
   type IconCardProps,
 } from "@/components";
 import { CSS } from "@/Constants";
-import { useTimeoutEffect } from "@/hooks";
+import { useScreenSize, useTimeoutEffect } from "@/hooks";
 import { Stack } from "@mui/material";
 import { useState } from "react";
 
 export const WhyChooseUs = () => {
+  const { lessThanEqualTo: sizeUnder } = useScreenSize();
+
   const pageOneCards: IconCardProps[] = [
     {
       title: `Insurance Accepted`,
@@ -63,6 +65,7 @@ replacements.`,
   const [cardPageIndex, setCardPageIndex] = useState(0);
   const [debouncedIndex, setDebouncedIndex] = useState(0);
 
+  const allCards = [...pageOneCards, ...pageTwoCards];
   const allPageCards = [pageOneCards, pageTwoCards];
   const pageCards = allPageCards[cardPageIndex];
   const debouncedCards = allPageCards[debouncedIndex];
@@ -94,6 +97,7 @@ replacements.`,
       sx={{
         alignItems: "center",
         height: "100%",
+        zIndex: 1,
       }}
     >
       <THeading bungee thin>
@@ -105,9 +109,11 @@ replacements.`,
         spacing={4}
         sx={{ width: "100%", height: "100%", alignItems: "center" }}
       >
-        <ActionButton onClick={lastPage} color="red">
-          <Icons.ChevronLeft sx={{ color: CSS.colors.white }} />
-        </ActionButton>
+        {!sizeUnder.md && (
+          <ActionButton onClick={lastPage} color="red">
+            <Icons.ChevronLeft sx={{ color: CSS.colors.white }} />
+          </ActionButton>
+        )}
 
         <Stack
           sx={{
@@ -117,46 +123,58 @@ replacements.`,
         >
           {/* Hidden to get initial bounds */}
           <Stack
-            direction={"row"}
+            direction={sizeUnder.md ? "column" : "row"}
             spacing={2}
             sx={{
               alignItems: "center",
               justifyContent: "space-evenly",
-              opacity: 0,
+              opacity: sizeUnder.md ? 1 : 0,
             }}
           >
-            {debouncedCards.map((props) => (
-              <Stack key={props.title} sx={{ flex: 1, height: "100%" }}>
-                <IconCard {...props} />
+            {(sizeUnder.md ? allCards : debouncedCards).map((props, i) => (
+              <Stack
+                key={props.title}
+                sx={
+                  sizeUnder.md ? { width: "100%" } : { flex: 1, height: "100%" }
+                }
+              >
+                <IconCard
+                  {...props}
+                  reverse={sizeUnder.md ? i % 2 === 1 : undefined}
+                />
               </Stack>
             ))}
           </Stack>
 
           {/* Stretches cards to the same height */}
-          <Stack
-            direction={"row"}
-            spacing={2}
-            sx={{
-              position: "absolute",
-              top: 0,
-              left: 0,
-              width: "100%",
-              height: "100%",
-              alignItems: "center",
-              justifyContent: "space-evenly",
-            }}
-          >
-            {pageCards.map((props) => (
-              <Stack key={props.title} sx={{ flex: 1, height: "100%" }}>
-                <IconCard {...props} />
-              </Stack>
-            ))}
-          </Stack>
+          {!sizeUnder.md && (
+            <Stack
+              direction={"row"}
+              spacing={2}
+              sx={{
+                position: "absolute",
+                top: 0,
+                left: 0,
+                width: "100%",
+                height: "100%",
+                alignItems: "center",
+                justifyContent: "space-evenly",
+              }}
+            >
+              {pageCards.map((props) => (
+                <Stack key={props.title} sx={{ flex: 1, height: "100%" }}>
+                  <IconCard {...props} />
+                </Stack>
+              ))}
+            </Stack>
+          )}
         </Stack>
 
-        <ActionButton onClick={nextPage} color="red">
-          <Icons.ChevronRight sx={{ color: CSS.colors.white }} />
-        </ActionButton>
+        {!sizeUnder.md && (
+          <ActionButton onClick={nextPage} color="red">
+            <Icons.ChevronRight sx={{ color: CSS.colors.white }} />
+          </ActionButton>
+        )}
       </Stack>
     </Stack>
   );

@@ -12,12 +12,18 @@ import {
 import { ROUTES } from "@/Constants";
 import { Link, Stack } from "@mui/material";
 import { WindshieldDangers } from "./WindshieldDangers";
+import { useScreenSize } from "@/hooks";
 
 export const ServicesWindshieldReplacements = () => {
+  const { lessThanEqualTo: sizeUnder } = useScreenSize();
+
   return (
     <FullPage screen>
       <HeroImage src={IMAGES.WindshieldReplacement2}>
-        <Stack sx={{ paddingInline: 8 }} spacing={4}>
+        <Stack
+          sx={{ paddingInline: sizeUnder.xs ? 1 : sizeUnder.sm ? 2 : 8 }}
+          spacing={4}
+        >
           <Stack>
             <THeading large bungee>
               Quality
@@ -40,11 +46,47 @@ export const ServicesWindshieldReplacements = () => {
 
       <WhenToReplaceSection />
 
-      <Stack direction={"row"} sx={{ paddingInline: 8 }} spacing={2}>
-        <Stack sx={{ flex: 1, maxHeight: "100%", paddingBlock: 8 }}>
-          <SquareImageShape imageSrc={IMAGES.ADAS2} alt="Camaro Auto Glass" />
+      <Stack
+        direction={sizeUnder.md ? "column" : "row"}
+        sx={{
+          paddingInline: sizeUnder.md ? 4 : 8,
+          paddingBlock: sizeUnder.sm ? 8 : sizeUnder.md ? 12 : undefined,
+        }}
+        spacing={sizeUnder.md ? 8 : 2}
+      >
+        <Stack
+          sx={{
+            flex: sizeUnder.md ? undefined : 1,
+            width: sizeUnder.md ? "100%" : undefined,
+
+            alignItems: sizeUnder.md ? "center" : "start",
+            justifyContent: "center",
+          }}
+        >
+          <Stack
+            sx={{
+              width: sizeUnder.xxs
+                ? "100%"
+                : sizeUnder.xs
+                  ? "90%"
+                  : sizeUnder.md
+                    ? "50%"
+                    : "75%",
+              pr: sizeUnder.xs ? 2 : 0,
+            }}
+          >
+            <SquareImageShape
+              heightMult={sizeUnder.md ? 0.75 : 1}
+              imageSrc={IMAGES.ADAS2}
+              alt="ADAS"
+            />
+          </Stack>
         </Stack>
-        <Stack sx={{ flex: 1, paddingBlock: 16 }} spacing={2}>
+
+        <Stack
+          sx={{ flex: 1, paddingBlock: sizeUnder.md ? 0 : 16 }}
+          spacing={2}
+        >
           <THeading>
             Advanced Driver Assistance Systems (ADAS) Calibration
           </THeading>
@@ -63,7 +105,9 @@ export const ServicesWindshieldReplacements = () => {
             and cameras are working in sync to provide the best possible safety
             features for your car.
           </TBody>
-          <Stack sx={{ width: "100%", alignItems: "end" }}>
+          <Stack
+            sx={{ width: "100%", alignItems: sizeUnder.xs ? "center" : "end" }}
+          >
             <Link href={ROUTES.SERVICE_ADAS}>
               <ActionButton color="red">Learn More</ActionButton>
             </Link>

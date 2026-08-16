@@ -11,6 +11,7 @@ import {
 import {
   useDimensions,
   useRequestCallbackShortForm,
+  useScreenSize,
   useTimeoutEffect,
 } from "@/hooks";
 import { SERVICES } from "@/interfaces";
@@ -43,6 +44,8 @@ const availableSideImages = [
 const availableRows = ["1st Row", "2nd Row", "3rd Row", "4th Row"];
 
 export const Quote = () => {
+  const { lessThanEqualTo: sizeUnder } = useScreenSize();
+
   const [serviceCardSquareRef, serviceCardSquareDims] = useDimensions();
 
   const {
@@ -176,14 +179,32 @@ export const Quote = () => {
 
   return (
     <FullPage screen>
-      <Stack spacing={4} sx={{ paddingBlock: 10, paddingInline: 20 }}>
+      <Stack
+        spacing={4}
+        sx={{
+          paddingBlock: sizeUnder.xs
+            ? 1.25
+            : sizeUnder.sm
+              ? 2.5
+              : sizeUnder.md
+                ? 5
+                : 10,
+          paddingInline: sizeUnder.xs
+            ? 2.5
+            : sizeUnder.sm
+              ? 5
+              : sizeUnder.md
+                ? 10
+                : 20,
+        }}
+      >
         <TitleWithSubtitle
           title="Request a callback"
           subtitle="Fill out this quick form and Vision Glass will call you back by the next day. All inputs marked with * are required."
         />
 
         <Stack spacing={2}>
-          <Stack spacing={2} direction={"row"}>
+          <Stack spacing={2} direction={sizeUnder.xs ? "column" : "row"}>
             <TextInput
               required
               label="First Name"
@@ -198,7 +219,7 @@ export const Quote = () => {
             />
           </Stack>
 
-          <Stack spacing={2} direction={"row"}>
+          <Stack spacing={2} direction={sizeUnder.xs ? "column" : "row"}>
             <TextInput
               required
               label="Phone"
@@ -213,7 +234,10 @@ export const Quote = () => {
             />
           </Stack>
 
-          <Stack spacing={2} direction={"row"}>
+          <Stack
+            spacing={2}
+            direction={sizeUnder.xs ? "column-reverse" : "row"}
+          >
             <RadioInput
               label="Tell us more about your vehicle"
               boxLabel="Tell us more"
@@ -238,7 +262,7 @@ export const Quote = () => {
             />
 
             <Stack spacing={2}>
-              <Stack direction={"row"} spacing={2}>
+              <Stack direction={sizeUnder.xs ? "column" : "row"} spacing={2}>
                 <SelectInput
                   required
                   label="Car Make"
@@ -256,7 +280,7 @@ export const Quote = () => {
                 />
               </Stack>
 
-              <Stack direction={"row"} spacing={2}>
+              <Stack direction={sizeUnder.xs ? "column" : "row"} spacing={2}>
                 <SelectInput
                   required
                   label="Car Year"
@@ -269,7 +293,7 @@ export const Quote = () => {
                 <Stack sx={{ width: "100%" }} />
               </Stack>
 
-              <Stack direction={"row"} spacing={2}>
+              <Stack direction={sizeUnder.xs ? "column" : "row"} spacing={2}>
                 <RadioInput
                   required
                   label="Identify Vehicle By"
@@ -287,7 +311,7 @@ export const Quote = () => {
               </Stack>
 
               {identifyBy === "VIN" && (
-                <Stack direction={"row"} spacing={2}>
+                <Stack direction={sizeUnder.xs ? "column" : "row"} spacing={2}>
                   <TextInput
                     required
                     label="VIN"
@@ -305,7 +329,10 @@ export const Quote = () => {
 
               {identifyBy === "Plate" && (
                 <Stack spacing={2}>
-                  <Stack direction={"row"} spacing={2}>
+                  <Stack
+                    direction={sizeUnder.xs ? "column" : "row"}
+                    spacing={2}
+                  >
                     <TextInput
                       required
                       label="Plate Number"
@@ -320,7 +347,10 @@ export const Quote = () => {
                     />
                   </Stack>
 
-                  <Stack direction={"row"} spacing={2}>
+                  <Stack
+                    direction={sizeUnder.xs ? "column" : "row"}
+                    spacing={2}
+                  >
                     <RadioInput
                       label="Vehicle Damage"
                       boxLabel="Tell us where the damage is"
@@ -340,7 +370,10 @@ export const Quote = () => {
                   subtitle="Tell us where the damage is to ensure accurate assessment and quote."
                 />
 
-                <Stack direction={"row"} spacing={2}>
+                <Stack
+                  direction={sizeUnder.xs ? "column-reverse" : "row"}
+                  spacing={sizeUnder.xs ? 4 : 2}
+                >
                   <Stack sx={{ width: "100%" }} spacing={2}>
                     <SelectInput
                       required
@@ -406,7 +439,7 @@ export const Quote = () => {
             />
 
             <Stack spacing={2}>
-              <Stack direction={"row"} spacing={2}>
+              <Stack direction={sizeUnder.xs ? "column" : "row"} spacing={2}>
                 <RadioInput
                   required
                   label="I'll pay with"
@@ -424,7 +457,7 @@ export const Quote = () => {
               </Stack>
 
               {payWithInsurance && (
-                <Stack direction={"row"} spacing={2}>
+                <Stack direction={sizeUnder.xs ? "column" : "row"} spacing={2}>
                   <TextInput
                     label="Insurance Company Name:"
                     value={insuranceName}
@@ -449,7 +482,7 @@ export const Quote = () => {
         />
 
         <Stack spacing={2}>
-          <Stack spacing={2} direction={"row"}>
+          <Stack spacing={2} direction={sizeUnder.xs ? "column" : "row"}>
             <RadioInput
               required
               checked={callbackAsap}
@@ -487,7 +520,11 @@ export const Quote = () => {
                   )
                 }
               />
-              <Stack direction={"row"} sx={{ width: "100%" }} spacing={2}>
+              <Stack
+                direction={sizeUnder.xs ? "column" : "row"}
+                sx={{ width: "100%" }}
+                spacing={2}
+              >
                 <SelectInput
                   required
                   label="From:"
@@ -509,7 +546,7 @@ export const Quote = () => {
 
         <Stack
           sx={{
-            pt: 4,
+            pt: sizeUnder.xs ? 0 : 4,
             alignItems: "center",
             justifyContent: "center",
           }}

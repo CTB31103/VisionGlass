@@ -1,5 +1,5 @@
 import { CSS, ROUTES } from "@/Constants";
-import { SERVICES } from "@/interfaces";
+import { SELECTABLE_SERVICES } from "@/interfaces";
 import {
   FormControl,
   InputLabel,
@@ -93,7 +93,7 @@ export const RequestCallbackShortForm = () => {
               setService(value)
             }
           >
-            {SERVICES.map((serv) => (
+            {SELECTABLE_SERVICES.map((serv) => (
               <MenuItem key={serv} value={serv}>
                 {serv}
               </MenuItem>
