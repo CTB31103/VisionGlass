@@ -7,16 +7,17 @@ import {
 } from "@/hooks";
 import { useUserStore } from "@/stores";
 import { Text } from "@chakra-ui/react";
-import { Divider, Drawer, Link, Menu, MenuItem, Stack } from "@mui/material";
+import { Drawer, Link, Stack } from "@mui/material";
 import clsx from "clsx";
 import { ActionButton, IconButton, QuoteButton } from "../buttons";
-import { CSS, ROUTES } from "@/Constants";
+import { CSS, LOCATIONS, ROUTES } from "@/Constants";
 import { useRef, useState } from "react";
 import { HeaderNavLinks, type HeaderNavLinksProps } from "./HeaderNavLinks";
 import { SERVICE_ROUTES, SERVICES } from "@/interfaces";
 import { Icons } from "../icons";
 import { TEXT_SIZES, THeading } from "../typography";
 import { DrawerItem } from "./DrawerItem";
+import { LocationsMenu } from "./LocationsMenu";
 
 const PUBLIC_ROUTES: HeaderNavLinksProps["links"] = [
   { text: "Home", linkPath: ROUTES.HOME },
@@ -39,33 +40,6 @@ const PUBLIC_ROUTES: HeaderNavLinksProps["links"] = [
   },
   { text: "About", linkPath: ROUTES.ABOUT, right: true },
   { text: "Contact", linkPath: ROUTES.CONTACT },
-];
-
-const LOCATIONS = [
-  {
-    title: "New York",
-    linkPath: ROUTES.CONTACT,
-  },
-  {
-    title: "South Carolina",
-    linkPath: ROUTES.CONTACT,
-  },
-  {
-    title: "Kentucky",
-    linkPath: ROUTES.CONTACT,
-  },
-  {
-    title: "Massachusetts",
-    linkPath: ROUTES.CONTACT,
-  },
-  {
-    title: "Connecticut",
-    linkPath: ROUTES.CONTACT,
-  },
-  {
-    title: "Florida",
-    linkPath: ROUTES.CONTACT,
-  },
 ];
 
 const SMALL_PUBLIC_ROUTES: HeaderNavLinksProps["links"] = [
@@ -91,7 +65,6 @@ export const Header = () => {
 
   const anchorRef = useRef<null | HTMLDivElement>(null);
   const [open, setOpen] = useState(false);
-  const close = () => setOpen(false);
 
   const [openDrawer, setOpenDrawer] = useState(false);
 
@@ -202,33 +175,11 @@ export const Header = () => {
                   />
                 </Stack>
 
-                <Menu
+                <LocationsMenu
                   anchorEl={anchorRef.current}
                   open={open}
                   onClose={() => setOpen(false)}
-                  anchorOrigin={{ vertical: "top", horizontal: "right" }}
-                  slotProps={{
-                    paper: {
-                      sx: {
-                        border: 2,
-                        borderColor: CSS.colors.black,
-                      },
-                    },
-                    list: {
-                      sx: {},
-                      dense: true,
-                    },
-                  }}
-                >
-                  {LOCATIONS.map((loc, i) => (
-                    <Stack sx={{ width: "100%" }} key={i}>
-                      <MenuItem onClick={close}>
-                        <Link href={loc.linkPath}>{loc.title}</Link>
-                      </MenuItem>
-                      <Divider />
-                    </Stack>
-                  ))}
-                </Menu>
+                />
               </Stack>
 
               <Stack spacing={1} sx={{ alignItems: "end", zIndex: 1 }}>
@@ -275,12 +226,22 @@ export const Header = () => {
             </Stack>
 
             <Stack direction={"row"} spacing={0}>
-              <IconButton
-                Icon={Icons.Location}
-                borderColor={CSS.colors.white}
+              <Stack ref={anchorRef} onClick={() => setOpen((prev) => !prev)}>
+                <IconButton
+                  Icon={Icons.Location}
+                  borderColor={CSS.colors.white}
+                />
+              </Stack>
+              <LocationsMenu
+                origin={{ vertical: "bottom", horizontal: "left" }}
+                anchorEl={anchorRef.current}
+                open={open}
+                onClose={() => setOpen(false)}
               />
 
-              <IconButton Icon={Icons.Phone} borderColor={CSS.colors.white} />
+              <Link href={ROUTES.TELEPHONE}>
+                <IconButton Icon={Icons.Phone} borderColor={CSS.colors.white} />
+              </Link>
             </Stack>
           </Stack>
 

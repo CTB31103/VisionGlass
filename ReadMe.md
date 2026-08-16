@@ -15,3 +15,6 @@ Google Cloud ReCaptcha
 https://console.cloud.google.com/security/recaptcha/keys
 enabled: reCAPTCHA Enterprise API
 from https://www.npmjs.com/package/react-google-recaptcha
+
+Run from ngrok
+ngrok http 5173 --host-header=localhost:5173

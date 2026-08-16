@@ -68,7 +68,7 @@ export const Footer = () => {
             title="Contact Us"
             items={[
               {
-                text: "By Phone:<br/>&nbsp;&nbsp;&nbsp;&nbsp;(716) 888-9980",
+                text: "By Phone:<br/>&nbsp;&nbsp;&nbsp;&nbsp;(716) 336-7222",
                 href: ROUTES.CONTACT,
               },
               {

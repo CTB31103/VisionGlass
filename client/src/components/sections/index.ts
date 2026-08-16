@@ -14,3 +14,4 @@ export * from "./OtherServicesSections";
 export * from "./TextImageRowColumns";
 export * from "./WhenToReplaceSection";
 export * from "./StoneBackground";
+export * from "./LocationsMenu";

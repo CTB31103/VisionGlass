@@ -5,3 +5,4 @@ export * from "./SwitchFormInput";
 export * from "./RadioInput";
 export * from "./SelectInput";
 export * from "./MultiSelectInput";
+export * from "./Menu";

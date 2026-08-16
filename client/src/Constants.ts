@@ -65,3 +65,30 @@ export const ROUTES = {
 
   TELEPHONE: "tel:+17163367222",
 };
+
+export const LOCATIONS = [
+  {
+    title: "New York",
+    linkPath: ROUTES.CONTACT,
+  },
+  {
+    title: "South Carolina",
+    linkPath: ROUTES.CONTACT,
+  },
+  {
+    title: "Kentucky",
+    linkPath: ROUTES.CONTACT,
+  },
+  {
+    title: "Massachusetts",
+    linkPath: ROUTES.CONTACT,
+  },
+  {
+    title: "Connecticut",
+    linkPath: ROUTES.CONTACT,
+  },
+  {
+    title: "Florida",
+    linkPath: ROUTES.CONTACT,
+  },
+];
