@@ -11,6 +11,8 @@ export const THeading = ({
   thin,
   large,
   innerHtml,
+  bungeeFill,
+  trunk,
 }: PropsWithChildren<TProps & { thin?: boolean; large?: boolean }>) => {
   const TextSize = useTextSizingService();
   return (
@@ -18,8 +20,15 @@ export const THeading = ({
       fontWeight={"bold"}
       fontSize={large ? TextSize.largest : TextSize.large}
       textAlign={align}
+      lineClamp={trunk}
       className={clsx(
-        bungee ? (thin ? "bungee-outline-thin" : "bungee-outline") : "",
+        bungeeFill
+          ? "bungee"
+          : bungee
+            ? thin
+              ? "bungee-outline-thin"
+              : "bungee-outline"
+            : "",
       )}
       dangerouslySetInnerHTML={
         innerHtml

@@ -21,7 +21,7 @@ export const BorderButton = ({
 }: PropsWithChildren<BorderButtonProps>) => {
   return (
     <Button
-      className="active:scale-100 hover:scale-105 hover:shadow-2xl transition-transform duration-75"
+      className="active:scale-100 hover:scale-105 hover:shadow-xl transition-transform duration-75"
       size={lg ? "2xl" : thin ? "md" : "lg"}
       borderWidth={1.5}
       w={fullWidth ? "100%" : undefined}

@@ -1,12 +1,19 @@
+import type { ReactNode } from "react";
 import { InputField } from "./InputField";
 import type { InputProps } from "./types";
 import { TextField } from "@mui/material";
 
-type TextInputProps = InputProps & {
+export type TextInputProps = InputProps & {
   value: string;
   setValue: (value: string) => void;
   multiline?: boolean;
   rows?: number;
+
+  endIcon?: ReactNode;
+  startIcon?: ReactNode;
+  inputType?: HTMLInputElement["type"];
+
+  keyMappings?: { [key: string]: () => void };
 };
 
 export const TextInput = (props: TextInputProps) => {
@@ -20,6 +27,13 @@ export const TextInput = (props: TextInputProps) => {
     required,
     multiline,
     rows,
+
+    startIcon,
+    endIcon,
+
+    inputType = "text",
+    disabled,
+    keyMappings = {},
   } = props;
 
   const label = `${parentlabel}${optional ? ` (optional)` : ``}`;
@@ -32,10 +46,20 @@ export const TextInput = (props: TextInputProps) => {
         onChange={({ target: { value } }) => setValue(value)}
         placeholder={placeholder}
         label={label}
-        type={secure ? "password" : "text"}
+        type={secure ? "password" : inputType}
         required={required}
         multiline={multiline}
         rows={rows}
+        disabled={disabled}
+        onKeyDown={(e) => {
+          if (keyMappings[e.key]) keyMappings[e.key]();
+        }}
+        slotProps={{
+          input: {
+            endAdornment: endIcon,
+            startAdornment: startIcon,
+          },
+        }}
       />
     </InputField>
   );

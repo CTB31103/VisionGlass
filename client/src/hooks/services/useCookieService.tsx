@@ -1,12 +1,12 @@
 export const useCookieService = () => {
   const getCookie = (key: string) => {
-    return window.sessionStorage.getItem(key);
+    return window.cookieStore.get({ name: key });
   };
   const setCookie = (key: string, value: string) => {
-    window.sessionStorage.setItem(key, value);
+    window.cookieStore.set(key, value);
   };
   const clearCookie = (key: string) => {
-    window.sessionStorage.removeItem(key);
+    window.cookieStore.delete(key);
   };
   return {
     getCookie,

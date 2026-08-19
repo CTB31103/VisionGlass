@@ -1,9 +1,37 @@
-import type { IUser } from "@/interfaces";
+import type { IPerson, IUser } from "@/interfaces";
+import queryString from "query-string";
 import { useAuthFetch, useHttpSignal } from "../http";
 
 export const useUserApi = () => {
   const { get, post, setCustomHeaders } = useAuthFetch();
   const { getNewSignal, abortSignal } = useHttpSignal();
+
+  const validAccessKey = async () => {
+    const res = await get<{ granted: boolean }>("/api/users/access");
+    if (res.err || !res.data) return false;
+    return true;
+  };
+
+  const createUser = async (
+    data: IPerson & { username: string; password: string; userType: string },
+  ) => {
+    return await post<{ newUser: IUser }>(`/api/users/`, data, {
+      signal: getNewSignal("createUser"),
+    });
+  };
+
+  const getAllUsers = async () => {
+    return await get<{ users: IUser[] }>(
+      `/api/users/`,
+      getNewSignal(`getAllUsers`),
+    );
+  };
+
+  const searchUsers = async (data: { query: string }) => {
+    return await get<{ users: IUser[] }>(
+      `/api/users/search?${queryString.stringify(data)}`,
+    );
+  };
 
   const login = async (body: {
     username: string;
@@ -39,6 +67,11 @@ export const useUserApi = () => {
   };
 
   return {
+    getAllUsers,
+    searchUsers,
+    createUser,
+    validAccessKey,
+
     login,
     loginWithToken,
     refresh,

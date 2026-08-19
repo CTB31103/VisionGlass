@@ -14,3 +14,7 @@ export * from "./servicesADAS";
 export * from "./servicesAutoGlass";
 export * from "./servicesCrackChip";
 export * from "./servicesMobile";
+export * from "./dashboardAdd";
+export * from "./customerAdd";
+export * from "./teamAdd";
+export * from "./profile";

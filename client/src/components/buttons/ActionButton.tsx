@@ -9,6 +9,7 @@ import {
 import { TBody } from "../typography";
 
 type ActionButtonProps = {
+  loading?: boolean;
   fullWidth?: boolean;
   autoHeight?: boolean;
   lg?: boolean;
@@ -22,6 +23,7 @@ export const ActionButton = ({
   children,
   lg,
   color: propColor = "none",
+  loading,
   onClick,
 }: PropsWithChildren<ActionButtonProps>) => {
   return (
@@ -35,6 +37,7 @@ export const ActionButton = ({
       bg={buttonColorCSS(propColor)}
       color={buttonTextColorCSS(propColor)}
       onClick={onClick}
+      loading={loading}
     >
       <TBody bungee medium>
         {children}

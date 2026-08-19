@@ -58,13 +58,30 @@ export const ROUTES = {
 
   LOGIN: "/login",
 
+  PROFILE: "/profile",
+
   DASHBOARD: "/dashboard",
+  DASHBOARD_ADD: "/dashboard/add",
+
   CUSTOMERS: "/customers",
+  CUSTOMERS_ADD: "/customers/add",
+
   TEAM: "/team",
+  TEAM_ADD: "/team/admin-add",
+
   REVIEWS: "/reviews",
 
   TELEPHONE: "tel:+17163367222",
 };
+
+export const AUTH_ROUTES = [
+  ROUTES.DASHBOARD,
+  ROUTES.DASHBOARD_ADD,
+  ROUTES.CUSTOMERS,
+  ROUTES.TEAM,
+  ROUTES.REVIEWS,
+  ROUTES.TELEPHONE,
+];
 
 export const LOCATIONS = [
   {

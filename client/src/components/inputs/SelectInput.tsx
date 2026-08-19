@@ -16,7 +16,17 @@ type SelectInputProps = InputProps & {
 };
 
 export const SelectInput = (props: SelectInputProps) => {
-  const { label, items, selectedItem, onSelect, required, disabled } = props;
+  const {
+    label: parentlabel,
+    items,
+    selectedItem,
+    onSelect,
+    required,
+    disabled,
+    optional,
+  } = props;
+
+  const label = `${parentlabel}${optional ? ` (optional)` : ``}`;
 
   const id = label.replaceAll(" ", "");
 

@@ -59,7 +59,12 @@ export const ContactForm = () => {
         >
           <TextInput label="Name" value="" setValue={() => {}} />
           <TextInput label="Email" value="" setValue={() => {}} />
-          <TextInput label="Phone" value="" setValue={() => {}} />
+          <TextInput
+            label="Phone"
+            placeholder="(xxx) xxx-xxxx"
+            value=""
+            setValue={() => {}}
+          />
           <TextInput
             label="Message"
             multiline

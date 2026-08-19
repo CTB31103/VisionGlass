@@ -21,7 +21,9 @@ export const TBody = ({
   bold,
   innerHtml,
   smaller,
+
   color,
+  trunk,
 }: TBodyProps) => {
   const TextSizes = useTextSizingService();
   return (
@@ -40,6 +42,7 @@ export const TBody = ({
         bungee ? "bungee-outline-thin" : "",
         bold ? "font-bold!" : "",
       )}
+      lineClamp={trunk}
       dangerouslySetInnerHTML={
         innerHtml
           ? {

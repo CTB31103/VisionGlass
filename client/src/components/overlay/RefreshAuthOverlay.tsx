@@ -38,17 +38,17 @@ export const RefreshAuthOverlay = () => {
   const { toHome } = useNavigationService();
   const { pathname } = useLocation();
   const { accessKey, setAccessKey } = useAccessKeyStore();
-  const { loggedIn, setUser } = useUserStore();
+  const { loggedIn, user, setUser, logout } = useUserStore();
 
   const { open, setOpen } = useRefreshScreenStore();
   const [scope] = useAnimate();
 
-  const [isGuest, setIsGuest] = useState(false);
+  const [_isGuest, setIsGuest] = useState(false);
 
   const {
-    userRoutes: { loginWithToken, refresh },
+    userRoutes: { loginWithToken, refresh, validAccessKey },
   } = useApi();
-  const { getCookie, setCookie, clearCookie } = useCookieService();
+  const { getCookie, clearCookie } = useCookieService();
 
   const isPublicRoute = () =>
     pathname === ROUTES.LOGIN || WHITE_LIST.includes(pathname);
@@ -59,7 +59,8 @@ export const RefreshAuthOverlay = () => {
 
     if (res.err || !res.data) {
       clearCookie(TOKEN_KEYS.REFRESH_KEY);
-      clearCookie(TOKEN_KEYS.ACCESS_KEY);
+      setAccessKey(null);
+      logout();
       setOpen(false);
       console.log(`API Refresh Error:`, res.err);
       console.log(``);
@@ -71,62 +72,87 @@ export const RefreshAuthOverlay = () => {
 
     setUser(res.data.user);
     setAccessKey(res.data.token);
-
-    setCookie(TOKEN_KEYS.ACCESS_KEY, res.data.token);
     setOpen(false);
-    console.log(``);
   };
 
-  const refreshUserAccess = async () => {
+  const refreshUserViaAccessToken = async () => {
     console.log(`Auth Request (Access)`);
-    const accessKeyCookie = getCookie(TOKEN_KEYS.ACCESS_KEY);
-    if (!accessKeyCookie) {
+
+    if (!accessKey) {
       console.log(`No Access Key - Immediate Refresh`);
       return await refreshKeys();
     }
 
-    const res = await loginWithToken(accessKeyCookie);
+    const res = await loginWithToken(accessKey);
 
     if (res.err || !res.data) {
-      console.log(`API Error:`, res.err);
-      console.log(``);
       if (res.err === "jwt expired") return await refreshKeys();
       clearCookie(TOKEN_KEYS.ACCESS_KEY);
       return;
     }
 
-    console.log(`Response:`);
-    console.log(toString(res.data));
-    console.log(``);
-
     setUser(res.data.user);
-    setAccessKey(accessKeyCookie);
+    setAccessKey(accessKey);
     setOpen(false);
-    console.log(``);
+  };
+
+  const authenticate = async () => {
+    let timeoutKey = null;
+    const publicRoute = isPublicRoute();
+    const isAccessKeyValid = await validAccessKey();
+    const refreshKey = await getCookie(TOKEN_KEYS.REFRESH_KEY);
+
+    const shouldRefreshWithAccess =
+      (accessKey && !isAccessKeyValid) || // Has access key but access key is invalid
+      (isAccessKeyValid && user.userId.length === 0); // Has valid access key but no user data
+
+    const shouldRefreshWithRefresh =
+      refreshKey?.value && refreshKey.value?.length > 0 ? true : false;
+
+    if (publicRoute) {
+      if (shouldRefreshWithAccess) {
+        refreshUserViaAccessToken();
+        return timeoutKey;
+      }
+
+      // Has no acccess key but has refresh key
+      if (shouldRefreshWithRefresh) {
+        refreshKeys();
+        return timeoutKey;
+      }
+    }
+
+    if (AUTH_LIST.some((authPath) => pathname.startsWith(authPath))) {
+      console.log(`Auth Route:`);
+      console.log(`shouldRefreshWithAccess: ${shouldRefreshWithAccess}`);
+      console.log(`shouldRefreshWithRefresh: ${shouldRefreshWithRefresh}`);
+      console.log(``);
+      if (!accessKey || shouldRefreshWithAccess || shouldRefreshWithRefresh) {
+        setOpen(true);
+        timeoutKey = setTimeout(() => {
+          if (!accessKey || shouldRefreshWithAccess)
+            refreshUserViaAccessToken();
+          else refreshKeys();
+        }, 500);
+      }
+    }
+
+    return timeoutKey;
   };
 
   useTimeoutEffect(
     () => {
-      let timeoutKey = null;
+      let timeoutKey: number | null = null;
 
-      const publicRoute = isPublicRoute();
-
-      if (publicRoute && isGuest) return; // authentication ran and could not authenticate, but user on public route
-
-      if (accessKey || (accessKey && accessKey.length > 0)) return; // is logged in
-
-      if (publicRoute) return refreshUserAccess();
-
-      if (AUTH_LIST.some((authPath) => pathname.startsWith(authPath))) {
-        setOpen(true);
-        timeoutKey = setTimeout(() => refreshUserAccess(), 500);
-      }
-
+      (async () => {
+        timeoutKey = (await authenticate()) || null;
+      })();
       return () => {
         if (timeoutKey) clearTimeout(timeoutKey);
       };
     },
-    [pathname, loggedIn, isPublicRoute],
+    [pathname],
+
     50,
   );
 
@@ -155,8 +181,8 @@ export const RefreshAuthOverlay = () => {
               </Heading>
 
               <Center className="z-1">
-                <ActionButton color="white" onClick={() => setOpen(false)}>
-                  <Heading fontWeight={"black"}>Close</Heading>
+                <ActionButton color="red" onClick={() => setOpen(false)}>
+                  Close
                 </ActionButton>
               </Center>
 

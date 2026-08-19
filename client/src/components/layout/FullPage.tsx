@@ -15,7 +15,7 @@ export const FullPage = (
     <div
       {...divProps}
       className={clsx(
-        "w-full",
+        "w-full ",
         props.screen ? "min-h-screen" : "min-h-full",
         props.className,
       )}

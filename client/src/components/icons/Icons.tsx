@@ -22,6 +22,19 @@ import LocationPinIcon from "@mui/icons-material/LocationPin";
 import PhoneIcon from "@mui/icons-material/Phone";
 
 import CloseIcon from "@mui/icons-material/Close";
+import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
+import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
+
+import AddIcon from "@mui/icons-material/Add";
+import EditIcon from "@mui/icons-material/Edit";
+import DeleteIcon from "@mui/icons-material/Delete";
+
+import SearchIcon from "@mui/icons-material/Search";
+import CalendarMonthIcon from "@mui/icons-material/CalendarMonth";
+import SellIcon from "@mui/icons-material/Sell";
+import ConstructionIcon from "@mui/icons-material/Construction";
+
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 
 export const Icons = {
   Close: CloseIcon,
@@ -46,6 +59,20 @@ export const Icons = {
   Menu: MenuIcon,
   Location: LocationPinIcon,
   Phone: PhoneIcon,
+
+  Expand: UnfoldMoreIcon,
+  Contract: UnfoldLessIcon,
+
+  Add: AddIcon,
+  Edit: EditIcon,
+  Delete: DeleteIcon,
+
+  Search: SearchIcon,
+  Calendar: CalendarMonthIcon,
+  Sales: SellIcon,
+  Tools: ConstructionIcon,
+
+  User: AccountCircleIcon,
 };
 
 export type IconType = OverridableComponent<SvgIconTypeMap<object, "svg">> & {

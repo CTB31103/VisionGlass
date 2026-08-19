@@ -19,56 +19,36 @@ const USER_RULES = {
 
 const createUserValidator = (
   body: any,
-): [
-  {
-    username: string;
-    password: string;
-    userType: UserType;
-  },
-  (
-    | {
-        firstName: string;
-        lastName: string;
-        email: string;
-        phone: string;
-      }
-    | undefined
-  ),
-] => {
+): {
+  username: string;
+  password: string;
+  userType: UserType;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+} => {
   const requiredRules = {
     username: USER_RULES.username,
     password: USER_RULES.password,
     userType: USER_RULES.userType,
-  };
-
-  let validator = new Validator(body, requiredRules);
-  Validate(validator);
-
-  const optionalRules = {
     ...USER_RULES.info,
   };
 
-  validator = new Validator(body, optionalRules);
+  let validator = new Validator(body, requiredRules);
   Validate(validator);
 
   const requiredInfo = {
     username: body.username as string,
     password: body.password as string,
     userType: body.userType as UserType,
+    firstName: body.firstName as string,
+    lastName: body.lastName as string,
+    email: body.email as string,
+    phone: body.phone as string,
   };
 
-  let optionalInfo = undefined;
-
-  if (body?.firstName) {
-    optionalInfo = {
-      firstName: body.firstName as string,
-      lastName: body.lastName as string,
-      email: body.email as string,
-      phone: body.phone as string,
-    };
-  }
-
-  return [requiredInfo, optionalInfo];
+  return requiredInfo;
 };
 
 const getUsersValidation = (params: any) => {
@@ -103,7 +83,7 @@ const loginUser = (body: any) => {
   };
 };
 
-const refreshUser = (header: any) => {
+const refreshUserWithRefreshToken = (header: any) => {
   let rules: any = {
     cookie: "required|string",
   };
@@ -147,12 +127,26 @@ const editUser = (body: any) => {
   };
 };
 
+const searchUsers = (queryParams: any) => {
+  const rules = {
+    query: "required|string|min:0|max:125",
+  };
+
+  const validator = new Validator(queryParams, rules);
+  Validate(validator);
+
+  return {
+    query: queryParams.query as string,
+  };
+};
+
 const UserControllerValidators = {
   createUserValidator,
   getUsersValidation,
   loginUser,
-  refreshUser,
+  refreshUserWithRefreshToken,
   editUser,
+  searchUsers,
 };
 
 export default UserControllerValidators;

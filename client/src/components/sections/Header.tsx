@@ -11,7 +11,7 @@ import { Drawer, Link, Stack } from "@mui/material";
 import clsx from "clsx";
 import { ActionButton, IconButton, QuoteButton } from "../buttons";
 import { CSS, LOCATIONS, ROUTES } from "@/Constants";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { HeaderNavLinks, type HeaderNavLinksProps } from "./HeaderNavLinks";
 import { SERVICE_ROUTES, SERVICES } from "@/interfaces";
 import { Icons } from "../icons";
@@ -68,20 +68,39 @@ export const Header = () => {
 
   const [openDrawer, setOpenDrawer] = useState(false);
 
-  const [expanded, setExpanded] = useState(true);
-  const direction = useScrollDirection();
+  const [preferForce, setPreferForce] = useState(false);
+  const [forceExpand, setForceExpand] = useState(false);
+
+  const [scrollExpanded, setScrollExpanded] = useState(true);
+  const highUpDirection = useScrollDirection([5, -75]);
+  const lowRangeDirection = useScrollDirection();
   const { top, scrollY } = usePagePosition({
     allowableRange: 0,
   });
 
+  useEffect(() => {
+    if (lowRangeDirection === "down" && forceExpand) {
+      // setForceExpand(false);
+      setPreferForce(false);
+    }
+  }, [lowRangeDirection]);
+
   useTimeoutEffect(
     () => {
-      if (top || direction === "up" || scrollY === 0) setExpanded(true);
-      else setExpanded(false);
+      if (preferForce) return setScrollExpanded(forceExpand);
+      if (top || highUpDirection === "up" || scrollY === 0) {
+        setScrollExpanded(true);
+        setForceExpand(true);
+      } else {
+        setScrollExpanded(false);
+        setForceExpand(false);
+      }
     },
-    [top, direction],
+    [top, highUpDirection, preferForce],
     50,
   );
+
+  const expanded = preferForce ? forceExpand : scrollExpanded;
 
   return (
     <Stack className={clsx(`sticky top-0 w-full z-5`)}>
@@ -342,7 +361,53 @@ export const Header = () => {
         </>
       )}
 
-      {!sizeAndUnder.md && <HeaderNavLinks links={PUBLIC_ROUTES} />}
+      {!sizeAndUnder.md && (
+        <Stack sx={{ width: "100%", position: "relative" }}>
+          <HeaderNavLinks links={PUBLIC_ROUTES} />
+          <Stack
+            direction={"row"}
+            sx={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+
+              alignItems: "center",
+              justifyContent: "space-between",
+
+              paddingInline: 2,
+              pointerEvents: "none",
+            }}
+          >
+            <Stack sx={{ pointerEvents: "all" }}>
+              <IconButton
+                Icon={expanded ? Icons.Contract : Icons.Expand}
+                bgcolor={CSS.colors.white}
+                borderColor={CSS.colors.black}
+                color={CSS.colors.black}
+                onClick={() =>
+                  setForceExpand(() => {
+                    setPreferForce(true);
+                    return !expanded;
+                  })
+                }
+              />
+            </Stack>
+
+            <Stack sx={{ pointerEvents: "all" }}>
+              <Link href={ROUTES.PROFILE}>
+                <IconButton
+                  Icon={Icons.User}
+                  bgcolor={CSS.colors.white}
+                  borderColor={CSS.colors.black}
+                  color={CSS.colors.black}
+                />
+              </Link>
+            </Stack>
+          </Stack>
+        </Stack>
+      )}
 
       {isLoggedIn && !sizeAndUnder.md && (
         <div

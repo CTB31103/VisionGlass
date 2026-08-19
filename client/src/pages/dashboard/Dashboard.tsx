@@ -1,28 +1,27 @@
-import { ActionButton, FullPage } from "@/components";
-import { useLogoutService } from "@/hooks";
-import { useRefreshScreenStore } from "@/stores";
-import { Center, Container, HStack } from "@chakra-ui/react";
+import { Divider, FullPage, PageHeader } from "@/components";
+import { Stack } from "@mui/material";
+import { DashboardCalendar } from "./DashboardCalendar";
+import { DashboardEvents } from "./DashboardEvents";
+import { useState } from "react";
+import { toMidnight } from "@/utils";
 
 export const Dashboard = () => {
-  const { open, setOpen } = useRefreshScreenStore();
-  const logout = useLogoutService();
+  const [selectedDate, setSelectedDate] = useState(toMidnight(new Date()));
 
   return (
-    <FullPage screen={true} className="flex">
-      <Container fluid className="flex">
-        <Center className="flex w-full">
-          <Container fluid className="flex">
-            <Center className="w-full">
-              <HStack gap={5}>
-                <ActionButton onClick={logout}>Logout</ActionButton>
-                <ActionButton onClick={() => setOpen(!open)}>
-                  Open Refresh
-                </ActionButton>
-              </HStack>
-            </Center>
-          </Container>
-        </Center>
-      </Container>
+    <FullPage screen>
+      <Stack
+        sx={{ width: "100%", paddingBlock: 4, paddingInline: 8 }}
+        spacing={4}
+      >
+        <PageHeader text="Dashboard" />
+
+        <DashboardCalendar date={selectedDate} setDate={setSelectedDate} />
+
+        <Divider />
+
+        <DashboardEvents date={selectedDate} />
+      </Stack>
     </FullPage>
   );
 };

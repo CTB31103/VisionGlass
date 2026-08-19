@@ -6,3 +6,5 @@ export * from "./RadioInput";
 export * from "./SelectInput";
 export * from "./MultiSelectInput";
 export * from "./Menu";
+export * from "./SearchBar";
+export * from "./NumberInput";

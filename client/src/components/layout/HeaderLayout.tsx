@@ -14,7 +14,6 @@ export const HeaderLayout = () => {
       className={clsx(
         "flex flex-col",
         "max-w-screen overflow-clip",
-        // open ? "max-h-screen overflow-y-hidden!" : "",
         open ? "max-h-screen" : "",
       )}
     >

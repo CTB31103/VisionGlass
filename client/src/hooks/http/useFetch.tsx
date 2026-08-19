@@ -41,6 +41,8 @@ export const useFetch = (props?: { authorization?: string | null }) => {
       }
 
       if (props?.authorization) {
+        console.log(`Adding Auth Token: ${props.authorization}`);
+        console.log(``);
         headers["Authorization"] = `Bearer ${props.authorization}`;
       }
 

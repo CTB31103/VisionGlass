@@ -8,6 +8,8 @@ export const UserType = {
 
 export type UserType = (typeof UserType)[keyof typeof UserType];
 
+export const USER_TYPES = Object.values(UserType);
+
 export interface IUser {
   userId: string;
   username: string;

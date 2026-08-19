@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 
-export const useScrollDirection = () => {
+export const useScrollDirection = (
+  [downAllowance, upAllowance]: [number, number] = [5, -5],
+) => {
   const [scrollDirection, setScrollDirection] = useState<"down" | "up" | null>(
     null,
   );
@@ -14,7 +16,8 @@ export const useScrollDirection = () => {
         const direction = scrollY > lastScrollY ? "down" : "up";
         if (
           direction !== scrollDirection &&
-          (scrollY - lastScrollY > 5 || scrollY - lastScrollY < -150)
+          (scrollY - lastScrollY > downAllowance ||
+            scrollY - lastScrollY < upAllowance)
         ) {
           setScrollDirection(direction);
         }

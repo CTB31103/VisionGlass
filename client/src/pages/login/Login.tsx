@@ -7,11 +7,11 @@ import {
   SwitchFormInput,
 } from "../../components";
 import { useForm } from "react-hook-form";
-import { ERROR_MESSAGE, TOKEN_KEYS } from "@/Constants";
+import { ERROR_MESSAGE } from "@/Constants";
 import { useApi } from "@/hooks/api";
 import { useAccessKeyStore, useUserStore } from "@/stores";
 import { useEffect } from "react";
-import { useCookieService, useNavigationService } from "@/hooks";
+import { useNavigationService } from "@/hooks";
 
 export const Login = () => {
   const { toDashboard } = useNavigationService();
@@ -22,7 +22,6 @@ export const Login = () => {
 
   const { loggedIn, user, setUser } = useUserStore();
   const setAccessKey = useAccessKeyStore((state) => state.setAccessKey);
-  const { setCookie } = useCookieService();
 
   const { control, handleSubmit } = useForm<{
     username: string;
@@ -55,7 +54,6 @@ export const Login = () => {
 
     setUser(res.data.user);
     setAccessKey(res.data.token);
-    setCookie(TOKEN_KEYS.ACCESS_KEY, res.data.token);
 
     toDashboard();
   });

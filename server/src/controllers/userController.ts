@@ -45,7 +45,7 @@ const createUser = ControllerFunc((req, res) =>
     async ({ session, abort }) =>
       await TryCatch(
         async () => {
-          const [validBody, validOptionalBody] =
+          const validBody =
             Validators.UserControllerValidators.createUserValidator(req.body);
 
           const createdUser: IUser = {
@@ -55,10 +55,10 @@ const createUser = ControllerFunc((req, res) =>
             userType: validBody.userType,
             profilePictureId: "",
             info: {
-              firstName: validOptionalBody?.firstName || "",
-              lastName: validOptionalBody?.lastName || "",
-              email: validOptionalBody?.email || "",
-              phone: validOptionalBody?.phone || "",
+              firstName: validBody.firstName,
+              lastName: validBody.lastName,
+              email: validBody.email,
+              phone: validBody.phone,
             },
           };
 
@@ -197,14 +197,16 @@ const loginUser = ControllerFunc((req, res) =>
   }
  * 
  * */
-const refreshUser = ControllerFunc((req, res) =>
+const refreshUserWithRefreshToken = ControllerFunc((req, res) =>
   TryCatch(
     async () => {
-      const { refreshToken: headerToken } =
-        Validators.UserControllerValidators.refreshUser(req.headers);
+      const { refreshToken } =
+        Validators.UserControllerValidators.refreshUserWithRefreshToken(
+          req.headers,
+        );
 
       const refreshTokenDoc = await RefreshTokenModel.findOne({
-        token: headerToken,
+        token: refreshToken,
       });
 
       if (!refreshTokenDoc) throw new Error("Token not recognized / Revoked");
@@ -213,7 +215,7 @@ const refreshUser = ControllerFunc((req, res) =>
         throw new Error("Token expired. Please login again.");
       }
 
-      const decoded = await TokenUtils.decodeJWTToken(headerToken);
+      const decoded = await TokenUtils.decodeJWTToken(refreshToken);
 
       const user = await UserModel.findOne({ userId: decoded.id });
       if (!user) throw new Error(`Provided user does not exist`);
@@ -307,7 +309,7 @@ const editUser = ControllerFunc((req, res) =>
   }
  * 
  * */
-const loginUserWithKey = ControllerFunc((req, res) =>
+const loginUserWithAccessToken = ControllerFunc((req, res) =>
   TryCatch(
     async () => {
       const { userId } = Validators.TokenValidators.resLocalsTokenValues(
@@ -322,14 +324,53 @@ const loginUserWithKey = ControllerFunc((req, res) =>
   ),
 );
 
+const searchUsers = ControllerFunc((req, res) =>
+  TryCatch(
+    async () => {
+      const { query } = Validators.UserControllerValidators.searchUsers(
+        req.query,
+      );
+
+      const queryFirstWord = query.split(" ")[0];
+      const regexQuery = { $regex: query, $options: "i" };
+
+      const users = (
+        await UserModel.find({
+          $or: [
+            { "info.firstName": regexQuery },
+            { "info.email": regexQuery },
+            { "info.lastName": regexQuery },
+            { "info.phone": regexQuery },
+            { username: regexQuery },
+            {
+              $and: [
+                { "info.firstName": { $regex: queryFirstWord, $options: "i" } },
+                {
+                  "info.lastName": {
+                    $regex: query.replace(queryFirstWord + " ", ""),
+                  },
+                },
+              ],
+            },
+          ],
+        })
+      ).map((user) => user.toClientUser());
+
+      res.status(200).json({ users });
+    },
+    (err) => res.status(500).json({ error: err }),
+  ),
+);
+
 const UserController = {
   createUser,
   getUsers,
   loginUser,
-  refreshUser,
+  refreshUserWithRefreshToken,
   logoutUser,
-  loginUserWithKey,
+  loginUserWithAccessToken,
   editUser,
+  searchUsers,
 };
 
 export default UserController;

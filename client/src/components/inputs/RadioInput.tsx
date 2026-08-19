@@ -10,7 +10,15 @@ type RadioInputProps = InputProps & {
 };
 
 export const RadioInput = (props: RadioInputProps) => {
-  const { checked, onClick, label, boxLabel, required } = props;
+  const {
+    checked,
+    onClick,
+    label: parentlabel,
+    optional,
+    boxLabel,
+    required,
+  } = props;
+  const label = `${parentlabel}${optional ? ` (optional)` : ``}`;
   return (
     <InputField {...props}>
       <Stack

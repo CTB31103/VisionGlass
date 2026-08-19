@@ -5,23 +5,33 @@ import Middleware from "../middleware";
 const UserRoutes = Router();
 const UserAuthRoutes = Router();
 
-UserRoutes.get("/", Controllers.UserController.getUsers);
+UserRoutes.post("/login", Controllers.UserController.loginUser);
+
+UserRoutes.get(
+  "/refresh",
+  Controllers.UserController.refreshUserWithRefreshToken,
+);
+
+// Begin Authenticated routes
+UserRoutes.use("/", UserAuthRoutes);
+UserAuthRoutes.use(Middleware.accessKeyOnly);
+//
+
+UserAuthRoutes.get("/", Controllers.UserController.getUsers);
 
 UserRoutes.post("/", Controllers.UserController.createUser);
 
-UserRoutes.post("/login", Controllers.UserController.loginUser);
-
-UserRoutes.get("/refresh", Controllers.UserController.refreshUser);
-
-// End non-authenticated usage
-UserRoutes.use("/", UserAuthRoutes);
-
-UserAuthRoutes.use(Middleware.accessKeyOnly);
-
 UserAuthRoutes.put("/", Controllers.UserController.editUser);
+
+UserAuthRoutes.get("/search", Controllers.UserController.searchUsers);
+
+UserAuthRoutes.get("/access", (_r, res) => res.send({ granted: true }));
 
 UserAuthRoutes.get("/logout", Controllers.UserController.logoutUser);
 
-UserAuthRoutes.get("/login", Controllers.UserController.loginUserWithKey);
+UserAuthRoutes.get(
+  "/login",
+  Controllers.UserController.loginUserWithAccessToken,
+);
 
 export default UserRoutes;

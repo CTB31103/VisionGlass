@@ -12,6 +12,13 @@ export const CustomerQuoteStatus = {
 export type CustomerQuoteStatus =
   (typeof CustomerQuoteStatus)[keyof typeof CustomerQuoteStatus];
 
+export const CUSTOMER_QUOTE_STATUS = [
+  CustomerQuoteStatus.NEW,
+  CustomerQuoteStatus.VALIDATED,
+  CustomerQuoteStatus.SCHEDULED,
+  CustomerQuoteStatus.DONE,
+];
+
 export const PaymentType = {
   INSURANCE: "insurance",
   ONSITE: "onsite",
