@@ -1,66 +1,54 @@
 import { Stack } from "@mui/material";
-import { useState } from "react";
 import { DashboardDateCard } from "./DashboardDateCard";
-import moment from "moment";
-import { useTimeoutEffect } from "@/hooks";
-import { BorderButton, Icons } from "@/components";
+import { BorderButton, Icons, THeading } from "@/components";
 import { toMidnight } from "@/utils";
 
 type DashboardCalendarProps = {
   date: Date;
   setDate: (d: Date) => void;
+
+  eventDates: number[];
+  week: Date[];
+  moveCalendar: (val: number) => void;
 };
 
 export const DashboardCalendar = ({
   date,
   setDate,
+
+  eventDates,
+  week,
+  moveCalendar,
 }: DashboardCalendarProps) => {
-  const [week, setWeek] = useState<Date[]>([]);
-
-  useTimeoutEffect(() => {
-    const td = moment(date);
-    const dayOfWeek = td.day();
-
-    const sunday = dayOfWeek === 0 ? td : moment(td).subtract(1, "day");
-    const weekArr = [];
-
-    for (let i = 0; i < 7; i++) {
-      weekArr.push(moment(sunday).add(i, "days").toDate());
-    }
-
-    setWeek(weekArr);
-  }, []);
-
-  const moveCalendar = (moveWeeks: number) => {
-    if (week.length !== 7) return;
-
-    const newWeek = [];
-    const sunday = moment(week[0]);
-
-    const newSunday =
-      moveWeeks > 0
-        ? moment(sunday).add(7 * Math.abs(moveWeeks), "days")
-        : moment(sunday).subtract(7 * Math.abs(moveWeeks), "days");
-
-    for (let i = 0; i < 7; i++) {
-      newWeek.push(moment(newSunday).add(i, "days").toDate());
-    }
-
-    setWeek(newWeek);
-  };
-
   return (
     <Stack spacing={2}>
-      <Stack direction={"row"} spacing={2}>
+      {week.length > 0 && (
+        <Stack sx={{ width: "100%", alignItems: "center" }}>
+          <THeading bungeeFill>{week[0].getFullYear()}</THeading>
+        </Stack>
+      )}
+
+      <Stack
+        direction={"row"}
+        sx={{
+          width: "100%",
+          height: "min-content",
+        }}
+        spacing={2}
+      >
         {week.map((day, i) => (
-          <DashboardDateCard
-            key={i}
-            date={day}
-            onClick={() => setDate(toMidnight(day))}
-            active={toMidnight(day).getTime() === date.getTime()}
-          />
+          <Stack key={i} sx={{ height: "max-content", flex: 1 }}>
+            <DashboardDateCard
+              date={day}
+              expanded={eventDates.length > 0}
+              hasEvents={eventDates.includes(toMidnight(day).getTime())}
+              onClick={() => setDate(toMidnight(day))}
+              active={toMidnight(day).getTime() === date.getTime()}
+            />
+          </Stack>
         ))}
       </Stack>
+
       <Stack
         direction={"row"}
         sx={{ justifyContent: "space-between", width: "100%" }}

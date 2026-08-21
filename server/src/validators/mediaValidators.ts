@@ -1,5 +1,4 @@
-import Validator from "validatorjs";
-import ValidateFunc from "./validate";
+import { ValidateFunc, Validator } from "./validate";
 
 const includesImageName = (params: any) => {
   const rules = {

@@ -8,3 +8,4 @@ export * from "./shapes";
 export * from "./icons";
 export * from "./typography";
 export * from "./forms";
+export * from "./modals";

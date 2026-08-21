@@ -1,7 +1,7 @@
 import { Router } from "express";
 import Controllers from "../controllers";
 
-const ChatRoutes = Router();
+export const ChatRoutes = Router();
 
 ChatRoutes.post("/groups", Controllers.ChatController.createChatGroup);
 
@@ -11,5 +11,3 @@ ChatRoutes.post(
   "/groups/:chatGroupId/send",
   Controllers.ChatController.sendMessage,
 );
-
-export default ChatRoutes;

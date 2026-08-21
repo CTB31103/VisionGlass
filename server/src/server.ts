@@ -5,7 +5,7 @@ import { Log } from "./utils";
 import dotenv from "dotenv";
 import Middleware from "./middleware";
 import path from "path";
-import Routes from "./routes";
+import { Routes } from "./routes";
 import cors from "cors";
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") });

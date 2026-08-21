@@ -1,5 +1,4 @@
-import Validator from "validatorjs";
-import ValidateFunc from "./validate";
+import { ValidateFunc, Validator } from "./validate";
 import { UserType } from "../interfaces";
 
 const bearerTokenPresent = (header: any) => {

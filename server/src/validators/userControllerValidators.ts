@@ -1,7 +1,6 @@
-import Validator from "validatorjs";
-import Validate, { requiredWith } from "./validate";
 import { UserType } from "../interfaces";
 import CONSTANTS from "../constants";
+import { ValidateFunc, Validator, requiredWith } from "./validate";
 
 const USER_RULES = {
   userId: "string|min:0|max:75",
@@ -36,7 +35,7 @@ const createUserValidator = (
   };
 
   let validator = new Validator(body, requiredRules);
-  Validate(validator);
+  ValidateFunc(validator);
 
   const requiredInfo = {
     username: body.username as string,
@@ -57,7 +56,7 @@ const getUsersValidation = (params: any) => {
   };
 
   const validator = new Validator(params, rules);
-  Validate(validator);
+  ValidateFunc(validator);
 
   const info = {
     userId: (params?.userId || undefined) as string | undefined,
@@ -74,7 +73,7 @@ const loginUser = (body: any) => {
   };
 
   const validator = new Validator(body, rules);
-  Validate(validator);
+  ValidateFunc(validator);
 
   return {
     username: body.username as string,
@@ -90,7 +89,7 @@ const refreshUserWithRefreshToken = (header: any) => {
 
   let validator = new Validator(header, rules);
   try {
-    Validate(validator);
+    ValidateFunc(validator);
   } catch (err) {
     throw new Error(`Missing cookie`);
   }
@@ -115,7 +114,7 @@ const editUser = (body: any) => {
   };
 
   const validator = new Validator(body, rules);
-  Validate(validator);
+  ValidateFunc(validator);
 
   return {
     username: body.username as string,
@@ -133,7 +132,7 @@ const searchUsers = (queryParams: any) => {
   };
 
   const validator = new Validator(queryParams, rules);
-  Validate(validator);
+  ValidateFunc(validator);
 
   return {
     query: queryParams.query as string,

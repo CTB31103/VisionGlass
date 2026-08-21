@@ -1,4 +1,4 @@
-import { Prop, PropType } from "@typegoose/typegoose";
+import { getModelForClass, Prop, PropType } from "@typegoose/typegoose";
 import { ICalendarEvent, ITimeBlock } from "../interfaces";
 import { Log } from "../utils";
 import { TimeBlock } from "./timeBlock";
@@ -13,7 +13,7 @@ export class CalendarEvent implements ICalendarEvent {
   @Prop({ type: Boolean })
   allDay: boolean;
   @Prop({ type: TimeBlock, _id: false })
-  timeBlock: ITimeBlock;
+  timeBlock?: ITimeBlock;
   @Prop({ type: String })
   title: string;
   @Prop({ type: String })
@@ -49,3 +49,5 @@ export class CalendarEvent implements ICalendarEvent {
     return Log.json(this);
   }
 }
+
+export const CalendarEventModel = getModelForClass(CalendarEvent);

@@ -1,11 +1,13 @@
-import APIKeyNeededRoutes from "./APIKeyNeededRoutes";
-import MediaRoutes from "./mediaRoutes";
+import { APIKeyNeededRoutes } from "./APIKeyNeededRoutes";
+import { MediaRoutes } from "./mediaRoutes";
+import { UserRoutes } from "./userRoutes";
+import { UserStatisticRoutes } from "./userStatisticRoutes";
 
-const Routes = {
+export const Routes = {
   MediaRoutes,
+  UserRoutes,
+  UserStatisticRoutes,
 
   // Auth Group Routes
   APIKeyNeededRoutes,
 };
-
-export default Routes;

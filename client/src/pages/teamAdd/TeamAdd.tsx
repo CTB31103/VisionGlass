@@ -1,18 +1,30 @@
 import {
   ActionButton,
+  BasicModal,
+  ModalCloseCenterButton,
   PageHeader,
   SelectInput,
   TBody,
   TextInput,
-  THeading,
 } from "@/components";
-import { CSS } from "@/Constants";
+
 import { useApi, useTimeoutEffect } from "@/hooks";
 import { USER_TYPES, UserType } from "@/interfaces";
 import { capitalize } from "@/utils";
-import { Modal, Paper, Stack } from "@mui/material";
+import { RULES, validation } from "@/validation";
+import { Stack } from "@mui/material";
 import { useState } from "react";
 import { useNavigate } from "react-router";
+
+type IData = {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  username: string;
+  password: string;
+  userType: string;
+};
 
 export const TeamAdd = () => {
   const navigate = useNavigate();
@@ -46,6 +58,26 @@ export const TeamAdd = () => {
     250,
   );
 
+  const isValid = (data: IData) => {
+    const props = validation<IData>(
+      {
+        firstName: [RULES.common.requiredString, "first name"],
+        lastName: [RULES.common.requiredString, "last name"],
+        email: [RULES.common.requiredEmail, ""],
+        phone: [RULES.common.requiredString, ""],
+        username: [RULES.common.requiredString, ""],
+        password: [RULES.common.requiredString, "temporary password"],
+        userType: [RULES.common.requiredString, "user role"],
+      },
+      data,
+    );
+    if (props.errorMsg) {
+      errorSnack(props.errorMsg);
+      return false;
+    }
+    return true;
+  };
+
   const submit = async () => {
     setLoading(true);
 
@@ -59,6 +91,11 @@ export const TeamAdd = () => {
       password: tempPwd,
       userType: role,
     };
+
+    if (!isValid(data)) {
+      setLoading(false);
+      return;
+    }
 
     const res = await createUser(data);
 
@@ -144,7 +181,30 @@ export const TeamAdd = () => {
         </ActionButton>
       </Stack>
 
-      <Modal open={successModalOpen} onClose={() => setSuccessModalOpen(false)}>
+      <BasicModal
+        title="Success"
+        subtitle="New team member added to the system."
+        open={successModalOpen}
+        onClose={() => setSuccessModalOpen(false)}
+      >
+        <Stack
+          sx={{
+            width: "100%",
+            height: "100%",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <TBody medium>Username: {username}</TBody>
+          <TBody medium>Password: {tempPwd}</TBody>
+        </Stack>
+
+        <ModalCloseCenterButton
+          onClick={() => (setSuccessModalOpen(false), navigate(-1))}
+        />
+      </BasicModal>
+
+      {/* <Modal >
         <Stack
           sx={{
             width: "100%",
@@ -198,7 +258,7 @@ export const TeamAdd = () => {
             </Stack>
           </Paper>
         </Stack>
-      </Modal>
+      </Modal> */}
     </Stack>
   );
 };

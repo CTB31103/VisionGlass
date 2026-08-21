@@ -13,7 +13,7 @@ export interface ICalendarEvent {
   creatorId: string;
   date: number;
   allDay: boolean;
-  timeBlock: ITimeBlock;
+  timeBlock?: ITimeBlock;
   title: string;
   desc: string;
   visibleUserIds: string[];

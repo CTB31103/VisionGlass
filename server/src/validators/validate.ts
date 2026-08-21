@@ -1,5 +1,27 @@
-import Validator from "validatorjs";
+import Validatorjs from "validatorjs";
 import { Log } from "../utils";
+
+export type IRules = { [key: string]: string };
+
+export const RULES = {
+  string: "string",
+  numeric: "numeric",
+  boolean: "boolean",
+  date: "date",
+
+  required: "required",
+  present: "present",
+  array: "array",
+
+  min: (len: number) => `min:${len}`,
+  max: (len: number) => `max:${len}`,
+  same: (attr: string) => `same:${attr}`,
+  size: (len: number) => `size:${len}`,
+  in: (vals: string[]) => `in:${vals.join(",")}`,
+  multiple: (...params: string[]) => params.join("|"),
+};
+
+export const Validator = Validatorjs;
 
 export const requiredWith = (fields: string[]) =>
   fields
@@ -9,7 +31,7 @@ export const requiredWith = (fields: string[]) =>
     )
     .join("");
 
-const ValidateFunc = (validator: Validator.Validator<any>) => {
+export const ValidateFunc = (validator: Validator.Validator<any>) => {
   if (validator.passes()) return;
 
   const errorsObj = validator.errors.all();
@@ -24,5 +46,3 @@ const ValidateFunc = (validator: Validator.Validator<any>) => {
 
   throw new Error(errors[0]);
 };
-
-export default ValidateFunc;

@@ -1,5 +1,13 @@
 import { Router } from "express";
+import Controllers from "../controllers";
 
-const CalendarEventRoutes = Router();
+export const CalendarEventRoutes = Router();
 
-export default CalendarEventRoutes;
+CalendarEventRoutes.get("/", Controllers.CalendarEventController.getEvents);
+
+CalendarEventRoutes.post("/", Controllers.CalendarEventController.createEvent);
+
+CalendarEventRoutes.delete(
+  "/:calendarEventId",
+  Controllers.CalendarEventController.deleteEvent,
+);

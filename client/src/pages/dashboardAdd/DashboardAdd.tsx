@@ -1,24 +1,53 @@
 import {
+  ActionButton,
+  BasicModal,
   FullPage,
+  ModalCloseCenterButton,
   PageHeader,
   RadioInput,
   SelectInput,
+  TBody,
   TextInput,
 } from "@/components";
+import { ROUTES } from "@/Constants";
+import { useApi, useRouteDateParam } from "@/hooks";
 import {
   fromReadableDate,
   fromTimeString,
+  toMidnight,
   toNearestHalfHour,
   toReadableDate,
   toTimeString,
 } from "@/utils";
+import { RULES, validation } from "@/validation";
 import { Stack } from "@mui/material";
 import moment from "moment";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 
+type IData = {
+  date: number;
+  allDay: boolean;
+  title: string;
+  desc: string;
+  timeBlock:
+    | {
+        from: number;
+        to: number;
+      }
+    | undefined;
+};
+
 export const DashboardAdd = () => {
   const navigate = useNavigate();
+
+  const {
+    snackbar: [_, errorSnack],
+    calendarEventRoutes: { createCalendarEvent },
+  } = useApi();
+
+  const [loading, setLoading] = useState(false);
+  const [successModalOpen, setSuccessModalOpen] = useState(false);
 
   const [title, setTitle] = useState("");
   const [desc, setDesc] = useState("");
@@ -28,6 +57,13 @@ export const DashboardAdd = () => {
   const [toDate, setToDate] = useState(toNearestHalfHour(new Date()));
   const [availableDates, setAvailableDates] = useState<Date[]>([]);
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
+
+  const [urlDate, setUrlDate] = useState<Date | undefined>(undefined);
+
+  useRouteDateParam((paramDate) => {
+    setFromDate(toNearestHalfHour(paramDate));
+    setUrlDate(paramDate);
+  });
 
   useEffect(() => {
     const td = moment(toNearestHalfHour(new Date()));
@@ -72,6 +108,71 @@ export const DashboardAdd = () => {
         .toDate(),
     );
   }, [fromDate]);
+
+  const isValid = (data: IData) => {
+    const [_, errorMsg1] = validation<Omit<IData, "timeBlock">>(
+      {
+        allDay: [RULES.common.requiredBool, "full day"],
+        date: [RULES.common.requiredNumber, ""],
+        desc: [RULES.common.requiredString, "description"],
+        title: [RULES.common.requiredString, ""],
+      },
+      data,
+    );
+    let errMsg2;
+
+    if (data.timeBlock) {
+      const [__, errorMsg2] = validation<
+        Exclude<IData["timeBlock"], undefined>
+      >(
+        {
+          from: [RULES.common.requiredNumber, ""],
+          to: [RULES.common.requiredNumber, ""],
+        },
+        data.timeBlock,
+      );
+      errMsg2 = errorMsg2;
+    }
+
+    if (errorMsg1 || errMsg2) {
+      errorSnack(errorMsg1 || errMsg2 || null);
+      return false;
+    }
+
+    return true;
+  };
+
+  const submit = async () => {
+    setLoading(true);
+    const data = {
+      date: toMidnight(moment(fromDate)).getTime(),
+      allDay: fullDay,
+      title,
+      desc,
+      timeBlock: fullDay
+        ? undefined
+        : {
+            from: fromDate.getTime(),
+            to: toDate.getTime(),
+          },
+    };
+
+    if (!isValid(data)) return setLoading(false);
+
+    const res = await createCalendarEvent(data);
+    setLoading(false);
+
+    if (res.err || !res.data) return errorSnack(res.err);
+
+    setSuccessModalOpen(true);
+  };
+
+  const onCloseModal = () => (
+    setSuccessModalOpen(false),
+    navigate(
+      ROUTES.DASHBOARD + `${urlDate ? `?date=${urlDate.getTime()}` : ``}`,
+    )
+  );
 
   return (
     <FullPage screen>
@@ -151,6 +252,40 @@ export const DashboardAdd = () => {
             </Stack>
           )}
         </Stack>
+
+        <Stack sx={{ width: "100%", alignItems: "center" }}>
+          <ActionButton loading={loading} onClick={submit} color="red">
+            Add to dashboard
+          </ActionButton>
+        </Stack>
+
+        <BasicModal
+          title={"Success"}
+          subtitle={"Event added to the system!"}
+          open={successModalOpen}
+          onClose={onCloseModal}
+        >
+          <Stack
+            sx={{
+              width: "100%",
+              height: "100%",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <Stack>
+              <TBody medium>Title: {title}</TBody>
+              <TBody medium>
+                Date:{" "}
+                {`${toReadableDate(fromDate, true)}${fullDay ? ` - Full Day Event` : ` - ${toTimeString(toDate)}`}`}
+              </TBody>
+              <TBody medium trunk={2}>
+                Description: {desc}
+              </TBody>
+            </Stack>
+          </Stack>
+          <ModalCloseCenterButton onClick={onCloseModal} />
+        </BasicModal>
       </Stack>
     </FullPage>
   );

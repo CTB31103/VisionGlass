@@ -23,7 +23,6 @@ import {
   useTimeoutEffect,
 } from "@/hooks";
 import { useState } from "react";
-import { toString } from "lodash";
 
 const WHITE_LIST = [ROUTES.HOME, ROUTES.ABOUT, ROUTES.CONTACT, ROUTES.QUOTES];
 
@@ -38,7 +37,7 @@ export const RefreshAuthOverlay = () => {
   const { toHome } = useNavigationService();
   const { pathname } = useLocation();
   const { accessKey, setAccessKey } = useAccessKeyStore();
-  const { loggedIn, user, setUser, logout } = useUserStore();
+  const { user, setUser, logout } = useUserStore();
 
   const { open, setOpen } = useRefreshScreenStore();
   const [scope] = useAnimate();
@@ -123,10 +122,6 @@ export const RefreshAuthOverlay = () => {
     }
 
     if (AUTH_LIST.some((authPath) => pathname.startsWith(authPath))) {
-      console.log(`Auth Route:`);
-      console.log(`shouldRefreshWithAccess: ${shouldRefreshWithAccess}`);
-      console.log(`shouldRefreshWithRefresh: ${shouldRefreshWithRefresh}`);
-      console.log(``);
       if (!accessKey || shouldRefreshWithAccess || shouldRefreshWithRefresh) {
         setOpen(true);
         timeoutKey = setTimeout(() => {

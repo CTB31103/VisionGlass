@@ -2,7 +2,7 @@ import { Router } from "express";
 import Controllers from "../controllers";
 import Middleware from "../middleware";
 
-const UserRoutes = Router();
+export const UserRoutes = Router();
 const UserAuthRoutes = Router();
 
 UserRoutes.post("/login", Controllers.UserController.loginUser);
@@ -33,5 +33,3 @@ UserAuthRoutes.get(
   "/login",
   Controllers.UserController.loginUserWithAccessToken,
 );
-
-export default UserRoutes;

@@ -1,4 +1,4 @@
-import { ReadMore, TBody, THeading } from "@/components";
+import { Divider, ReadMore, TBody, THeading } from "@/components";
 import { EditDeleteButtons } from "@/components/buttons/EditDeleteButtons";
 import { Chip, Stack } from "@mui/material";
 import moment from "moment";
@@ -7,8 +7,11 @@ type DashboardEventCardProps = {
   title: string;
   desc: string;
 
-  startDate: Date;
+  date: Date;
+
+  startDate?: Date;
   endDate?: Date;
+  divider?: boolean;
 
   onEdit?: () => void;
   onDelete?: () => void;
@@ -17,37 +20,44 @@ type DashboardEventCardProps = {
 export const DashboardEventCard = ({
   title,
   desc,
+  date,
   startDate,
   endDate,
+  divider,
   onEdit,
   onDelete,
 }: DashboardEventCardProps) => {
   const mStartDate = moment(startDate);
+  const mDate = moment(date);
   const mEndDate = endDate ? moment(endDate) : undefined;
   return (
-    <Stack sx={{ width: "100%" }} spacing={1}>
-      <Stack
-        direction={"row"}
-        sx={{ alignItems: "center", justifyContent: "space-between" }}
-      >
-        <Stack>
-          <THeading bold>{title}</THeading>
-          <Stack direction={"row"} spacing={1}>
-            {!mEndDate && (
-              <Chip variant="outlined" size="small" label="All Day" />
-            )}
-            <TBody>
-              {`${mStartDate.format("MMM Do, H:mm a")}${mEndDate ? ` - ${mEndDate.format("H:mm a")}` : ""}`}
-            </TBody>
+    <Stack sx={{ width: "100%" }} spacing={4}>
+      <Stack sx={{ width: "100%" }} spacing={1}>
+        <Stack
+          direction={"row"}
+          sx={{ alignItems: "center", justifyContent: "space-between" }}
+        >
+          <Stack>
+            <THeading bold>{title}</THeading>
+            <Stack direction={"row"} spacing={1}>
+              {!mEndDate && (
+                <Chip variant="outlined" size="small" label="All Day" />
+              )}
+              <TBody>
+                {`${mDate.format("MMM Do")}${mStartDate ? `, ${mStartDate.format("H:mm a")}${mEndDate ? ` - ${mEndDate.format("H:mm a")}` : ""}` : ``}`}
+              </TBody>
+            </Stack>
           </Stack>
+
+          {(onEdit || onDelete) && (
+            <EditDeleteButtons onEdit={onEdit} onDelete={onDelete} />
+          )}
         </Stack>
 
-        {(onEdit || onDelete) && (
-          <EditDeleteButtons onEdit={onEdit} onDelete={onDelete} />
-        )}
+        <ReadMore text={desc} />
       </Stack>
 
-      <ReadMore text={desc} />
+      {divider && <Divider />}
     </Stack>
   );
 };

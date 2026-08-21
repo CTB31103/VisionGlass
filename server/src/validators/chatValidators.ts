@@ -1,5 +1,4 @@
-import Validator from "validatorjs";
-import ValidateFunc from "./validate";
+import { ValidateFunc, Validator } from "./validate";
 
 const CHATGROUP_RULES = {
   title: "present|string|min:0|max:75",

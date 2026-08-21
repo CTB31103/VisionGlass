@@ -362,7 +362,7 @@ const searchUsers = ControllerFunc((req, res) =>
   ),
 );
 
-const UserController = {
+export const UserController = {
   createUser,
   getUsers,
   loginUser,
@@ -372,5 +372,3 @@ const UserController = {
   editUser,
   searchUsers,
 };
-
-export default UserController;
