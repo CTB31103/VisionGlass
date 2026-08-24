@@ -30,10 +30,14 @@ export const PaymentOptions = ({
     setAfterTaxPrice,
     servicePrice,
     setServicePrice,
+
+    paymentOptional: optionalInp,
+    paymentRequired: requiredInp,
   },
   fullForm,
 }: PaymentOptionsProps) => {
   const { lessThanEqualTo: sizeUnder } = useScreenSize();
+
   return (
     <Stack spacing={2}>
       <Stack direction={sizeUnder.xs ? "column" : "row"} spacing={2}>
@@ -59,16 +63,16 @@ export const PaymentOptions = ({
             label="Service Amount - Before Tax:"
             value={servicePrice}
             setValue={setServicePrice}
-            optional={!insuranceContacted}
-            required={insuranceContacted}
+            optional={optionalInp}
+            required={requiredInp}
           />
 
           <NumberInput
             label="Service Amount - After Tax:"
             value={afterTaxPrice}
             setValue={setAfterTaxPrice}
-            optional={!insuranceContacted}
-            required={insuranceContacted}
+            optional={optionalInp}
+            required={requiredInp}
           />
         </Stack>
       )}
@@ -80,15 +84,15 @@ export const PaymentOptions = ({
               label="Insurance Company Name:"
               value={insuranceName}
               setValue={setInsuranceName}
-              optional={!insuranceContacted}
-              required={insuranceContacted}
+              optional={optionalInp}
+              required={requiredInp}
             />
             <TextInput
               label="Insurance Policy #:"
               value={policyNumber}
               setValue={setPolicyNumber}
-              optional={!insuranceContacted}
-              required={insuranceContacted}
+              optional={optionalInp}
+              required={requiredInp}
             />
           </Stack>
 
@@ -140,7 +144,8 @@ export const PaymentOptions = ({
                     label="Insurance Amount:"
                     value={insuranceAmount}
                     setValue={setInsuranceAmount}
-                    optional
+                    optional={optionalInp}
+                    required={requiredInp}
                   />
                 </Stack>
               )}

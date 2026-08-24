@@ -33,7 +33,7 @@ export const Customers = () => {
           searchBar={search}
           setSearchBar={setSearch}
           btnText="New Customer"
-          btnLink={ROUTES.TEAM_ADD}
+          btnLink={ROUTES.CUSTOMERS_ADD}
         >
           <SelectInput
             label="Status:"

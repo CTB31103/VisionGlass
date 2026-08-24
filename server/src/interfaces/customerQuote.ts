@@ -1,61 +1,78 @@
-import { IAddress } from "./address";
-import { IPerson } from "./person";
-import { ITimeBlock } from "./timeBlock";
+import type { IPerson } from "./person";
+import type { ITimeBlock } from "./timeBlock";
 
-export enum CustomerQuoteStatus {
-  NEW = "new",
-  VALIDATED = "insurance_validated",
-  SCHEDULED = "scheduled",
-  DONE = "done",
-}
+export const CustomerQuoteStatus = {
+  NEW: "new",
+  VALIDATED: "insurance_validated",
+  SCHEDULED: "scheduled",
+  DONE: "done",
+} as const;
 
-export enum PaymentType {
-  INSURANCE = "insurance",
-  ONSITE = "onsite",
-}
+export type CustomerQuoteStatus =
+  (typeof CustomerQuoteStatus)[keyof typeof CustomerQuoteStatus];
 
-export enum PackageType {
-  PREMIUM = "premium",
-  BASIC = "basic",
-  ESSENTIALS = "essentials",
-}
+export const CUSTOMER_QUOTE_STATUS = [
+  CustomerQuoteStatus.NEW,
+  CustomerQuoteStatus.VALIDATED,
+  CustomerQuoteStatus.SCHEDULED,
+  CustomerQuoteStatus.DONE,
+];
 
-export enum CarDamageLocation {
-  FRONT = "front",
-  BACK = "back",
-  SIDE = "side",
-}
+export const PaymentType = {
+  INSURANCE: "insurance",
+  ONSITE: "onsite",
+} as const;
 
-export enum WindowSide {
-  LEFT = "left",
-  RIGHT = "right",
-}
+export type PaymentType = (typeof PaymentType)[keyof typeof PaymentType];
 
-export enum DamageSize {
-  GREATER = "greater than 6 in.",
-  LESSER = "less than 6 in.",
-}
+export const CarDamageLocation = {
+  FRONT: "front",
+  BACK: "back",
+  SIDE: "side",
+} as const;
+
+export type CarDamageLocation =
+  (typeof CarDamageLocation)[keyof typeof CarDamageLocation];
+
+export const WindowSide = {
+  LEFT: "left",
+  RIGHT: "right",
+} as const;
+
+export type WindowSide = (typeof WindowSide)[keyof typeof WindowSide];
 
 export interface ICustomerQuote {
   customerQuoteId: string;
-  salesmanId: string;
-  technicianId: string;
+  teamMembers: string[];
   status: CustomerQuoteStatus;
   customer: IPerson;
-  car: ICar;
-  damage: ICarDamage;
-  address: IAddress;
-  paymentType: PaymentType;
-  packageType: PackageType;
-  callbackTime: ITimeBlock;
-  meetingTime: number;
+  car?: ICar;
+  damage?: ICarDamage;
+  address?: string;
+  paymentInfo?: IPaymentInfo;
+  callbackTime?: ICallbackInfo;
+  meetingTime?: ITimeBlock;
+}
+
+export interface ICallbackInfo {
+  asap: boolean;
+  dayPrefrence: string[];
+  timePreference?: ITimeBlock;
+}
+
+export interface IPaymentInfo {
+  type: PaymentType;
+  serviceAmount: number;
+  serviceAmountAfterTax: number;
+  insurance?: IInsuranceInfo;
 }
 
 export interface ICar {
   make: string;
   model: string;
-  vin: string;
-  plateInfo: ICarPlate;
+  year: number;
+  vin?: string;
+  plateInfo?: ICarPlate;
 }
 
 export interface ICarPlate {
@@ -66,5 +83,12 @@ export interface ICarPlate {
 export interface ICarDamage {
   location: CarDamageLocation;
   windowSide?: WindowSide;
-  damageSize: DamageSize;
+  rows?: number[];
+}
+
+export interface IInsuranceInfo {
+  insuranceName: string;
+  policyNumber: string;
+  fullCoverage: boolean;
+  coverageAmount: number;
 }

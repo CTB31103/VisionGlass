@@ -2,7 +2,7 @@ import { UserType } from "../interfaces";
 import CONSTANTS from "../constants";
 import { ValidateFunc, Validator, requiredWith } from "./validate";
 
-const USER_RULES = {
+export const USER_RULES = {
   userId: "string|min:0|max:75",
   username: "required|string|min:3|max:30",
   password: "required|string|min:6|max:100",

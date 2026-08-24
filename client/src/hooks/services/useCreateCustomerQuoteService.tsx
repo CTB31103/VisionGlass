@@ -3,6 +3,21 @@ import { useTimeoutEffect } from "../utils";
 import { getBrands, getModelsByBrand } from "auto-parts-db";
 import { useRequestCallbackShortForm } from "../components";
 import { IMAGES } from "@/assets";
+import type {
+  CarDamageLocation,
+  ICustomerQuote,
+  WindowSide,
+} from "@/interfaces";
+import { useApi } from "../api";
+import moment from "moment";
+import { toNearestHalfHour } from "@/utils";
+import {
+  validateAddress,
+  validatePayment,
+  validatePerson,
+  validateTimeBlock,
+  type ICombinedValidationResponse,
+} from "@/validation";
 
 const availableDays = [
   "Weekdays",
@@ -33,6 +48,14 @@ export type UseCreateCustomerQuoteServiceResponse = ReturnType<
 
 export const useCreateCustomerQuoteService = () => {
   const {
+    snackbar: [_, errorSnack],
+    customerQuoteRoutes: { createCustomerQuoteService },
+  } = useApi();
+
+  const [loading, setLoading] = useState(false);
+  const [successModelOpen, setSuccessModalOpen] = useState(false);
+
+  const {
     firstName,
     setFirstName,
 
@@ -62,7 +85,7 @@ export const useCreateCustomerQuoteService = () => {
   );
   const [damageImage, setDamageImage] = useState(availableSideImages[0]);
   const [damageSide, setDamageSide] = useState("");
-  const [damageRows, setDamageRows] = useState<string[]>([]);
+  const [damageRows, setDamageRows] = useState<number[]>([]);
   const damageIsSideWindows =
     damageMainLocation ===
     availableDamageOptions[availableDamageOptions.length - 1];
@@ -84,10 +107,36 @@ export const useCreateCustomerQuoteService = () => {
   const [callbackFrom, setCallbackFrom] = useState("");
   const [callbackTo, setCallbackTo] = useState("");
 
+  const [readyToSchedule, setReadyToSchedule] = useState(false);
+  const [carAddress, setCarAddress] = useState("");
+  const [meetingTime, setMeetingTime] = useState<Date>(
+    toNearestHalfHour(new Date()),
+  );
+  const [endMeetingTime, setEndMeetingTime] = useState(
+    moment(meetingTime).add(30, "minutes").toDate(),
+  );
+
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const [availableCarMakes, setAvailableCarMakes] = useState<string[]>([]);
   const [availableCarModels, setAvailableCarModels] = useState<string[]>([]);
-  const [availableCarYears, setAvailableCarYears] = useState<number[]>([]);
+  const [availableCarYears, setAvailableCarYears] = useState<number[]>([
+    new Date().getFullYear(),
+  ]);
+
+  const [createdQuote, setCreatedQuote] = useState<ICustomerQuote | undefined>(
+    undefined,
+  );
+
+  const paymentOptional = readyToSchedule
+    ? !readyToSchedule
+    : payWithInsurance
+      ? !insuranceContacted
+      : !readyToSchedule;
+  const paymentRequired = readyToSchedule
+    ? readyToSchedule
+    : payWithInsurance
+      ? insuranceContacted
+      : readyToSchedule;
 
   const setAvailableItems = () => {
     setAvailableTimes(
@@ -196,6 +245,130 @@ export const useCreateCustomerQuoteService = () => {
     250,
   );
 
+  useEffect(() => {
+    setEndMeetingTime(moment(meetingTime).add(30, "minutes").toDate());
+  }, [meetingTime.getTime()]);
+
+  const isValid = (
+    data: Omit<
+      Omit<Omit<ICustomerQuote, "customerQuoteId">, "teamMembers">,
+      "status"
+    >,
+  ) => {
+    const validObjects: ICombinedValidationResponse<unknown>[] = [];
+
+    const validCustomer = validatePerson(data.customer);
+    validObjects.push(validCustomer);
+
+    if (paymentRequired && data.paymentInfo) {
+      const { validPayment, validInsurance } = validatePayment(
+        data.paymentInfo,
+      );
+      validObjects.push(validPayment);
+
+      if (validInsurance) validObjects.push(validInsurance);
+    }
+
+    if (readyToSchedule) {
+      const validScheduling = validateTimeBlock(data.meetingTime, [
+        "service appointment start time",
+        "service appointment end time",
+      ]);
+      validObjects.push(validScheduling);
+
+      const validAddress = validateAddress(data);
+      validObjects.push(validAddress);
+    }
+
+    for (const validObj of validObjects) {
+      if (validObj.errorMsg) {
+        errorSnack(validObj.errorMsg);
+        return false;
+      }
+    }
+
+    return true;
+  };
+
+  const createData = () => {
+    const data: Omit<
+      Omit<Omit<ICustomerQuote, "customerQuoteId">, "teamMembers">,
+      "status"
+    > = {
+      customer: {
+        firstName,
+        lastName,
+        email,
+        phone,
+      },
+      car:
+        carMake.length > 0 || carModel.length > 0
+          ? {
+              make: carMake,
+              model: carModel,
+              year: carYear,
+
+              vin: vin.length > 0 ? vin : undefined,
+              plateInfo:
+                plate.length > 0 || zip.length > 0
+                  ? {
+                      plate,
+                      zip,
+                    }
+                  : undefined,
+            }
+          : undefined,
+      paymentInfo: {
+        type: payWithInsurance ? "insurance" : "onsite",
+        serviceAmount: servicePrice,
+        serviceAmountAfterTax: afterTaxPrice,
+        insurance: payWithInsurance
+          ? {
+              insuranceName,
+              coverageAmount: insuranceAmount,
+              fullCoverage,
+              policyNumber,
+            }
+          : undefined,
+      },
+      damage:
+        damageMainLocation.length > 0
+          ? {
+              location: damageMainLocation as CarDamageLocation,
+              rows: damageRows,
+              windowSide: damageSide as WindowSide,
+            }
+          : undefined,
+      address: readyToSchedule ? carAddress : undefined,
+      meetingTime: readyToSchedule
+        ? {
+            from: meetingTime.getTime(),
+            to: endMeetingTime.getTime(),
+          }
+        : undefined,
+    };
+
+    return data;
+  };
+
+  const submitToAPI = async () => {
+    setLoading(true);
+    const data = createData();
+
+    if (!isValid(data)) {
+      setLoading(false);
+      return;
+    }
+
+    const res = await createCustomerQuoteService(data);
+    setLoading(false);
+
+    if (res.err || !res.data) return errorSnack(res.err);
+
+    setSuccessModalOpen(true);
+    setCreatedQuote(res.data.customerQuote);
+  };
+
   return {
     contactInfo: {
       firstName,
@@ -270,6 +443,9 @@ export const useCreateCustomerQuoteService = () => {
       setInsuranceAmount,
       fullCoverage,
       setFullCoverage,
+
+      paymentOptional,
+      paymentRequired,
     },
 
     callbackInfo: {
@@ -284,5 +460,23 @@ export const useCreateCustomerQuoteService = () => {
       availableDays,
       availableTimes,
     },
+
+    meetingInfo: {
+      carAddress,
+      setCarAddress,
+      meetingTime,
+      setMeetingTime,
+      readyToSchedule,
+      setReadyToSchedule,
+      endMeetingTime,
+      setEndMeetingTime,
+    },
+
+    loading,
+    createdQuote,
+    successModelOpen,
+    setSuccessModalOpen,
+
+    submitToAPI,
   };
 };

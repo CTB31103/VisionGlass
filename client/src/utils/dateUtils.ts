@@ -43,3 +43,14 @@ export const toNearestHalfHour = (date: MDate) => {
 
   return mDate.toDate();
 };
+
+export const toNearestHour = (date: MDate) => {
+  const mDate = moment(date);
+  const minute = mDate.minutes();
+
+  if (minute >= 30) mDate.hour(mDate.hour() + 1);
+
+  mDate.minutes(0);
+
+  return mDate.toDate();
+};

@@ -10,7 +10,7 @@ import { Text } from "@chakra-ui/react";
 import { Drawer, Link, Stack } from "@mui/material";
 import clsx from "clsx";
 import { ActionButton, IconButton, QuoteButton } from "../buttons";
-import { CSS, LOCATIONS, ROUTES } from "@/Constants";
+import { ALL_AUTH_ROUTES, CSS, LOCATIONS, ROUTES } from "@/Constants";
 import { useEffect, useRef, useState } from "react";
 import { HeaderNavLinks, type HeaderNavLinksProps } from "./HeaderNavLinks";
 import { SERVICE_ROUTES, SERVICES } from "@/interfaces";
@@ -18,6 +18,7 @@ import { Icons } from "../icons";
 import { TEXT_SIZES, THeading } from "../typography";
 import { DrawerItem } from "./DrawerItem";
 import { LocationsMenu } from "./LocationsMenu";
+import { useLocation } from "react-router";
 
 const PUBLIC_ROUTES: HeaderNavLinksProps["links"] = [
   { text: "Home", linkPath: ROUTES.HOME },
@@ -59,6 +60,7 @@ const AUTH_ROUTES: HeaderNavLinksProps["links"] = [
 ];
 
 export const Header = () => {
+  const location = useLocation();
   const isLoggedIn = useUserStore((state) => state.loggedIn);
 
   const { lessThanEqualTo: sizeAndUnder } = useScreenSize();
@@ -98,6 +100,23 @@ export const Header = () => {
     },
     [top, highUpDirection, preferForce],
     50,
+  );
+
+  const onExpandContractBtn = () =>
+    setForceExpand(() => {
+      setPreferForce(true);
+      return !expanded;
+    });
+
+  useTimeoutEffect(
+    () => {
+      if (ALL_AUTH_ROUTES.includes(location.pathname)) {
+        setPreferForce(true);
+        setForceExpand(false);
+      }
+    },
+    [location.pathname],
+    1500,
   );
 
   const expanded = preferForce ? forceExpand : scrollExpanded;
@@ -386,12 +405,7 @@ export const Header = () => {
                 bgcolor={CSS.colors.white}
                 borderColor={CSS.colors.black}
                 color={CSS.colors.black}
-                onClick={() =>
-                  setForceExpand(() => {
-                    setPreferForce(true);
-                    return !expanded;
-                  })
-                }
+                onClick={onExpandContractBtn}
               />
             </Stack>
 

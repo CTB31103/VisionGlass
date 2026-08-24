@@ -66,7 +66,7 @@ export const validatorThrowErrors = (
 type IValidData<T> = T | undefined;
 type IErrorMsg = string | undefined;
 
-type ICombinedValidationResponse<T> = [IValidData<T>, IErrorMsg] & {
+export type ICombinedValidationResponse<T> = [IValidData<T>, IErrorMsg] & {
   validData: IValidData<T>;
   errorMsg: IErrorMsg;
 };
@@ -119,3 +119,11 @@ export const validation = <T extends object>(
 
   return craftReturnObj(returnObj, errorMsg);
 };
+
+export const requiredWith = (fields: string[]) =>
+  fields
+    .map(
+      (field, i, arr) =>
+        `required_with:${field}${i < arr.length - 1 ? "|" : ""}`,
+    )
+    .join("");

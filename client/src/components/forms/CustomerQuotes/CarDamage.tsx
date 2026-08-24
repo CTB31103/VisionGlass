@@ -65,11 +65,12 @@ export const CarDamage = ({
               required={!optional}
               optional={optional}
               label="What row(s) is the damage on?"
-              items={availableRows.map((option) => ({
-                value: option,
+              items={availableRows.map((option, i) => ({
+                value: (i + 1).toString(),
+                text: option,
               }))}
-              selectedItems={damageRows}
-              onSelect={setDamageRows}
+              selectedItems={damageRows.map((d) => d.toString())}
+              onSelect={(v) => setDamageRows(v.map((val) => parseInt(val)))}
             />
           </Stack>
         )}

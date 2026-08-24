@@ -1,4 +1,3 @@
-import type { IAddress } from "./address";
 import type { IPerson } from "./person";
 import type { ITimeBlock } from "./timeBlock";
 
@@ -26,14 +25,6 @@ export const PaymentType = {
 
 export type PaymentType = (typeof PaymentType)[keyof typeof PaymentType];
 
-export const PackageType = {
-  PREMIUM: "premium",
-  BASIC: "basic",
-  ESSENTIALS: "essentials",
-} as const;
-
-export type PackageType = (typeof PackageType)[keyof typeof PackageType];
-
 export const CarDamageLocation = {
   FRONT: "front",
   BACK: "back",
@@ -50,33 +41,38 @@ export const WindowSide = {
 
 export type WindowSide = (typeof WindowSide)[keyof typeof WindowSide];
 
-export const DamageSize = {
-  GREATER: "greater than 6 in.",
-  LESSER: "less than 6 in.",
-} as const;
-
-export type DamageSize = (typeof DamageSize)[keyof typeof DamageSize];
-
 export interface ICustomerQuote {
   customerQuoteId: string;
-  salesmanId: string;
-  technicianId: string;
+  teamMembers: string[];
   status: CustomerQuoteStatus;
   customer: IPerson;
-  car: ICar;
-  damage: ICarDamage;
-  address: IAddress;
-  paymentType: PaymentType;
-  packageType: PackageType;
-  callbackTime: ITimeBlock;
-  meetingTime: number;
+  car?: ICar;
+  damage?: ICarDamage;
+  address?: string;
+  paymentInfo?: IPaymentInfo;
+  callbackTime?: ICallbackInfo;
+  meetingTime?: ITimeBlock;
+}
+
+export interface ICallbackInfo {
+  asap: boolean;
+  dayPrefrence: string[];
+  timePreference?: ITimeBlock;
+}
+
+export interface IPaymentInfo {
+  type: PaymentType;
+  serviceAmount: number;
+  serviceAmountAfterTax: number;
+  insurance?: IInsuranceInfo;
 }
 
 export interface ICar {
   make: string;
   model: string;
-  vin: string;
-  plateInfo: ICarPlate;
+  year: number;
+  vin?: string;
+  plateInfo?: ICarPlate;
 }
 
 export interface ICarPlate {
@@ -87,5 +83,12 @@ export interface ICarPlate {
 export interface ICarDamage {
   location: CarDamageLocation;
   windowSide?: WindowSide;
-  damageSize: DamageSize;
+  rows?: number[];
+}
+
+export interface IInsuranceInfo {
+  insuranceName: string;
+  policyNumber: string;
+  fullCoverage: boolean;
+  coverageAmount: number;
 }

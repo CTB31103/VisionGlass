@@ -92,4 +92,5 @@ export const CalendarEventValidators = {
   getEventsValidation,
   createEventValidation,
   deleteEvent,
+  timeBlockValidation,
 };

@@ -8,3 +8,5 @@ export * from "./MultiSelectInput";
 export * from "./Menu";
 export * from "./SearchBar";
 export * from "./NumberInput";
+export * from "./DateTextInput";
+export * from "./DateSelectInput";

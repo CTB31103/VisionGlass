@@ -2,6 +2,7 @@ import { Stack } from "@mui/material";
 import { DashboardDateCard } from "./DashboardDateCard";
 import { BorderButton, Icons, THeading } from "@/components";
 import { toMidnight } from "@/utils";
+import moment from "moment";
 
 type DashboardCalendarProps = {
   date: Date;
@@ -20,11 +21,18 @@ export const DashboardCalendar = ({
   week,
   moveCalendar,
 }: DashboardCalendarProps) => {
+  const mStart = week.length > 0 ? moment(week[0]) : undefined;
+  const mEnd = week.length > 0 ? moment(week[week.length - 1]) : undefined;
   return (
     <Stack spacing={2}>
-      {week.length > 0 && (
+      {mStart && mEnd && (
         <Stack sx={{ width: "100%", alignItems: "center" }}>
-          <THeading bungeeFill>{week[0].getFullYear()}</THeading>
+          <THeading bungeeFill>
+            {mStart.month() != mEnd.month()
+              ? `${mStart.format("MMM")}-${mEnd.format("MMM")} `
+              : `${mStart.format("MMM")} `}
+            {`${mStart.year() != mEnd.year() ? `${mStart.format("YY")}-${mEnd.format("YY")}` : `${mStart.format("YYYY")}`}`}
+          </THeading>
         </Stack>
       )}
 
