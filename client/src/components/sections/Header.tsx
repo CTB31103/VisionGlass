@@ -70,19 +70,37 @@ export const Header = () => {
 
   const [openDrawer, setOpenDrawer] = useState(false);
 
+  const [autoPreferForce, setAutoPreferForce] = useState(false);
   const [preferForce, setPreferForce] = useState(false);
   const [forceExpand, setForceExpand] = useState(false);
 
   const [scrollExpanded, setScrollExpanded] = useState(true);
   const highUpDirection = useScrollDirection([5, -75]);
   const lowRangeDirection = useScrollDirection();
-  const { top, scrollY } = usePagePosition({
+  const { top } = usePagePosition({
     allowableRange: 0,
   });
 
+  const [preventTopLoop, setPreventTopLoop] = useState(0);
+
+  useEffect(() => {
+    const timeoutKey = setTimeout(() => {
+      setPreventTopLoop(0);
+    }, 300);
+
+    if (preventTopLoop > 3) {
+      window.scrollTo({ top: 0, behavior: "instant" });
+    }
+
+    setPreventTopLoop((prev) => prev + 1);
+
+    return () => {
+      clearTimeout(timeoutKey);
+    };
+  }, [scrollExpanded]);
+
   useEffect(() => {
     if (lowRangeDirection === "down" && forceExpand) {
-      // setForceExpand(false);
       setPreferForce(false);
     }
   }, [lowRangeDirection]);
@@ -90,13 +108,18 @@ export const Header = () => {
   useTimeoutEffect(
     () => {
       if (preferForce) return setScrollExpanded(forceExpand);
-      if (top || highUpDirection === "up" || scrollY === 0) {
+
+      if (autoPreferForce && !(top || highUpDirection === "up")) return;
+
+      if (top || highUpDirection === "up") {
         setScrollExpanded(true);
         setForceExpand(true);
       } else {
         setScrollExpanded(false);
         setForceExpand(false);
       }
+
+      setAutoPreferForce(false);
     },
     [top, highUpDirection, preferForce],
     50,
@@ -111,7 +134,7 @@ export const Header = () => {
   useTimeoutEffect(
     () => {
       if (ALL_AUTH_ROUTES.includes(location.pathname)) {
-        setPreferForce(true);
+        setAutoPreferForce(true);
         setForceExpand(false);
       }
     },
@@ -119,7 +142,8 @@ export const Header = () => {
     1500,
   );
 
-  const expanded = preferForce ? forceExpand : scrollExpanded;
+  const expanded =
+    preferForce || autoPreferForce ? forceExpand : scrollExpanded;
 
   return (
     <Stack className={clsx(`sticky top-0 w-full z-5`)}>

@@ -4,6 +4,7 @@ import { MediaValidators } from "./mediaValidators";
 import { ChatValidators } from "./chatValidators";
 import { CalendarEventValidators } from "./calendarEventValidators";
 import { CustomerQuoteValidators } from "./customerQuoteValidators";
+export * from "./validate";
 
 const Validators = {
   TokenValidators,

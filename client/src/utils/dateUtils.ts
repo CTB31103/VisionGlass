@@ -10,11 +10,16 @@ export const toReadableDate = (
   includeTime: boolean = true,
 ) => moment(date).format(`MM/DD/YY${includeTime ? " hh:mm a" : ""}`);
 
+export const toReadableDateYY = (
+  date: MDate = new Date(),
+  includeTime: boolean = true,
+) => moment(date).format(`MM/DD/YYYY${includeTime ? " hh:mm a" : ""}`);
+
 export const toTimeString = (date: MDate = new Date()) =>
   moment(date).format("hh:mm a");
 
-export const fromReadableDate = (dateStr: string) =>
-  moment(dateStr, "MM/DD/YY", true).toDate();
+export const fromReadableDate = (dateStr: string, longYear: boolean = false) =>
+  moment(dateStr, `MM/DD/YY${longYear ? "YY" : ""}`, true).toDate();
 
 export const fromTimeString = (timeStr: string, date: MDate = new Date()) => {
   const timeDate = moment(timeStr, "hh:mm a");
@@ -29,8 +34,10 @@ export const fromTimeString = (timeStr: string, date: MDate = new Date()) => {
   return combined.toDate();
 };
 
-export const isValidReadableDate = (dateStr: string) =>
-  moment(dateStr, "MM/DD/YY", true).isValid();
+export const isValidReadableDate = (
+  dateStr: string,
+  longYear: boolean = false,
+) => moment(dateStr, `MM/DD/YY${longYear ? "YY" : ""}`, true).isValid();
 
 export const toNearestHalfHour = (date: MDate) => {
   const mDate = moment(date);

@@ -4,3 +4,4 @@ export * from "./tryCatchFunc";
 export * from "./sessionFunc";
 export * from "./tokenUtils";
 export * from "./imageUtils";
+export * from "./dateUtils";

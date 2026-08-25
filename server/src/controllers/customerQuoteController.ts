@@ -2,11 +2,76 @@ import { ICustomerQuote } from "../interfaces";
 import { CustomerQuote, CustomerQuoteModel, MongoDoc } from "../models";
 import { HashUtils, Log, TryCatch } from "../utils";
 import Validators from "../validators";
+import { RULES, validationV2 } from "../validators/validate";
 import ControllerFunc from "./controllerFunc";
+
+const getQuotes = ControllerFunc((req, res) =>
+  TryCatch(
+    async () => {
+      Validators.TokenValidators.resLocalsTokenValues(res.locals);
+      const { validData: validQueryData } = validationV2<{ query?: string }>(
+        { query: [RULES.common.optionalString, ""] },
+        req.query,
+      );
+
+      let databaseQuery: any = {};
+
+      if (validQueryData?.query) {
+        const regexQuery = { $regex: validQueryData.query, $options: "i" };
+        databaseQuery = {
+          $or: [
+            {
+              "customer.firstName": regexQuery,
+            },
+            {
+              "customer.lastName": regexQuery,
+            },
+            {
+              "customer.email": regexQuery,
+            },
+            {
+              "customer.phone": regexQuery,
+            },
+            {
+              "car.make": regexQuery,
+            },
+            {
+              "car.model": regexQuery,
+            },
+            {
+              "paymentInfo.insurance.insuranceName": regexQuery,
+            },
+            {
+              "paymentInfo.insurance.policyNumber": regexQuery,
+            },
+          ],
+        };
+
+        if (!Number.isNaN(parseInt(validQueryData.query))) {
+          (databaseQuery["$or"] as unknown[]).push({
+            "car.year": validQueryData.query,
+          });
+        }
+      }
+
+      const customerQuotes = (await CustomerQuoteModel.find(databaseQuery)).map(
+        (q) => q.toCustomerQuote(),
+      );
+
+      res.send({ customerQuotes });
+    },
+    (err) => {
+      res.status(500).json({ error: err });
+    },
+  ),
+);
 
 const create = ControllerFunc((req, res) =>
   TryCatch(
     async () => {
+      const { userId } = Validators.TokenValidators.resLocalsTokenValues(
+        res.locals,
+      );
       const {
         customer,
         carInfo,
@@ -19,7 +84,7 @@ const create = ControllerFunc((req, res) =>
 
       const customerQuoteData: ICustomerQuote = {
         customerQuoteId: HashUtils.uniqueId(),
-        teamMembers: [],
+        teamMembers: [userId],
         status:
           meetingTime !== undefined
             ? "scheduled"
@@ -39,9 +104,6 @@ const create = ControllerFunc((req, res) =>
         await CustomerQuoteModel.create([customerQuoteData], {})
       )[0].toCustomerQuote();
 
-      // Log.colors.yellow(Log.json(customerQuote.toCustomerQuote()));
-      // Log.log(``);
-
       res.send({
         customerQuote,
       });
@@ -54,4 +116,5 @@ const create = ControllerFunc((req, res) =>
 
 export const CustomerQuoteController = {
   create,
+  getQuotes,
 };

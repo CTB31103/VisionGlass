@@ -25,7 +25,7 @@ UserAuthRoutes.put("/", Controllers.UserController.editUser);
 
 UserAuthRoutes.get("/search", Controllers.UserController.searchUsers);
 
-UserAuthRoutes.get("/access", (_r, res) => res.send({ granted: true }));
+UserAuthRoutes.get("/access", Controllers.UserController.userHasAccess);
 
 UserAuthRoutes.get("/logout", Controllers.UserController.logoutUser);
 

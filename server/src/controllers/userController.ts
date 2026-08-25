@@ -362,6 +362,23 @@ const searchUsers = ControllerFunc((req, res) =>
   ),
 );
 
+const userHasAccess = ControllerFunc((req, res) =>
+  TryCatch(
+    async () => {
+      const { userId } = Validators.TokenValidators.resLocalsTokenValues(
+        res.locals,
+      );
+      const user = await UserModel.findOne({ userId });
+      if (!user) throw new Error(`Could not find user`);
+
+      res.send({ granted: true });
+    },
+    (err) => {
+      res.status(500).json({ error: err });
+    },
+  ),
+);
+
 export const UserController = {
   createUser,
   getUsers,
@@ -371,4 +388,5 @@ export const UserController = {
   loginUserWithAccessToken,
   editUser,
   searchUsers,
+  userHasAccess,
 };

@@ -70,7 +70,7 @@ export class CarDamage implements ICarDamage {
   location: CarDamageLocation;
   @Prop({ type: String })
   windowSide?: WindowSide;
-  @Prop({ type: () => [Number], _id: false }, PropType.ARRAY)
+  @Prop({ type: Number }, PropType.ARRAY)
   rows?: number[];
 
   constructor({ location, windowSide, rows }: ICarDamage) {
@@ -87,7 +87,7 @@ export class CarDamage implements ICarDamage {
 export class CallbackInfo implements ICallbackInfo {
   @Prop({ type: Boolean })
   asap: boolean;
-  @Prop({ type: () => [String], _id: false }, PropType.ARRAY)
+  @Prop({ type: String }, PropType.ARRAY)
   dayPrefrence: string[];
   @Prop({ type: TimeBlock, _id: false })
   timePreference?: ITimeBlock | undefined;
@@ -172,7 +172,7 @@ export class CustomerQuote implements ICustomerQuote {
   address?: string;
   @Prop({ type: TimeBlock, _id: false })
   meetingTime?: ITimeBlock;
-  @Prop({ type: () => [String] }, PropType.ARRAY)
+  @Prop({ type: String }, PropType.ARRAY)
   teamMembers: string[];
   @Prop({ type: PaymentInfo, _id: false })
   paymentInfo?: IPaymentInfo;

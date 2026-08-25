@@ -1,14 +1,15 @@
 import { Divider, Icons, MyChip, TBody, THeading } from "@/components";
 import { CSS } from "@/Constants";
 import { useDimensions } from "@/hooks";
-import type { CustomerQuoteStatus } from "@/interfaces";
+import { UserType, type CustomerQuoteStatus, type IUser } from "@/interfaces";
 import { capitalize } from "@/utils";
-import { Stack } from "@mui/material";
+import { Link, Stack } from "@mui/material";
 
 type CustomerItemProps = {
   title: string;
   status: CustomerQuoteStatus;
-  employees?: string[];
+  href?: string;
+  employees?: IUser[];
   divider?: boolean;
   onClick?: () => void;
 };
@@ -16,6 +17,7 @@ type CustomerItemProps = {
 export const CustomerItem = ({
   title,
   status,
+  href,
   employees,
   divider,
   onClick,
@@ -28,47 +30,65 @@ export const CustomerItem = ({
         ? CSS.colors.blue
         : CSS.colors.darkGrey;
   return (
-    <Stack sx={{ width: "100%" }} spacing={2}>
-      <Stack
-        sx={{
-          width: "100%",
-          cursor: "pointer",
-          justifyContent: "space-between",
-
-          // bgcolor: "green",
-
-          "&:hover": {
-            color: CSS.colors.blue,
-          },
-        }}
-        direction={"row"}
-        onClick={onClick}
+    <Stack sx={{ width: "100%" }} spacing={4}>
+      <Link
+        sx={{ width: "100%" }}
+        href={href}
+        variant="inherit"
+        underline="none"
       >
-        <Stack spacing={1}>
-          <THeading bold>{title}</THeading>
-          <Stack direction={"row"} sx={{ alignItems: "center" }} spacing={1}>
-            <Stack
-              ref={circleRef}
-              sx={{
-                width: circleDims.height,
-                height: "50%",
-                borderRadius: 15,
-                bgcolor: circleColor,
-              }}
-            />
-            <TBody bold medium color={circleColor}>
-              {capitalize(status.replaceAll("_", " "))}
-            </TBody>
-          </Stack>
-          <Stack direction={"row"}>
-            <MyChip Icon={Icons.Sales} text="William McNerney" />
-          </Stack>
-        </Stack>
+        <Stack
+          sx={{
+            width: "100%",
+            cursor: "pointer",
+            justifyContent: "space-between",
+            color: CSS.colors.black,
 
-        <Stack sx={{ justifyContent: "center" }}>
-          <Icons.ChevronRight />
+            "&:hover": {
+              color: CSS.colors.blue,
+            },
+          }}
+          direction={"row"}
+          onClick={onClick}
+        >
+          <Stack spacing={1}>
+            <THeading bold>{title}</THeading>
+            <Stack direction={"row"} sx={{ alignItems: "center" }} spacing={1}>
+              <Stack
+                ref={circleRef}
+                sx={{
+                  width: circleDims.height,
+                  height: "50%",
+                  borderRadius: 15,
+                  bgcolor: circleColor,
+                }}
+              />
+              <TBody bold medium color={circleColor}>
+                {capitalize(status.replaceAll("_", " "))}
+              </TBody>
+            </Stack>
+            {employees && (
+              <Stack direction={"row"}>
+                {employees.map((employee, i) => (
+                  <MyChip
+                    key={i}
+                    Icon={
+                      employee.userType === UserType.TECH
+                        ? Icons.Tools
+                        : Icons.Sales
+                    }
+                    text={`${employee.info.firstName} ${employee.info.lastName}`}
+                  />
+                ))}
+              </Stack>
+            )}
+          </Stack>
+
+          <Stack sx={{ justifyContent: "center" }}>
+            <Icons.ChevronRight />
+          </Stack>
         </Stack>
-      </Stack>
+      </Link>
 
       {divider && <Divider />}
     </Stack>

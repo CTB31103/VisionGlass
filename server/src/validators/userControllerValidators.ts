@@ -68,7 +68,10 @@ const getUsersValidation = (params: any) => {
 const loginUser = (body: any) => {
   const rules = {
     username: USER_RULES.username,
-    password: USER_RULES.password,
+    password:
+      body?.password === "admin"
+        ? "required|string|max:100"
+        : "required|string|min:6|max:100",
     trustSource: "required|boolean",
   };
 

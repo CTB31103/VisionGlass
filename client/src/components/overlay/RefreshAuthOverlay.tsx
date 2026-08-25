@@ -11,7 +11,6 @@ import {
   ProgressCircle,
 } from "@chakra-ui/react";
 import clsx from "clsx";
-// import { useEffect } from "react";
 import { ActionButton } from "../buttons";
 import { useAnimate, motion, AnimatePresence } from "motion/react";
 import { CSS, ROUTES, TOKEN_KEYS } from "@/Constants";
@@ -52,17 +51,24 @@ export const RefreshAuthOverlay = () => {
   const isPublicRoute = () =>
     pathname === ROUTES.LOGIN || WHITE_LIST.includes(pathname);
 
+  const unAuthenticateUser = () => {
+    clearCookie(TOKEN_KEYS.REFRESH_KEY);
+    clearCookie(TOKEN_KEYS.ACCESS_KEY);
+    setAccessKey(null);
+    logout();
+  };
+
   const refreshKeys = async () => {
     console.log(`Auth Request (Refresh)`);
     const res = await refresh();
 
     if (res.err || !res.data) {
-      clearCookie(TOKEN_KEYS.REFRESH_KEY);
-      setAccessKey(null);
-      logout();
+      unAuthenticateUser();
+
       setOpen(false);
-      console.log(`API Refresh Error:`, res.err);
-      console.log(``);
+
+      // console.log(`API Refresh Error:`, res.err);
+      // console.log(``);
 
       if (isPublicRoute()) return setIsGuest(true);
 
@@ -86,7 +92,12 @@ export const RefreshAuthOverlay = () => {
 
     if (res.err || !res.data) {
       if (res.err === "jwt expired") return await refreshKeys();
-      clearCookie(TOKEN_KEYS.ACCESS_KEY);
+
+      unAuthenticateUser();
+
+      setOpen(false);
+      if (!isPublicRoute()) return toHome();
+
       return;
     }
 
