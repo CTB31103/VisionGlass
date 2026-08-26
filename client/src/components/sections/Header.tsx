@@ -434,7 +434,7 @@ export const Header = () => {
             </Stack>
 
             <Stack sx={{ pointerEvents: "all" }}>
-              <Link href={ROUTES.PROFILE}>
+              <Link href={!isLoggedIn ? ROUTES.LOGIN : ROUTES.PROFILE}>
                 <IconButton
                   Icon={Icons.User}
                   bgcolor={CSS.colors.white}

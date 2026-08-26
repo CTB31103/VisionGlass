@@ -9,7 +9,7 @@ export type IRulesV2<T> = { [K in keyof T]: [string, string] };
 
 export const RULES = {
   string: "string",
-  email: "string",
+  email: "email",
   numeric: "numeric",
   boolean: "boolean",
   date: "date",
@@ -25,10 +25,10 @@ export const RULES = {
     requiredArray: "required|array",
     requiredEmail: "required|email",
 
-    optionalArray: "present|array",
-    optionalString: "present|string",
-    optionalNumber: "present|numeric",
-    optionalEmail: "present|email",
+    optionalArray: "array",
+    optionalString: "string",
+    optionalNumber: "numeric",
+    optionalEmail: "email",
   },
 
   min: (len: number) => `min:${len}`,

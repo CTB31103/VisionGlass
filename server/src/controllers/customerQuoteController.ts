@@ -1,6 +1,7 @@
-import { ICustomerQuote } from "../interfaces";
-import { CustomerQuote, CustomerQuoteModel, MongoDoc } from "../models";
-import { HashUtils, Log, TryCatch } from "../utils";
+import moment from "moment";
+import { CustomerQuoteStatus, ICustomerQuote } from "../interfaces";
+import { CustomerQuote, CustomerQuoteModel, RootFilterQuery } from "../models";
+import { HashUtils, Log, toMidnight, TryCatch } from "../utils";
 import Validators from "../validators";
 import { RULES, validationV2 } from "../validators/validate";
 import ControllerFunc from "./controllerFunc";
@@ -9,56 +10,131 @@ const getQuotes = ControllerFunc((req, res) =>
   TryCatch(
     async () => {
       Validators.TokenValidators.resLocalsTokenValues(res.locals);
-      const { validData: validQueryData } = validationV2<{ query?: string }>(
-        { query: [RULES.common.optionalString, ""] },
+      const { validData: validQueryData, errorMsg } = validationV2<{
+        query?: string;
+        pageLimit?: string;
+        pageNumber?: string;
+        status?: string;
+        employee?: string;
+        scheduledDate?: string;
+      }>(
+        {
+          query: [RULES.common.optionalString, ""],
+          pageLimit: [RULES.common.optionalString, ""],
+          pageNumber: [RULES.common.optionalString, ""],
+          status: [RULES.common.optionalString, ""],
+          employee: [RULES.common.optionalString, ""],
+          scheduledDate: [RULES.common.optionalString, ""],
+        },
         req.query,
       );
 
-      let databaseQuery: any = {};
+      const pageNumber = validQueryData?.pageNumber
+        ? parseInt(validQueryData.pageNumber)
+        : 1;
+      const pageLimit = validQueryData?.pageLimit
+        ? parseInt(validQueryData.pageLimit)
+        : 4;
+
+      let databaseQuery: RootFilterQuery<ICustomerQuote> = {
+        $and: [],
+      };
 
       if (validQueryData?.query) {
         const regexQuery = { $regex: validQueryData.query, $options: "i" };
-        databaseQuery = {
-          $or: [
+        const queryOr: RootFilterQuery<ICustomerQuote>["$or"] = [
+          {
+            "customer.firstName": regexQuery,
+          },
+          {
+            "customer.lastName": regexQuery,
+          },
+          {
+            "customer.email": regexQuery,
+          },
+          {
+            "customer.phone": regexQuery,
+          },
+          {
+            "car.make": regexQuery,
+          },
+          {
+            "car.model": regexQuery,
+          },
+          {
+            "paymentInfo.insurance.insuranceName": regexQuery,
+          },
+          {
+            "paymentInfo.insurance.policyNumber": regexQuery,
+          },
+        ];
+
+        if (!Number.isNaN(parseInt(validQueryData.query))) {
+          queryOr.push({
+            "car.year": parseInt(validQueryData.query),
+          });
+        }
+
+        databaseQuery.$and!.push({ $or: queryOr });
+      }
+
+      if (validQueryData?.status) {
+        const statusOr: RootFilterQuery<ICustomerQuote> = {
+          status: validQueryData.status as CustomerQuoteStatus,
+        };
+
+        databaseQuery.$and!.push(statusOr);
+      }
+
+      if (validQueryData?.employee) {
+        const employeeOr: RootFilterQuery<ICustomerQuote> = {
+          teamMembers: validQueryData.employee,
+        };
+
+        databaseQuery.$and!.push(employeeOr);
+      }
+
+      if (
+        validQueryData?.scheduledDate &&
+        !Number.isNaN(parseInt(validQueryData.scheduledDate))
+      ) {
+        const midnight = toMidnight(
+          moment(new Date(parseInt(validQueryData.scheduledDate))),
+        );
+        const nextDay = moment(midnight).add(1, "day").toDate();
+        const dateOr: RootFilterQuery<ICustomerQuote> = {
+          $and: [
             {
-              "customer.firstName": regexQuery,
+              "meetingTime.from": { $gte: midnight.getTime() },
             },
             {
-              "customer.lastName": regexQuery,
-            },
-            {
-              "customer.email": regexQuery,
-            },
-            {
-              "customer.phone": regexQuery,
-            },
-            {
-              "car.make": regexQuery,
-            },
-            {
-              "car.model": regexQuery,
-            },
-            {
-              "paymentInfo.insurance.insuranceName": regexQuery,
-            },
-            {
-              "paymentInfo.insurance.policyNumber": regexQuery,
+              "meetingTime.from": { $lte: nextDay.getTime() },
             },
           ],
         };
 
-        if (!Number.isNaN(parseInt(validQueryData.query))) {
-          (databaseQuery["$or"] as unknown[]).push({
-            "car.year": validQueryData.query,
-          });
-        }
+        databaseQuery.$and!.push(dateOr);
       }
 
-      const customerQuotes = (await CustomerQuoteModel.find(databaseQuery)).map(
-        (q) => q.toCustomerQuote(),
+      const customerQuotesPaginationResult = await CustomerQuoteModel.paginate(
+        databaseQuery,
+        {
+          limit: pageLimit,
+          page: pageNumber,
+        },
       );
 
-      res.send({ customerQuotes });
+      const customerQuotes = customerQuotesPaginationResult.docs.map((doc) =>
+        doc.toCustomerQuote(),
+      );
+
+      res.send({
+        customerQuotes,
+        page: customerQuotesPaginationResult.page ?? pageNumber,
+        pageLimit: customerQuotesPaginationResult.limit,
+        total: customerQuotesPaginationResult.totalDocs,
+        totalPages: customerQuotesPaginationResult.totalPages,
+      });
     },
     (err) => {
       res.status(500).json({ error: err });

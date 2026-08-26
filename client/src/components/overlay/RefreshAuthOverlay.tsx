@@ -19,6 +19,7 @@ import {
   useApi,
   useCookieService,
   useNavigationService,
+  useSessionService,
   useTimeoutEffect,
 } from "@/hooks";
 import { useState } from "react";
@@ -46,14 +47,20 @@ export const RefreshAuthOverlay = () => {
   const {
     userRoutes: { loginWithToken, refresh, validAccessKey },
   } = useApi();
-  const { getCookie, clearCookie } = useCookieService();
+  const cookieService = useCookieService();
+  const sessionService = useSessionService();
 
   const isPublicRoute = () =>
     pathname === ROUTES.LOGIN || WHITE_LIST.includes(pathname);
 
+  const clearBothStorages = (key: string) => (
+    cookieService.clearCookie(key),
+    sessionService.clearSessionValue(key)
+  );
+
   const unAuthenticateUser = () => {
-    clearCookie(TOKEN_KEYS.REFRESH_KEY);
-    clearCookie(TOKEN_KEYS.ACCESS_KEY);
+    clearBothStorages(TOKEN_KEYS.REFRESH_KEY);
+    clearBothStorages(TOKEN_KEYS.ACCESS_KEY);
     setAccessKey(null);
     logout();
   };
@@ -64,11 +71,10 @@ export const RefreshAuthOverlay = () => {
 
     if (res.err || !res.data) {
       unAuthenticateUser();
-
       setOpen(false);
 
-      // console.log(`API Refresh Error:`, res.err);
-      // console.log(``);
+      console.log(`Refresh failed:`);
+      console.log(``);
 
       if (isPublicRoute()) return setIsGuest(true);
 
@@ -110,37 +116,36 @@ export const RefreshAuthOverlay = () => {
     let timeoutKey = null;
     const publicRoute = isPublicRoute();
     const isAccessKeyValid = await validAccessKey();
-    const refreshKey = await getCookie(TOKEN_KEYS.REFRESH_KEY);
+    const refreshKey = cookieService.getCookie(TOKEN_KEYS.REFRESH_KEY);
 
     const shouldRefreshWithAccess =
       (accessKey && !isAccessKeyValid) || // Has access key but access key is invalid
       (isAccessKeyValid && user.userId.length === 0); // Has valid access key but no user data
 
-    const shouldRefreshWithRefresh =
-      refreshKey?.value && refreshKey.value?.length > 0 ? true : false;
+    // const shouldRefreshWithRefresh =
+    //   refreshKey && refreshKey.length > 0 ? true : false;
 
     if (publicRoute) {
-      if (shouldRefreshWithAccess) {
-        refreshUserViaAccessToken();
-        return timeoutKey;
-      }
-
-      // Has no acccess key but has refresh key
-      if (shouldRefreshWithRefresh) {
-        refreshKeys();
-        return timeoutKey;
-      }
+      console.log(`Refresh Auth Overlay:`);
+      console.log(`Public Route`);
+      console.log(`shouldRefreshWithAccess: ${shouldRefreshWithAccess}`);
+      // console.log(`shouldRefreshWithRefresh: ${shouldRefreshWithRefresh}`);
+      console.log(`refreshKey: ${refreshKey}`);
+      console.log(`TOKEN_KEYS.REFRESH_KEY: ${TOKEN_KEYS.REFRESH_KEY}`);
+      console.log(``);
+      if (shouldRefreshWithAccess) refreshUserViaAccessToken();
+      else refreshKeys();
+      return timeoutKey;
     }
 
     if (AUTH_LIST.some((authPath) => pathname.startsWith(authPath))) {
-      if (!accessKey || shouldRefreshWithAccess || shouldRefreshWithRefresh) {
-        setOpen(true);
-        timeoutKey = setTimeout(() => {
-          if (!accessKey || shouldRefreshWithAccess)
-            refreshUserViaAccessToken();
-          else refreshKeys();
-        }, 500);
-      }
+      if (isAccessKeyValid && user.userId.length !== 0) return timeoutKey;
+
+      setOpen(true);
+      timeoutKey = setTimeout(() => {
+        if (shouldRefreshWithAccess) refreshUserViaAccessToken();
+        else refreshKeys();
+      }, 500);
     }
 
     return timeoutKey;

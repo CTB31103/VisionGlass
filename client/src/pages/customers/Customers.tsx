@@ -4,6 +4,7 @@ import {
   FullPage,
   NoDataFound,
   PageHeader,
+  PaginationControl,
   SelectInput,
 } from "@/components";
 import {
@@ -12,16 +13,20 @@ import {
   type IUser,
 } from "@/interfaces";
 import { Stack } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { CustomerItem } from "./CustomerItem";
-import { ROUTES } from "@/Constants";
-import { useApi, useTimeoutEffect } from "@/hooks";
 import {
-  capitalize,
-  toNearestHalfHour,
-  toReadableDate,
-  toString,
-} from "@/utils";
+  DEFAULT_PAGINATION_LIMIT_OPTIONS,
+  DEFAULT_PAGINATION_OPTION,
+  ROUTES,
+} from "@/Constants";
+import {
+  useApi,
+  useTimeoutEffect,
+  type IPaginationOptions,
+  type IPaginationResult,
+} from "@/hooks";
+import { capitalize, toNearestHalfHour } from "@/utils";
 
 export const Customers = () => {
   const {
@@ -40,21 +45,45 @@ export const Customers = () => {
   );
 
   const [allQuotes, setAllQuotes] = useState<ICustomerQuote[]>([]);
-  const [filteredQuotes, setFilteredQuotes] = useState<ICustomerQuote[]>([]);
+  const [pageNumber, setPageNumber] = useState(1);
+  const [pageLimit, setPageLimit] = useState(10);
+  const [totalPages, setTotalPages] = useState(0);
+  const [totalQuotes, setTotalQuotes] = useState(0);
 
   const [allEmployees, setAllEmployees] = useState<IUser[]>([]);
 
   const availableStatus = [...CUSTOMER_QUOTE_STATUS];
 
-  const getAllCustomersState = async () => {
+  const setAPISearchResult = ({
+    customerQuotes,
+    page,
+    pageLimit,
+    total,
+    totalPages,
+  }: { customerQuotes: ICustomerQuote[] } & IPaginationResult) => {
+    setAllQuotes(customerQuotes);
+    setPageNumber(page);
+    setPageLimit(pageLimit);
+    setTotalPages(totalPages);
+    setTotalQuotes(total);
+  };
+
+  const getCustomersByPage = async (
+    paginationOptions: IPaginationOptions = DEFAULT_PAGINATION_OPTION,
+  ) => {
     setLoading(true);
 
-    const res = await customerQuoteRoutes.getAllCustomers();
+    const res = await customerQuoteRoutes.getAllCustomers({
+      ...paginationOptions,
+      status: status !== "" ? (status as ICustomerQuote["status"]) : undefined,
+      employee: employee.length > 0 ? employee : undefined,
+      scheduledDate: scheduledDate ? scheduledDate.getTime() : undefined,
+    });
     setLoading(false);
 
     if (res.err || !res.data) return errorSnack(res.err);
 
-    setAllQuotes(res.data.customerQuotes);
+    setAPISearchResult(res.data);
   };
 
   const getAllEmployees = async () => {
@@ -68,50 +97,58 @@ export const Customers = () => {
     setAllEmployees(res.data.users);
   };
 
-  const filterQuotes = () => {
-    setFilteredQuotes(
-      allQuotes.filter((quote) => {
-        if (status.length > 0 && status !== "All") {
-          if (quote.status !== status) return false;
-        }
+  // const filterQuotes = () => {
+  //   setFilteredQuotes(
+  //     allQuotes.filter((quote) => {
+  //       if (status.length > 0 && status !== "All") {
+  //         if (quote.status !== status) return false;
+  //       }
 
-        if (employee.length > 0) {
-          if (!quote.teamMembers.includes(employee)) return false;
-        }
+  //       if (employee.length > 0) {
+  //         if (!quote.teamMembers.includes(employee)) return false;
+  //       }
 
-        if (scheduledDate) {
-          if (
-            !quote.meetingTime ||
-            toReadableDate(new Date(quote.meetingTime.from), false) !==
-              toReadableDate(scheduledDate, false)
-          )
-            return false;
-        }
+  //       if (scheduledDate) {
+  //         if (
+  //           !quote.meetingTime ||
+  //           toReadableDate(new Date(quote.meetingTime.from), false) !==
+  //             toReadableDate(scheduledDate, false)
+  //         )
+  //           return false;
+  //       }
 
-        return true;
-      }),
-    );
-  };
+  //       return true;
+  //     }),
+  //   );
+  // };
+
+  useTimeoutEffect(
+    () => {
+      getAllEmployees();
+    },
+    [],
+    50,
+  );
 
   useTimeoutEffect(
     () => {
       if (search.length !== 0) return;
 
-      getAllCustomersState();
-      getAllEmployees();
+      getCustomersByPage();
     },
-    [search],
+    [search, status, employee, scheduledDate?.getTime()],
+    // []
     50,
   );
 
-  useEffect(() => {
-    filterQuotes();
-  }, [
-    toString(allQuotes.map((q) => q.customerQuoteId)),
-    status,
-    employee,
-    scheduledDate?.getTime(),
-  ]);
+  // useEffect(() => {
+  //   filterQuotes();
+  // }, [
+  //   toString(allQuotes.map((q) => q.customerQuoteId)),
+  //   status,
+  //   employee,
+  //   scheduledDate?.getTime(),
+  // ]);
 
   const onSearch = async () => {
     setLoading(true);
@@ -121,7 +158,7 @@ export const Customers = () => {
 
     if (res.err || !res.data) return errorSnack(res.err);
 
-    setAllQuotes(res.data.customerQuotes);
+    setAPISearchResult(res.data);
   };
 
   return (
@@ -175,17 +212,17 @@ export const Customers = () => {
         </Filters>
 
         <Stack sx={{ width: "100%" }} spacing={4}>
-          {loading || filteredQuotes.length === 0 ? (
+          {loading || allQuotes.length === 0 ? (
             <NoDataFound
               loading={loading}
               message={
-                filteredQuotes.length > 0
+                allQuotes.length > 0
                   ? "No customers found that match selected filters"
                   : undefined
               }
             />
           ) : (
-            filteredQuotes.map((quote, i, arr) => (
+            allQuotes.map((quote, i, arr) => (
               <CustomerItem
                 key={i}
                 href={ROUTES.CUSTOMERS + `/${quote.customerQuoteId}`}
@@ -199,6 +236,30 @@ export const Customers = () => {
             ))
           )}
         </Stack>
+
+        <PaginationControl
+          page={pageNumber}
+          totalPage={totalPages}
+          totalCount={totalQuotes}
+          onNextPage={
+            pageNumber !== totalPages && !loading
+              ? () =>
+                  getCustomersByPage({ pageLimit, pageNumber: pageNumber + 1 })
+              : undefined
+          }
+          onPrevPage={
+            pageNumber > 1 && !loading
+              ? () =>
+                  getCustomersByPage({ pageLimit, pageNumber: pageNumber - 1 })
+              : undefined
+          }
+          pageLimit={{
+            value: pageLimit,
+            set: (newPageLimit) =>
+              getCustomersByPage({ pageLimit: newPageLimit, pageNumber: 1 }),
+            available: DEFAULT_PAGINATION_LIMIT_OPTIONS,
+          }}
+        />
       </Stack>
     </FullPage>
   );

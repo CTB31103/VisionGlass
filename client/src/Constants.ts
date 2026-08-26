@@ -111,3 +111,7 @@ export const LOCATIONS = [
     linkPath: ROUTES.CONTACT,
   },
 ];
+
+export const DEFAULT_PAGINATION_OPTION = { pageNumber: 1, pageLimit: 5 };
+
+export const DEFAULT_PAGINATION_LIMIT_OPTIONS = [5, 10, 20];

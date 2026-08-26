@@ -7,6 +7,7 @@ import {
   DefaultIdVirtual,
   DefaultSchemaOptions,
   Types,
+  QueryFilter,
 } from "mongoose";
 
 export type MongoDoc<T> = Document<
@@ -28,3 +29,5 @@ export type MongoDoc<T> = Document<
   IObjectWithTypegooseFunction & {
     id: string;
   };
+
+export type RootFilterQuery<T> = QueryFilter<T>;

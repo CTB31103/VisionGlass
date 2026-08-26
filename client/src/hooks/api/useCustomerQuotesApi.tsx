@@ -1,21 +1,37 @@
 import queryString from "query-string";
-import { useAuthFetch, useHttpSignal } from "..";
+import {
+  useAuthFetch,
+  useHttpSignal,
+  type IPaginationOptions,
+  type IPaginationResult,
+} from "..";
 import type { ICustomerQuote } from "@/interfaces";
+import { DEFAULT_PAGINATION_OPTION } from "@/Constants";
 
 export const useCustomerQuotesApi = () => {
   const { get, post } = useAuthFetch();
   const { getNewSignal } = useHttpSignal();
 
-  const getAllCustomers = async () => {
-    return await get<{ customerQuotes: ICustomerQuote[] }>(
-      `/api/customer-quotes`,
+  const getAllCustomers = async (
+    queryParams: IPaginationOptions & {
+      status?: ICustomerQuote["status"];
+      employee?: string;
+      scheduledDate?: number;
+    } = DEFAULT_PAGINATION_OPTION,
+  ) => {
+    return await get<{ customerQuotes: ICustomerQuote[] } & IPaginationResult>(
+      `/api/customer-quotes?` + queryString.stringify(queryParams),
       getNewSignal(`getAllCustomers`),
     );
   };
 
-  const search = async (query: string) => {
-    return await get<{ customerQuotes: ICustomerQuote[] }>(
-      `/api/customer-quotes?` + queryString.stringify({ query }),
+  const search = async (
+    query: string,
+    queryParams: IPaginationOptions = DEFAULT_PAGINATION_OPTION,
+  ) => {
+    return await get<{ customerQuotes: ICustomerQuote[] } & IPaginationResult>(
+      `/api/customer-quotes?` +
+        queryString.stringify({ query, ...queryParams }),
       getNewSignal(`getAllCustomers`),
     );
   };

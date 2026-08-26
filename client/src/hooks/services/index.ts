@@ -6,3 +6,4 @@ export * from "./useTextSizingService";
 export * from "./useCreateCustomerQuoteService";
 export * from "./useIsAdminService";
 export * from "./useRouteDateParam";
+export * from "./useSessionService";

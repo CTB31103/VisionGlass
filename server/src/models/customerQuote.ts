@@ -2,8 +2,11 @@ import {
   getModelForClass,
   index,
   modelOptions,
+  mongoose,
+  plugin,
   Prop,
   PropType,
+  ReturnModelType,
 } from "@typegoose/typegoose";
 import {
   CarDamageLocation,
@@ -23,6 +26,8 @@ import {
 } from "../interfaces";
 import { Person } from "./person";
 import { TimeBlock } from "./timeBlock";
+import mongoosePaginate from "mongoose-paginate-v2";
+import { MongoDoc } from "./mongoDoc";
 
 export class CarPlate implements ICarPlate {
   @Prop({ type: String })
@@ -157,6 +162,7 @@ export class PaymentInfo implements IPaymentInfo {
   },
 })
 @index({ customerQuoteId: 1 }, { unique: true })
+@plugin(mongoosePaginate)
 export class CustomerQuote implements ICustomerQuote {
   @Prop({ type: String })
   customerQuoteId: string;
@@ -210,4 +216,9 @@ export class CustomerQuote implements ICustomerQuote {
   }
 }
 
-export const CustomerQuoteModel = getModelForClass(CustomerQuote);
+type CustomerQuoteModel = ReturnModelType<typeof CustomerQuote> &
+  Pick<mongoose.PaginateModel<MongoDoc<CustomerQuote>>, "paginate">;
+
+export const CustomerQuoteModel = getModelForClass(
+  CustomerQuote,
+) as CustomerQuoteModel;

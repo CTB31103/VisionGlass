@@ -170,10 +170,11 @@ const loginUser = ControllerFunc((req, res) =>
           userId: user.userId,
           expiresOn: moment().add(7, "days").toDate().getTime(),
         };
-        await RefreshTokenModel.findOneAndUpdate(
+        const updated = await RefreshTokenModel.findOneAndUpdate(
           { userId: user.userId },
           refreshToken,
         );
+        if (!updated) await RefreshTokenModel.create([refreshToken]);
 
         res.cookie(CONSTANTS.auth.jwt.headerRefreshKey, refreshTokenJWT, {
           httpOnly: true,
@@ -226,7 +227,14 @@ const refreshUserWithRefreshToken = ControllerFunc((req, res) =>
       );
       res.status(200).json({ user: user.toClientUser(), token: accessToken });
     },
-    (err) => res.status(500).json({ error: err }),
+    (err) => {
+      res.clearCookie(CONSTANTS.auth.jwt.headerRefreshKey, {
+        httpOnly: true,
+        secure: CONSTANTS.env.isProduction(), // true over HTTPS
+        sameSite: "strict",
+      });
+      res.status(500).json({ error: err });
+    },
   ),
 );
 

@@ -17,3 +17,4 @@ export * from "./StoneBackground";
 export * from "./LocationsMenu";
 export * from "./PageHeader";
 export * from "./NoDataFound";
+export * from "./PaginationControl";

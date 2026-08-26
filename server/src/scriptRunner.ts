@@ -20,7 +20,7 @@ mongoose
       await createAdmin();
       await createCustomers();
 
-      // await printDB();
+      await printDB();
 
       exit();
     })();
