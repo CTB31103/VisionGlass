@@ -22,6 +22,7 @@ import {
 } from "@/Constants";
 import {
   useApi,
+  usePaginatedState,
   useTimeoutEffect,
   type IPaginationOptions,
   type IPaginationResult,
@@ -44,11 +45,16 @@ export const Customers = () => {
     undefined,
   );
 
-  const [allQuotes, setAllQuotes] = useState<ICustomerQuote[]>([]);
-  const [pageNumber, setPageNumber] = useState(1);
-  const [pageLimit, setPageLimit] = useState(10);
-  const [totalPages, setTotalPages] = useState(0);
-  const [totalQuotes, setTotalQuotes] = useState(0);
+  const {
+    docs: [allQuotes, setAllQuotes],
+    totalDocs: [totalQuotes, setTotalQuotes],
+    pageNumber,
+    setPageNumber,
+    pageLimit,
+    setPageLimit,
+    totalPages,
+    setTotalPages,
+  } = usePaginatedState<ICustomerQuote>();
 
   const [allEmployees, setAllEmployees] = useState<IUser[]>([]);
 

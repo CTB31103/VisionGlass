@@ -8,3 +8,4 @@ export * from "./useScrollDirection";
 export * from "./usePagePosition";
 export * from "./useHoverable";
 export * from "./useSnackbar";
+export * from "./usePaginatedState";

@@ -4,6 +4,8 @@ import { MediaValidators } from "./mediaValidators";
 import { ChatValidators } from "./chatValidators";
 import { CalendarEventValidators } from "./calendarEventValidators";
 import { CustomerQuoteValidators } from "./customerQuoteValidators";
+import { ReviewControllerValidators } from "./reviewValidators";
+import { PaginationValidation } from "./paginationValidation";
 export * from "./validate";
 
 const Validators = {
@@ -13,6 +15,8 @@ const Validators = {
   ChatValidators,
   CalendarEventValidators,
   CustomerQuoteValidators,
+  ReviewControllerValidators,
+  PaginationValidation,
 };
 
 export default Validators;

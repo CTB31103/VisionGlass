@@ -26,9 +26,15 @@ export const RULES = {
     requiredArray: "required|array",
     requiredEmail: "required|email",
 
-    optionalString: "present|string",
-    optionalNumber: "present|numeric",
-    optionalEmail: "present|email",
+    optionalString: "string",
+    optionalNumber: "numeric",
+    optionalEmail: "email",
+
+    presentString: "present|string|min:1",
+    presentBool: "present|boolean",
+    presentNumber: "present|numeric",
+    presentArray: "present|array",
+    presentEmail: "present|email",
   },
 
   min: (len: number) => `min:${len}`,

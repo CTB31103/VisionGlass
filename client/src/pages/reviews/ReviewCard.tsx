@@ -1,8 +1,22 @@
-import { Divider, ReadMore, StarRow, TBody, THeading } from "@/components";
+import {
+  Divider,
+  ReadMore,
+  StarRow,
+  TBody,
+  THeading,
+  type StarRating,
+} from "@/components";
 import { CSS } from "@/Constants";
+import type { IReview } from "@/interfaces";
+import { toLegalDate } from "@/utils";
 import { Stack } from "@mui/material";
 
-export const ReviewCard = () => {
+type ReviewCardProps = {
+  review: IReview;
+  divider?: boolean;
+};
+
+export const ReviewCard = ({ review, divider = false }: ReviewCardProps) => {
   return (
     <Stack spacing={4} sx={{ width: "100%" }}>
       <Stack sx={{ width: "100%" }}>
@@ -15,22 +29,24 @@ export const ReviewCard = () => {
           }}
         >
           <Stack>
-            <THeading>John Doe</THeading>
+            <THeading>
+              {`${review.person.firstName} ${review.person.lastName}`.trim()}
+            </THeading>
             <TBody medium color={CSS.colors.darkGrey}>
-              May 8, 2026 - johndoe@gmail.com - 7163469684
+              {`${toLegalDate(new Date(review.createdOn))}${review.person.email.length > 0 ? ` - ${review.person.email}` : ""}${review.person.phone.length > 0 ? ` - ${review.person.phone}` : ""}`}
             </TBody>
           </Stack>
 
           <Stack direction={"row"} spacing={2} sx={{ alignItems: "center" }}>
-            <THeading>5/5</THeading>
-            <StarRow />
+            <THeading>{review.rating}/5</THeading>
+            <StarRow filled={review.rating as StarRating} />
           </Stack>
         </Stack>
 
-        <ReadMore text="This is a huge read more comment" />
+        <ReadMore text={review.message} />
       </Stack>
 
-      <Divider />
+      {divider && <Divider />}
     </Stack>
   );
 };

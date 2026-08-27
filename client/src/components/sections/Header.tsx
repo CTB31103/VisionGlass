@@ -7,7 +7,7 @@ import {
 } from "@/hooks";
 import { useUserStore } from "@/stores";
 import { Text } from "@chakra-ui/react";
-import { Drawer, Link, Stack } from "@mui/material";
+import { Link, Stack } from "@mui/material";
 import clsx from "clsx";
 import { ActionButton, IconButton, QuoteButton } from "../buttons";
 import { ALL_AUTH_ROUTES, CSS, LOCATIONS, ROUTES } from "@/Constants";
@@ -15,10 +15,11 @@ import { useEffect, useRef, useState } from "react";
 import { HeaderNavLinks, type HeaderNavLinksProps } from "./HeaderNavLinks";
 import { SERVICE_ROUTES, SERVICES } from "@/interfaces";
 import { Icons } from "../icons";
-import { TEXT_SIZES, THeading } from "../typography";
-import { DrawerItem } from "./DrawerItem";
 import { LocationsMenu } from "./LocationsMenu";
 import { useLocation } from "react-router";
+import { HeaderDrawer } from "./HeaderDrawer";
+import { HeaderSmallBar } from "./HeaderSmallBar";
+import { TBody, TEXT_SIZES } from "../typography";
 
 const PUBLIC_ROUTES: HeaderNavLinksProps["links"] = [
   { text: "Home", linkPath: ROUTES.HOME },
@@ -46,6 +47,9 @@ const PUBLIC_ROUTES: HeaderNavLinksProps["links"] = [
 const SMALL_PUBLIC_ROUTES: HeaderNavLinksProps["links"] = [
   ...PUBLIC_ROUTES,
   { text: "Locations", linkPath: ROUTES.CONTACT, menuOptions: LOCATIONS },
+];
+
+const NON_AUTH_ROUTES: HeaderNavLinksProps["links"] = [
   { text: "Login", linkPath: ROUTES.LOGIN },
 ];
 
@@ -258,155 +262,59 @@ export const Header = () => {
       </div>
 
       {sizeAndUnder.md && (
-        <>
-          <Stack
-            direction={"row"}
-            sx={{
-              bgcolor: CSS.colors.blue,
-              paddingBlock: 1,
-              paddingInline: 2,
-              alignItems: "center",
-              justifyContent: "space-between",
-            }}
-          >
+        <Stack sx={{ width: "100%" }}>
+          <HeaderSmallBar onDrawer={() => setOpenDrawer((prev) => !prev)} />
+          <Stack sx={{ width: "100%", alignItems: "center" }}>
             <Stack
+              sx={{
+                p: 1,
+                paddingInline: 2,
+                borderEndStartRadius: 5,
+                borderEndEndRadius: 5,
+                bgcolor: CSS.colors.red,
+
+                borderWidth: 1,
+                borderTopWidth: 0,
+                borderColor: CSS.colors.black,
+
+                cursor: "pointer",
+
+                alignItems: "center",
+              }}
+              onClick={onExpandContractBtn}
               direction={"row"}
-              spacing={2}
-              sx={{ alignItems: "center", color: CSS.colors.white }}
+              spacing={1}
             >
-              <IconButton
-                Icon={Icons.Menu}
-                bgcolor={CSS.colors.white}
-                borderColor={CSS.colors.black}
-                color={CSS.colors.black}
-                onClick={() => setOpenDrawer((prev) => !prev)}
-              />
+              <TBody smaller bold color={CSS.colors.white}>
+                {expanded ? "Shrink" : "Expand"}
+              </TBody>
 
-              <Link href={ROUTES.HOME} color="inherit">
-                <THeading bold>Vision Glass</THeading>
-              </Link>
-            </Stack>
-
-            <Stack direction={"row"} spacing={0}>
-              <Stack ref={anchorRef} onClick={() => setOpen((prev) => !prev)}>
-                <IconButton
-                  Icon={Icons.Location}
-                  borderColor={CSS.colors.white}
+              {expanded ? (
+                <Icons.Contract
+                  sx={{ color: CSS.colors.white, fontSize: TEXT_SIZES.medium1 }}
                 />
-              </Stack>
-              <LocationsMenu
-                origin={{ vertical: "bottom", horizontal: "left" }}
-                anchorEl={anchorRef.current}
-                open={open}
-                onClose={() => setOpen(false)}
-              />
-
-              <Link href={ROUTES.TELEPHONE}>
-                <IconButton Icon={Icons.Phone} borderColor={CSS.colors.white} />
-              </Link>
+              ) : (
+                <Icons.Expand
+                  sx={{ color: CSS.colors.white, fontSize: TEXT_SIZES.medium1 }}
+                />
+              )}
             </Stack>
           </Stack>
 
-          <Drawer open={openDrawer} onClose={() => setOpenDrawer(false)}>
-            <Stack
-              sx={{
-                width: sizeAndUnder.xs ? "100vw" : "75vw",
-                height: "100%",
-
-                bgcolor: CSS.colors.grey,
-
-                position: "relative",
-              }}
-            >
-              <Stack
-                sx={{
-                  width: "100%",
-                  position: "sticky",
-                  top: 0,
-                  left: 0,
-                  zIndex: 2,
-                }}
-              >
-                <Stack
-                  sx={{
-                    width: "100%",
-                    alignItems: "center",
-                    position: "relative",
-
-                    bgcolor: CSS.colors.grey,
-                    borderBottomWidth: 2,
-                    borderColor: CSS.colors.black,
-
-                    paddingInline: 4,
-                    paddingBlock: 2,
-                  }}
-                >
-                  <Link href={ROUTES.HOME} variant="inherit">
-                    <img
-                      src={IMAGES.LogoSmall}
-                      alt="Vision Glass: How Big Is Your Crack?"
-                      style={{
-                        width: 175,
-                      }}
-                    />
-                  </Link>
-
-                  <Stack
-                    direction={"row"}
-                    sx={{
-                      position: "absolute",
-                      height: "100%",
-                      top: 0,
-                      left: 0,
-                      alignItems: "center",
-                    }}
-                  >
-                    <IconButton
-                      onClick={() => setOpenDrawer(false)}
-                      Icon={Icons.Close}
-                      fontSize={TEXT_SIZES.large}
-                      color={CSS.colors.black}
-                    />
-                  </Stack>
-                </Stack>
-              </Stack>
-
-              <Stack
-                sx={{
-                  paddingInline: 4,
-                  pt: 2,
-                  pb: 8,
-                  width: "100%",
-                  height: "100%",
-                  bgcolor: CSS.colors.blue,
-                  overflowY: "scroll",
-                }}
-                spacing={2}
-              >
-                {SMALL_PUBLIC_ROUTES.map((route, i, arr) => (
-                  <DrawerItem
-                    key={i}
-                    {...route}
-                    divider={i !== arr.length - 1 || isLoggedIn}
-                  />
-                ))}
-                {isLoggedIn &&
-                  AUTH_ROUTES.map((route, i, arr) => (
-                    <DrawerItem
-                      key={i}
-                      {...route}
-                      divider={i !== arr.length - 1}
-                    />
-                  ))}
-              </Stack>
-            </Stack>
-          </Drawer>
-        </>
+          <HeaderDrawer
+            openDrawer={openDrawer}
+            onClose={() => setOpenDrawer(false)}
+            routes={SMALL_PUBLIC_ROUTES.concat(
+              isLoggedIn ? AUTH_ROUTES : NON_AUTH_ROUTES,
+            )}
+          />
+        </Stack>
       )}
 
       {!sizeAndUnder.md && (
         <Stack sx={{ width: "100%", position: "relative" }}>
           <HeaderNavLinks links={PUBLIC_ROUTES} />
+
           <Stack
             direction={"row"}
             sx={{

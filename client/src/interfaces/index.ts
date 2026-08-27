@@ -11,3 +11,4 @@ export * from "./timeBlock";
 export * from "./user";
 export * from "./userStatistic";
 export * from "./services";
+export * from "./review";

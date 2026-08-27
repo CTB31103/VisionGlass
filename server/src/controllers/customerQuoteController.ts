@@ -1,27 +1,34 @@
 import moment from "moment";
 import { CustomerQuoteStatus, ICustomerQuote } from "../interfaces";
 import { CustomerQuote, CustomerQuoteModel, RootFilterQuery } from "../models";
-import { HashUtils, Log, toMidnight, TryCatch } from "../utils";
+import {
+  ConditionalUtils,
+  HashUtils,
+  Log,
+  toMidnight,
+  TryCatch,
+} from "../utils";
 import Validators from "../validators";
 import { RULES, validationV2 } from "../validators/validate";
 import ControllerFunc from "./controllerFunc";
+import CONSTANTS from "../constants";
 
 const getQuotes = ControllerFunc((req, res) =>
   TryCatch(
     async () => {
       Validators.TokenValidators.resLocalsTokenValues(res.locals);
+      const { validData: validPagination, errorMsg: paginationErr } =
+        Validators.PaginationValidation.paginatedQuery(req.query);
       const { validData: validQueryData, errorMsg } = validationV2<{
         query?: string;
-        pageLimit?: string;
-        pageNumber?: string;
+
         status?: string;
         employee?: string;
         scheduledDate?: string;
       }>(
         {
           query: [RULES.common.optionalString, ""],
-          pageLimit: [RULES.common.optionalString, ""],
-          pageNumber: [RULES.common.optionalString, ""],
+
           status: [RULES.common.optionalString, ""],
           employee: [RULES.common.optionalString, ""],
           scheduledDate: [RULES.common.optionalString, ""],
@@ -29,12 +36,12 @@ const getQuotes = ControllerFunc((req, res) =>
         req.query,
       );
 
-      const pageNumber = validQueryData?.pageNumber
-        ? parseInt(validQueryData.pageNumber)
-        : 1;
-      const pageLimit = validQueryData?.pageLimit
-        ? parseInt(validQueryData.pageLimit)
-        : 4;
+      const pageNumber = ConditionalUtils.getPageNumber(
+        validPagination?.pageNumber,
+      );
+      const pageLimit = ConditionalUtils.getPageLimit(
+        validPagination?.pageLimit,
+      );
 
       let databaseQuery: RootFilterQuery<ICustomerQuote> = {
         $and: [],

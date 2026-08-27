@@ -1,6 +1,12 @@
 import mongoose from "mongoose";
 import CONSTANTS from "./constants";
-import { clearDB, createAdmin, createCustomers, printDB } from "./scripts";
+import {
+  clearDB,
+  createAdmin,
+  createCustomers,
+  createReviews,
+  printDB,
+} from "./scripts";
 import { Log } from "./utils";
 import { exit } from "node:process";
 
@@ -19,8 +25,9 @@ mongoose
       await clearDB();
       await createAdmin();
       await createCustomers();
+      await createReviews();
 
-      await printDB();
+      await printDB(false);
 
       exit();
     })();

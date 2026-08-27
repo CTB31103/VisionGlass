@@ -32,6 +32,13 @@ const CONSTANTS = {
       path: "/uploads",
     },
   },
+
+  pagination: {
+    default: {
+      limit: 5,
+      page: 1,
+    },
+  },
 };
 
 export default CONSTANTS;

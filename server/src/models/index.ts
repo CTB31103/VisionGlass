@@ -11,3 +11,4 @@ export * from "./timeBlock";
 export * from "./user";
 export * from "./userStatistic";
 export * from "./mongoDoc";
+export * from "./review";

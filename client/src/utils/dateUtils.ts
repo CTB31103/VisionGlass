@@ -10,6 +10,9 @@ export const toReadableDate = (
   includeTime: boolean = true,
 ) => moment(date).format(`MM/DD/YY${includeTime ? " hh:mm a" : ""}`);
 
+export const toLegalDate = (date: MDate = new Date()) =>
+  moment(date).format("MMM D, YYYY");
+
 export const toReadableDateYY = (
   date: MDate = new Date(),
   includeTime: boolean = true,
