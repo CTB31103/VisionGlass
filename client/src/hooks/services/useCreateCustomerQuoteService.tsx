@@ -251,8 +251,11 @@ export const useCreateCustomerQuoteService = () => {
 
   const isValid = (
     data: Omit<
-      Omit<Omit<ICustomerQuote, "customerQuoteId">, "teamMembers">,
-      "status"
+      Omit<
+        Omit<Omit<ICustomerQuote, "customerQuoteId">, "teamMembers">,
+        "status"
+      >,
+      "createdOn"
     >,
   ) => {
     const validObjects: ICombinedValidationResponse<unknown>[] = [];
@@ -292,8 +295,11 @@ export const useCreateCustomerQuoteService = () => {
 
   const createData = () => {
     const data: Omit<
-      Omit<Omit<ICustomerQuote, "customerQuoteId">, "teamMembers">,
-      "status"
+      Omit<
+        Omit<Omit<ICustomerQuote, "customerQuoteId">, "teamMembers">,
+        "status"
+      >,
+      "createdOn"
     > = {
       customer: {
         firstName,

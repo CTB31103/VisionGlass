@@ -6,6 +6,7 @@ export type TProps = {
   bungeeFill?: boolean;
   bungee?: boolean;
   bold?: boolean;
+  opacity?: number;
 
   color?: string;
 

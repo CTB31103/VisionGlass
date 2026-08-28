@@ -124,9 +124,13 @@ const LOCATIONS = [
   I am going to give you a typescript type used to format data; I want you to generate an array of 10 objects with values that fit their keys. Your generation should be in JSON suitable to be copied and pasted into a code editor. This is the typescript type:
   
   {
-  policyNumber: string;
-  insuranceCompany: string;
-}
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone: string;
+  }
+
+  Use names that are more real sounding than typical dummy values, also make all phone numbers be from the buffalo area or florida area
 */
 
 const PEOPLE = [

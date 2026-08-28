@@ -14,9 +14,11 @@ export const useCustomerQuotesApi = () => {
 
   const getAllCustomers = async (
     queryParams: IPaginationOptions & {
-      status?: ICustomerQuote["status"];
+      status?: ICustomerQuote["status"][];
       employee?: string;
       scheduledDate?: number;
+      createdAfter?: number;
+      createdBefore?: number;
     } = DEFAULT_PAGINATION_OPTION,
   ) => {
     return await get<{ customerQuotes: ICustomerQuote[] } & IPaginationResult>(
@@ -38,8 +40,11 @@ export const useCustomerQuotesApi = () => {
 
   const createCustomerQuoteService = async (
     data: Omit<
-      Omit<Omit<ICustomerQuote, "customerQuoteId">, "teamMembers">,
-      "status"
+      Omit<
+        Omit<Omit<ICustomerQuote, "customerQuoteId">, "teamMembers">,
+        "status"
+      >,
+      "createdOn"
     >,
   ) => {
     return await post<{ customerQuote: ICustomerQuote }>(

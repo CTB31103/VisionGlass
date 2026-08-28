@@ -27,6 +27,12 @@ export const useUserApi = () => {
     );
   };
 
+  const getUser = async (userId: string) => {
+    return await get<{ users: [IUser] }>(
+      `/api/users?${queryString.stringify({ userId })}`,
+    );
+  };
+
   const searchUsers = async (data: { query: string }) => {
     return await get<{ users: IUser[] }>(
       `/api/users/search?${queryString.stringify(data)}`,
@@ -70,6 +76,7 @@ export const useUserApi = () => {
     getAllUsers,
     searchUsers,
     createUser,
+    getUser,
     validAccessKey,
 
     login,

@@ -22,14 +22,19 @@ const getQuotes = ControllerFunc((req, res) =>
       const { validData: validQueryData, errorMsg } = validationV2<{
         query?: string;
 
-        status?: string;
+        status?: string[] | string;
         employee?: string;
         scheduledDate?: string;
       }>(
         {
           query: [RULES.common.optionalString, ""],
 
-          status: [RULES.common.optionalString, ""],
+          status: [
+            Array.isArray(req.query["status"])
+              ? RULES.common.optionalArray
+              : RULES.common.optionalString,
+            "",
+          ],
           employee: [RULES.common.optionalString, ""],
           scheduledDate: [RULES.common.optionalString, ""],
         },
@@ -87,10 +92,20 @@ const getQuotes = ControllerFunc((req, res) =>
 
       if (validQueryData?.status) {
         const statusOr: RootFilterQuery<ICustomerQuote> = {
-          status: validQueryData.status as CustomerQuoteStatus,
+          $or: (typeof validQueryData.status === "string"
+            ? [validQueryData.status]
+            : validQueryData.status
+          ).map((status) => ({
+            status: status as CustomerQuoteStatus,
+          })),
         };
-
         databaseQuery.$and!.push(statusOr);
+
+        // validQueryData.status.forEach((status) =>
+        //   databaseQuery.$and!.push({
+        //     status: status as CustomerQuoteStatus,
+        //   }),
+        // );
       }
 
       if (validQueryData?.employee) {
@@ -123,6 +138,10 @@ const getQuotes = ControllerFunc((req, res) =>
         databaseQuery.$and!.push(dateOr);
       }
 
+      // Log.colors.yellow(`Query:`);
+      // Log.colors.yellow(Log.json(databaseQuery));
+      // Log.colors.yellow(``);
+
       const customerQuotesPaginationResult = await CustomerQuoteModel.paginate(
         databaseQuery,
         {
@@ -134,6 +153,10 @@ const getQuotes = ControllerFunc((req, res) =>
       const customerQuotes = customerQuotesPaginationResult.docs.map((doc) =>
         doc.toCustomerQuote(),
       );
+
+      // Log.colors.purple(`Result ${customerQuotes.length}:`);
+      // Log.colors.purple(Log.json(customerQuotes));
+      // Log.colors.purple(``);
 
       res.send({
         customerQuotes,

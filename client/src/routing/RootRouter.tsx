@@ -48,6 +48,7 @@ export const RootRouter = () => {
           <Route path={ROUTES.LOGIN} element={<Login />} />
 
           {/* Auth */}
+          <Route path={ROUTES.PROFILE} element={<Profile />} />
           <Route path={ROUTES.PROFILE + "/:userId"} element={<Profile />} />
 
           <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />

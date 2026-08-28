@@ -13,6 +13,7 @@ export const THeading = ({
   innerHtml,
   bungeeFill,
   trunk,
+  opacity,
 }: PropsWithChildren<TProps & { thin?: boolean; large?: boolean }>) => {
   const TextSize = useTextSizingService();
   return (
@@ -37,6 +38,7 @@ export const THeading = ({
             }
           : undefined
       }
+      opacity={opacity}
     >
       {children}
     </Text>

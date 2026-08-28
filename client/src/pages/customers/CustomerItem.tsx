@@ -1,8 +1,12 @@
-import { Divider, Icons, MyChip, TBody, THeading } from "@/components";
+import {
+  Divider,
+  Icons,
+  MyChip,
+  QuoteStatusCircle,
+  THeading,
+} from "@/components";
 import { CSS } from "@/Constants";
-import { useDimensions } from "@/hooks";
 import { UserType, type CustomerQuoteStatus, type IUser } from "@/interfaces";
-import { capitalize } from "@/utils";
 import { Link, Stack } from "@mui/material";
 
 type CustomerItemProps = {
@@ -22,13 +26,6 @@ export const CustomerItem = ({
   divider,
   onClick,
 }: CustomerItemProps) => {
-  const [circleRef, circleDims] = useDimensions();
-  const circleColor =
-    status === "new"
-      ? CSS.colors.red
-      : status === "done"
-        ? CSS.colors.blue
-        : CSS.colors.darkGrey;
   return (
     <Stack sx={{ width: "100%" }} spacing={4}>
       <Link
@@ -53,20 +50,7 @@ export const CustomerItem = ({
         >
           <Stack spacing={1}>
             <THeading bold>{title}</THeading>
-            <Stack direction={"row"} sx={{ alignItems: "center" }} spacing={1}>
-              <Stack
-                ref={circleRef}
-                sx={{
-                  width: circleDims.height,
-                  height: "50%",
-                  borderRadius: 15,
-                  bgcolor: circleColor,
-                }}
-              />
-              <TBody bold medium color={circleColor}>
-                {capitalize(status.replaceAll("_", " "))}
-              </TBody>
-            </Stack>
+            <QuoteStatusCircle status={status} />
             {employees && (
               <Stack direction={"row"}>
                 {employees.map((employee, i) => (

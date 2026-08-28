@@ -5,6 +5,7 @@ import {
   createAdmin,
   createCustomers,
   createReviews,
+  createTeam,
   printDB,
 } from "./scripts";
 import { Log } from "./utils";
@@ -26,6 +27,7 @@ mongoose
       await createAdmin();
       await createCustomers();
       await createReviews();
+      await createTeam();
 
       await printDB(false);
 

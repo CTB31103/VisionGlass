@@ -3,3 +3,4 @@ export * from "./createAdmin";
 export * from "./printDB";
 export * from "./createCustomers";
 export * from "./createReviews";
+export * from "./createTeam";

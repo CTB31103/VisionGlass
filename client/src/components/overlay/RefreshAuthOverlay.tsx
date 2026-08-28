@@ -13,7 +13,7 @@ import {
 import clsx from "clsx";
 import { ActionButton } from "../buttons";
 import { useAnimate, motion, AnimatePresence } from "motion/react";
-import { CSS, ROUTES, TOKEN_KEYS } from "@/Constants";
+import { ALL_AUTH_ROUTES, CSS, ROUTES, TOKEN_KEYS } from "@/Constants";
 import { useLocation } from "react-router";
 import {
   useApi,
@@ -26,12 +26,12 @@ import { useState } from "react";
 
 const WHITE_LIST = [ROUTES.HOME, ROUTES.ABOUT, ROUTES.CONTACT, ROUTES.QUOTES];
 
-const AUTH_LIST = [
-  ROUTES.DASHBOARD,
-  ROUTES.CUSTOMERS,
-  ROUTES.TEAM,
-  ROUTES.REVIEWS,
-];
+// const AUTH_LIST = [
+//   ROUTES.DASHBOARD,
+//   ROUTES.CUSTOMERS,
+//   ROUTES.TEAM,
+//   ROUTES.REVIEWS,
+// ];
 
 export const RefreshAuthOverlay = () => {
   const { toHome } = useNavigationService();
@@ -138,7 +138,7 @@ export const RefreshAuthOverlay = () => {
       return timeoutKey;
     }
 
-    if (AUTH_LIST.some((authPath) => pathname.startsWith(authPath))) {
+    if (ALL_AUTH_ROUTES.some((authPath) => pathname.startsWith(authPath))) {
       if (isAccessKeyValid && user.userId.length !== 0) return timeoutKey;
 
       setOpen(true);

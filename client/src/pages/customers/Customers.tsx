@@ -2,6 +2,7 @@ import {
   DateTextInput,
   Filters,
   FullPage,
+  MultiSelectInput,
   NoDataFound,
   PageHeader,
   PaginationControl,
@@ -27,9 +28,12 @@ import {
   type IPaginationOptions,
   type IPaginationResult,
 } from "@/hooks";
-import { capitalize, toNearestHalfHour } from "@/utils";
+import { capitalize, toNearestHalfHour, toString } from "@/utils";
+import { useLocation } from "react-router";
+import queryString from "query-string";
 
 export const Customers = () => {
+  const location = useLocation();
   const {
     snackbar: [_, errorSnack],
     customerQuoteRoutes,
@@ -39,7 +43,7 @@ export const Customers = () => {
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
 
-  const [status, setStatus] = useState("");
+  const [status, setStatus] = useState([""]);
   const [employee, setEmployee] = useState("");
   const [scheduledDate, setScheduledDate] = useState<Date | undefined>(
     undefined,
@@ -81,7 +85,10 @@ export const Customers = () => {
 
     const res = await customerQuoteRoutes.getAllCustomers({
       ...paginationOptions,
-      status: status !== "" ? (status as ICustomerQuote["status"]) : undefined,
+      status:
+        status.length >= 1 && status[0] !== ""
+          ? (status as ICustomerQuote["status"][])
+          : undefined,
       employee: employee.length > 0 ? employee : undefined,
       scheduledDate: scheduledDate ? scheduledDate.getTime() : undefined,
     });
@@ -103,31 +110,6 @@ export const Customers = () => {
     setAllEmployees(res.data.users);
   };
 
-  // const filterQuotes = () => {
-  //   setFilteredQuotes(
-  //     allQuotes.filter((quote) => {
-  //       if (status.length > 0 && status !== "All") {
-  //         if (quote.status !== status) return false;
-  //       }
-
-  //       if (employee.length > 0) {
-  //         if (!quote.teamMembers.includes(employee)) return false;
-  //       }
-
-  //       if (scheduledDate) {
-  //         if (
-  //           !quote.meetingTime ||
-  //           toReadableDate(new Date(quote.meetingTime.from), false) !==
-  //             toReadableDate(scheduledDate, false)
-  //         )
-  //           return false;
-  //       }
-
-  //       return true;
-  //     }),
-  //   );
-  // };
-
   useTimeoutEffect(
     () => {
       getAllEmployees();
@@ -138,23 +120,41 @@ export const Customers = () => {
 
   useTimeoutEffect(
     () => {
+      const searchParams = queryString.parse(location.search);
+
+      if (searchParams["status"] !== undefined) {
+        const pStatus = searchParams["status"];
+        if (Array.isArray(pStatus)) {
+          setStatus(pStatus as string[]);
+        } else if (typeof pStatus === "string") {
+          setStatus([pStatus]);
+        }
+      }
+
+      if (
+        typeof searchParams["employee"] === "string" &&
+        (searchParams["employee"] as string).length > 0
+      ) {
+        const pEmployee = searchParams["employee"];
+        setEmployee(pEmployee);
+      }
+
+      if (searchParams) console.log(toString(searchParams));
+      console.log(``);
+    },
+    [toString(location)],
+    50,
+  );
+
+  useTimeoutEffect(
+    () => {
       if (search.length !== 0) return;
 
       getCustomersByPage();
     },
     [search, status, employee, scheduledDate?.getTime()],
-    // []
     50,
   );
-
-  // useEffect(() => {
-  //   filterQuotes();
-  // }, [
-  //   toString(allQuotes.map((q) => q.customerQuoteId)),
-  //   status,
-  //   employee,
-  //   scheduledDate?.getTime(),
-  // ]);
 
   const onSearch = async () => {
     setLoading(true);
@@ -182,10 +182,16 @@ export const Customers = () => {
           btnText="New Customer"
           btnLink={ROUTES.CUSTOMERS_ADD}
         >
-          <SelectInput
+          <MultiSelectInput
             label="Status:"
-            selectedItem={status}
-            onSelect={setStatus}
+            selectedItems={status}
+            onSelect={(val) =>
+              val.includes("") && val[val.length - 1] === ""
+                ? setStatus([""])
+                : val.length > 1 && val[0] === ""
+                  ? setStatus(val.filter((v) => v.length !== 0))
+                  : setStatus(val)
+            }
             items={[{ value: "", text: "All" }].concat(
               availableStatus.map((value) => ({
                 value,
@@ -197,17 +203,21 @@ export const Customers = () => {
               })),
             )}
           />
-          <SelectInput
-            label="Employee:"
-            selectedItem={employee}
-            onSelect={setEmployee}
-            items={[{ value: "", text: "Any" }].concat(
-              allEmployees.map((employee) => ({
-                value: employee.userId,
-                text: `${employee.info.firstName} ${employee.info.lastName}`,
-              })),
-            )}
-          />
+          {allEmployees.length > 0 ? (
+            <SelectInput
+              label="Employee:"
+              selectedItem={employee}
+              onSelect={setEmployee}
+              items={[{ value: "", text: "Any" }].concat(
+                allEmployees.map((employee) => ({
+                  value: employee.userId,
+                  text: `${employee.info.firstName} ${employee.info.lastName}`,
+                })),
+              )}
+            />
+          ) : (
+            <Stack sx={{ flex: 1 }} />
+          )}
           <DateTextInput
             label="Scheduled Date:"
             date={scheduledDate}

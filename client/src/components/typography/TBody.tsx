@@ -21,7 +21,7 @@ export const TBody = ({
   bold,
   innerHtml,
   smaller,
-
+  opacity,
   color,
   trunk,
 }: TBodyProps) => {
@@ -51,6 +51,7 @@ export const TBody = ({
           : undefined
       }
       color={color}
+      opacity={opacity}
       textWrap={"wrap"}
     >
       {children}

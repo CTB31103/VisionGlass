@@ -46,6 +46,7 @@ export interface ICustomerQuote {
   teamMembers: string[];
   status: CustomerQuoteStatus;
   customer: IPerson;
+  createdOn: number;
   car?: ICar;
   damage?: ICarDamage;
   address?: string;
