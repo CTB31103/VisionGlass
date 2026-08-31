@@ -2,6 +2,7 @@ import { Route, Routes } from "react-router";
 import {
   About,
   Contact,
+  Customer,
   CustomerAdd,
   Customers,
   Dashboard,
@@ -54,8 +55,12 @@ export const RootRouter = () => {
           <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
           <Route path={ROUTES.DASHBOARD_ADD} element={<DashboardAdd />} />
 
-          <Route path={ROUTES.CUSTOMERS} element={<Customers />} />
           <Route path={ROUTES.CUSTOMERS_ADD} element={<CustomerAdd />} />
+          <Route path={ROUTES.CUSTOMERS} element={<Customers />} />
+          <Route
+            path={ROUTES.CUSTOMERS + "/:customerQuoteId"}
+            element={<Customer />}
+          />
 
           <Route path={ROUTES.TEAM} element={<Team />} />
           <Route path={ROUTES.TEAM_ADD} element={<TeamAdd />} />

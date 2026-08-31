@@ -28,6 +28,7 @@ import { Person } from "./person";
 import { TimeBlock } from "./timeBlock";
 import mongoosePaginate from "mongoose-paginate-v2";
 import { MongoDoc } from "./mongoDoc";
+import { produce } from "immer";
 
 export class CarPlate implements ICarPlate {
   @Prop({ type: String })
@@ -184,6 +185,10 @@ export class CustomerQuote implements ICustomerQuote {
   paymentInfo?: IPaymentInfo;
   @Prop({ type: CallbackInfo, _id: false })
   callbackTime?: ICallbackInfo;
+  @Prop({ type: Number, _id: false })
+  createdOn: number;
+  @Prop({ type: String, _id: false })
+  notes: string;
 
   constructor({
     customerQuoteId,
@@ -196,6 +201,8 @@ export class CustomerQuote implements ICustomerQuote {
     meetingTime,
     teamMembers,
     paymentInfo,
+    notes,
+    createdOn,
   }: ICustomerQuote) {
     this.customerQuoteId = customerQuoteId;
     this.status = status;
@@ -203,12 +210,14 @@ export class CustomerQuote implements ICustomerQuote {
     this.car = car ? new Car(car) : undefined;
     this.damage = damage ? new CarDamage(damage) : undefined;
     this.address = address;
-    this.teamMembers = teamMembers;
+    this.teamMembers = produce(teamMembers, (_draft) => {});
     this.paymentInfo = paymentInfo ? new PaymentInfo(paymentInfo) : undefined;
     this.callbackTime = callbackTime
       ? new CallbackInfo(callbackTime)
       : undefined;
     this.meetingTime = meetingTime ? new TimeBlock(meetingTime) : undefined;
+    this.notes = notes;
+    this.createdOn = createdOn;
   }
 
   toCustomerQuote() {

@@ -19,12 +19,14 @@ export const createCustomers = async () => {
     const isInsured = coinFlip();
     const callbackAsap = coinFlip();
     const gaveVin = coinFlip();
+    const quoted = coinFlip();
 
     const sideDamage = coinFlip();
 
     const fullCoverage = i % 2 === 0;
     const price = randBtwn(100, 300);
-    const taxed = price * (100 + randBtwn(7, 13));
+    const taxed = price * (1 + randBtwn(7, 13) / 100);
+    const shouldHavePrice = isScheduled || isInsured || quoted;
 
     const insurance = INSURANCE[i];
     const from = moment(toNearestHalfHour(new Date()))
@@ -45,6 +47,14 @@ export const createCustomers = async () => {
       .seconds(0)
       .milliseconds(0)
       .toDate();
+    const createdOn = moment()
+      .subtract(randBtwn(0, 5), "days")
+      .hours(randBtwn(7, 19))
+      .minutes(0)
+      .seconds(0)
+      .milliseconds(0)
+      .toDate()
+      .getTime();
 
     const customer: ICustomerQuote = {
       customerQuoteId: HashUtils.uniqueId(),
@@ -53,7 +63,9 @@ export const createCustomers = async () => {
         ? "scheduled"
         : isInsured
           ? "insurance_validated"
-          : "new",
+          : quoted
+            ? "quoted"
+            : "new",
       customer: PEOPLE[i],
 
       car: {
@@ -69,21 +81,23 @@ export const createCustomers = async () => {
         rows: sideDamage ? (coinFlip() ? [3] : [1, 2]) : undefined,
       },
 
-      paymentInfo: {
-        serviceAmount: price,
-        serviceAmountAfterTax: taxed,
-        type: isInsured ? "insurance" : "onsite",
-        insurance: isInsured
-          ? {
-              insuranceName: insurance.insuranceCompany,
-              policyNumber: insurance.policyNumber,
-              coverageAmount: fullCoverage
-                ? taxed
-                : randBtwn(price * 0.1, price * 0.75),
-              fullCoverage,
-            }
-          : undefined,
-      },
+      paymentInfo: shouldHavePrice
+        ? {
+            serviceAmount: price,
+            serviceAmountAfterTax: taxed,
+            type: isInsured ? "insurance" : "onsite",
+            insurance: isInsured
+              ? {
+                  insuranceName: insurance.insuranceCompany,
+                  policyNumber: insurance.policyNumber,
+                  coverageAmount: fullCoverage
+                    ? taxed
+                    : randBtwn(price * 0.1, price * 0.75),
+                  fullCoverage,
+                }
+              : undefined,
+          }
+        : undefined,
 
       address: isScheduled ? ADDRESSES[i] : undefined,
       meetingTime: isScheduled
@@ -106,6 +120,8 @@ export const createCustomers = async () => {
                   },
             }
           : undefined,
+      createdOn,
+      notes: "",
     };
 
     customers.push(customer);

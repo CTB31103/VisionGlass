@@ -19,3 +19,4 @@ export * from "./PageHeader";
 export * from "./NoDataFound";
 export * from "./PaginationControl";
 export * from "./QuoteStatusCircle";
+export * from "./LoadingPage";

@@ -18,3 +18,4 @@ export * from "./dashboardAdd";
 export * from "./customerAdd";
 export * from "./teamAdd";
 export * from "./profile";
+export * from "./customer";

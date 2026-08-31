@@ -19,7 +19,7 @@ UserAuthRoutes.use(Middleware.accessKeyOnly);
 
 UserAuthRoutes.get("/", Controllers.UserController.getUsers);
 
-UserRoutes.post("/", Controllers.UserController.createUser);
+UserAuthRoutes.post("/", Controllers.UserController.createUser);
 
 UserAuthRoutes.put("/", Controllers.UserController.editUser);
 
@@ -33,3 +33,5 @@ UserAuthRoutes.get(
   "/login",
   Controllers.UserController.loginUserWithAccessToken,
 );
+
+UserAuthRoutes.get("/:userId", Controllers.UserController.getUser);

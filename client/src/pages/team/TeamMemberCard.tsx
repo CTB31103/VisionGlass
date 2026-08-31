@@ -3,12 +3,12 @@ import {
   EditDeleteButtons,
   Icons,
   MyChip,
+  SmallSquareUser,
   TBody,
-  TEXT_SIZES,
   THeading,
 } from "@/components";
 import { CSS, ROUTES } from "@/Constants";
-import { useDimensions, useIsAdminService } from "@/hooks";
+import { useIsAdminService } from "@/hooks";
 import { UserType, type IUser } from "@/interfaces";
 import { Link, Stack } from "@mui/material";
 import { capitalize } from "lodash";
@@ -19,7 +19,6 @@ type TeamMemberCardProps = {
 };
 
 export const TeamMemberCard = ({ user, onClick }: TeamMemberCardProps) => {
-  const [squareRef, squareDims] = useDimensions();
   const isAdmin = useIsAdminService();
 
   const userTypeIcon =
@@ -48,24 +47,7 @@ export const TeamMemberCard = ({ user, onClick }: TeamMemberCardProps) => {
           onClick={onClick}
           spacing={2}
         >
-          <Stack
-            ref={squareRef}
-            sx={{
-              width: "15%",
-              height: squareDims.width,
-
-              alignItems: "center",
-              justifyContent: "center",
-
-              borderWidth: 1,
-              borderColor: CSS.colors.black,
-              borderRadius: 5,
-            }}
-          >
-            <Icons.User
-              sx={{ fontSize: TEXT_SIZES.largest, color: CSS.colors.black }}
-            />
-          </Stack>
+          <SmallSquareUser />
 
           <Stack sx={{ width: "100%", height: "100%" }} spacing={2}>
             <Stack sx={{ width: "100%" }} direction={"row"}>

@@ -35,6 +35,8 @@ import SellIcon from "@mui/icons-material/Sell";
 import ConstructionIcon from "@mui/icons-material/Construction";
 
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import PersonIcon from "@mui/icons-material/Person";
+import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 
 export const Icons = {
   Close: CloseIcon,
@@ -73,6 +75,9 @@ export const Icons = {
   Tools: ConstructionIcon,
 
   User: AccountCircleIcon,
+  Person: PersonIcon,
+
+  Car: DirectionsCarIcon,
 };
 
 export type IconType = OverridableComponent<SvgIconTypeMap<object, "svg">> & {

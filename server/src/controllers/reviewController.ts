@@ -61,11 +61,11 @@ const getReviews = ControllerFunc((req, res) =>
           case "Rating - Low/High":
             sort = { rating: 1 };
             break;
-          case "Earliest First":
-            sort = { createdOn: 1 };
-            break;
-          case "Most Recent First":
+          case "Most Recent":
             sort = { createdOn: -1 };
+            break;
+          case "Date Created":
+            sort = { createdOn: 1 };
             break;
           default:
             break;

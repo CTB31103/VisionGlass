@@ -65,6 +65,7 @@ export const ROUTES = {
 
   CUSTOMERS: "/customers",
   CUSTOMERS_ADD: "/customers/add",
+  CUSTOMERS_EDIT: "/customers/edit",
 
   TEAM: "/team",
   TEAM_ADD: "/team/admin-add",

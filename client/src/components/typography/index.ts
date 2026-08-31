@@ -5,3 +5,4 @@ export * from "./NumberedItem";
 export * from "./CheckmarkItem";
 export * from "./ReadMore";
 export * from "./MyChip";
+export * from "./LabledRowText";

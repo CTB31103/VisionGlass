@@ -9,7 +9,7 @@ import type { ICustomerQuote } from "@/interfaces";
 import { DEFAULT_PAGINATION_OPTION } from "@/Constants";
 
 export const useCustomerQuotesApi = () => {
-  const { get, post } = useAuthFetch();
+  const { get, post, put } = useAuthFetch();
   const { getNewSignal } = useHttpSignal();
 
   const getAllCustomers = async (
@@ -24,6 +24,13 @@ export const useCustomerQuotesApi = () => {
     return await get<{ customerQuotes: ICustomerQuote[] } & IPaginationResult>(
       `/api/customer-quotes?` + queryString.stringify(queryParams),
       getNewSignal(`getAllCustomers`),
+    );
+  };
+
+  const getCustomer = async (customerQuoteId: string) => {
+    return await get<{ customer: ICustomerQuote }>(
+      `/api/customer-quotes/${customerQuoteId}`,
+      getNewSignal(`getCustomer`),
     );
   };
 
@@ -54,9 +61,46 @@ export const useCustomerQuotesApi = () => {
     );
   };
 
+  const editStatus = async (
+    customer: ICustomerQuote,
+    status: ICustomerQuote["status"],
+  ) => {
+    return await put<{ customer: ICustomerQuote }>(
+      `/api/customer-quotes/status/${customer.customerQuoteId}`,
+      { ...customer, status },
+      { signal: getNewSignal(`editStatus`) },
+    );
+  };
+
+  const editNotes = async (customer: ICustomerQuote, notes: string) => {
+    return await put<{ customer: ICustomerQuote }>(
+      `/api/customer-quotes/${customer.customerQuoteId}`,
+      { ...customer, notes },
+    );
+  };
+
+  const edit = async (customer: ICustomerQuote) => {
+    return await put<{ customer: ICustomerQuote }>(
+      `/api/customer-quotes/${customer.customerQuoteId}`,
+      customer,
+    );
+  };
+
+  const toggleTeamMember = async (customerQuoteId: string, userId: string) => {
+    return await put<{ customer: ICustomerQuote }>(
+      `/api/customer-quotes/team/${customerQuoteId}`,
+      { userId, customerQuoteId },
+    );
+  };
+
   return {
     getAllCustomers,
+    getCustomer,
+    editStatus,
+    editNotes,
     search,
     createCustomerQuoteService,
+    edit,
+    toggleTeamMember,
   };
 };

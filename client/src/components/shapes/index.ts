@@ -6,3 +6,6 @@ export * from "./CurveText";
 export * from "./BackgroundShape";
 export * from "./SlantedImageShape";
 export * from "./SquareImageShape";
+export * from "./LargeUserImage";
+export * from "./LargeSquareIcon";
+export * from "./SmallSquareUser";

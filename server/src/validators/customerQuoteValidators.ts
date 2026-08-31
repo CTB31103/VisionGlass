@@ -212,6 +212,11 @@ const create = (body: any) => {
     meetingTime = validMeetingTime;
   }
 
+  const { validData: validNotes, errorMsg: notesErr } = validationV2<{
+    notes: string;
+  }>({ notes: [RULES.common.presentString, ""] }, body);
+  if (notesErr || !validNotes) throw new Error(notesErr);
+
   return {
     customer,
     carInfo,
@@ -220,9 +225,66 @@ const create = (body: any) => {
     paymentInfo,
     callbackTime,
     meetingTime,
+    ...validNotes,
   };
+};
+
+const edit = (body: any) => {
+  const validCreate = create(body);
+
+  const { validData, errorMsg } = validationV2<{ customerQuoteId: string }>(
+    { customerQuoteId: [RULES.common.requiredString, ""] },
+    body,
+  );
+  if (errorMsg || !validData) throw new Error(errorMsg);
+
+  return { ...validCreate, ...validData };
+};
+
+const customerQuoteId = (params: any) => {
+  const { validData, errorMsg } = validationV2<{ customerQuoteId: string }>(
+    { customerQuoteId: [RULES.common.requiredString, ""] },
+    params,
+  );
+  if (errorMsg || !validData) throw new Error(errorMsg);
+
+  return validData;
+};
+
+const editStatus = (body: any) => {
+  const { validData, errorMsg } = validationV2<{
+    customerQuoteId: string;
+    status: string;
+  }>(
+    {
+      customerQuoteId: [RULES.common.requiredString, ""],
+      status: [RULES.common.requiredString, ""],
+    },
+    body,
+  );
+  if (errorMsg || !validData) throw new Error(errorMsg);
+  return validData;
+};
+
+const toggleTeamMember = (body: any) => {
+  const { validData, errorMsg } = validationV2<{
+    userId: string;
+    customerQuoteId: string;
+  }>(
+    {
+      userId: [RULES.common.requiredString, ""],
+      customerQuoteId: [RULES.common.requiredString, ""],
+    },
+    body,
+  );
+  if (errorMsg || !validData) throw new Error(errorMsg);
+  return validData;
 };
 
 export const CustomerQuoteValidators = {
   create,
+  edit,
+  customerQuoteId,
+  editStatus,
+  toggleTeamMember,
 };

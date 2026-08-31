@@ -2,15 +2,14 @@ import {
   Divider,
   EditDeleteButtons,
   FullPage,
-  Icons,
+  LargeUserImage,
   NoDataFound,
   PageHeader,
   TBody,
-  TEXT_SIZES,
   THeading,
 } from "@/components";
-import { CSS, ROUTES } from "@/Constants";
-import { useApi, useDimensions, useTimeoutEffect } from "@/hooks";
+import { ROUTES } from "@/Constants";
+import { useApi, useTimeoutEffect } from "@/hooks";
 import type { ICustomerQuote, IUser } from "@/interfaces";
 import { useUserStore } from "@/stores";
 import { Spinner } from "@chakra-ui/react";
@@ -25,7 +24,6 @@ export const Profile = () => {
   const params = useParams();
 
   const authUser = useUserStore((state) => state.user);
-  const [squareRef, squareDims] = useDimensions();
 
   const {
     snackbar: [_, errorSnack],
@@ -70,7 +68,7 @@ export const Profile = () => {
 
     if (res.err || !res.data) return errorSnack(res.err);
 
-    setUserProfile(res.data.users[0]);
+    setUserProfile(res.data.user);
   };
 
   const getCurrentCustomers = async () => {
@@ -164,33 +162,9 @@ export const Profile = () => {
           direction={"row"}
         >
           <Stack direction={"row"} spacing={4} sx={{ alignItems: "start" }}>
-            <Stack
-              ref={squareRef}
-              sx={{
-                width: "20vw",
-                height: squareDims.width,
+            <LargeUserImage onUserPhotoClick={onUserPhotoClick} />
 
-                alignItems: "center",
-                justifyContent: "center",
-
-                borderWidth: 1,
-                borderColor: CSS.colors.black,
-                borderRadius: 5,
-
-                cursor: "pointer",
-                color: CSS.colors.black,
-
-                "&:hover": {
-                  borderColor: CSS.colors.blue,
-                  color: CSS.colors.blue,
-                },
-              }}
-              onClick={onUserPhotoClick}
-            >
-              <Icons.User sx={{ fontSize: TEXT_SIZES.largest * 1.75 }} />
-            </Stack>
-
-            <Stack spacing={-0.5} sx={{ alignItems: "start" }}>
+            <Stack spacing={0} sx={{ alignItems: "start" }}>
               <THeading>{userProfile.username}</THeading>
               <TBody medium>{fullName.trim()}</TBody>
               {hasEmail && (

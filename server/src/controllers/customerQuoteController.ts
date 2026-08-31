@@ -138,10 +138,6 @@ const getQuotes = ControllerFunc((req, res) =>
         databaseQuery.$and!.push(dateOr);
       }
 
-      // Log.colors.yellow(`Query:`);
-      // Log.colors.yellow(Log.json(databaseQuery));
-      // Log.colors.yellow(``);
-
       const customerQuotesPaginationResult = await CustomerQuoteModel.paginate(
         databaseQuery,
         {
@@ -153,10 +149,6 @@ const getQuotes = ControllerFunc((req, res) =>
       const customerQuotes = customerQuotesPaginationResult.docs.map((doc) =>
         doc.toCustomerQuote(),
       );
-
-      // Log.colors.purple(`Result ${customerQuotes.length}:`);
-      // Log.colors.purple(Log.json(customerQuotes));
-      // Log.colors.purple(``);
 
       res.send({
         customerQuotes,
@@ -186,6 +178,7 @@ const create = ControllerFunc((req, res) =>
         paymentInfo,
         callbackTime,
         meetingTime,
+        notes,
       } = Validators.CustomerQuoteValidators.create(req.body);
 
       const customerQuoteData: ICustomerQuote = {
@@ -196,7 +189,9 @@ const create = ControllerFunc((req, res) =>
             ? "scheduled"
             : (paymentInfo?.insurance?.coverageAmount ?? 0) > 0
               ? "insurance_validated"
-              : "new",
+              : (paymentInfo?.serviceAmount ?? 0) > 0
+                ? "quoted"
+                : "new",
         customer,
         car: carInfo,
         damage: damageInfo,
@@ -204,6 +199,8 @@ const create = ControllerFunc((req, res) =>
         paymentInfo: paymentInfo,
         callbackTime: callbackTime,
         meetingTime: meetingTime,
+        createdOn: new Date().getTime(),
+        notes,
       };
 
       const customerQuote: CustomerQuote = (
@@ -220,7 +217,161 @@ const create = ControllerFunc((req, res) =>
   ),
 );
 
+const getQuote = ControllerFunc((req, res) =>
+  TryCatch(
+    async () => {
+      const { validData, errorMsg } = validationV2<{ customerQuoteId: string }>(
+        { customerQuoteId: [RULES.common.requiredString, ""] },
+        req.params,
+      );
+      if (errorMsg || !validData) throw new Error(errorMsg);
+
+      const { customerQuoteId } = validData;
+
+      const quote = await CustomerQuoteModel.findOne({ customerQuoteId });
+
+      if (!quote) throw new Error(`Could not find customer`);
+
+      res.send({ customer: quote.toCustomerQuote() });
+    },
+    (err) => {
+      res.status(500).json({ error: err });
+    },
+  ),
+);
+
+const edit = ControllerFunc((req, res) =>
+  TryCatch(
+    async () => {
+      const { customerQuoteId: paramCustomerQuoteId } =
+        Validators.CustomerQuoteValidators.customerQuoteId(req.params);
+      const { userId } = Validators.TokenValidators.resLocalsTokenValues(
+        res.locals,
+      );
+      const {
+        customerQuoteId,
+        customer,
+        carInfo,
+        damageInfo,
+        address,
+        paymentInfo,
+        callbackTime,
+        meetingTime,
+        notes,
+      } = Validators.CustomerQuoteValidators.edit(req.body);
+
+      if (paramCustomerQuoteId !== customerQuoteId)
+        throw new Error(`Customer ID mismatch.`);
+
+      const ogQuote = await CustomerQuoteModel.findOne({ customerQuoteId });
+      if (!ogQuote) throw new Error(`Customer could not be found.`);
+
+      const teamMembers = [...ogQuote.teamMembers];
+      if (!teamMembers.includes(userId)) teamMembers.push(userId);
+
+      // Auto infer status from fields
+      const customerQuoteData: ICustomerQuote = {
+        customerQuoteId,
+        teamMembers,
+        status:
+          meetingTime !== undefined
+            ? "scheduled"
+            : (paymentInfo?.insurance?.coverageAmount ?? 0) > 0
+              ? "insurance_validated"
+              : (paymentInfo?.serviceAmount ?? 0) > 0
+                ? "quoted"
+                : "new",
+        customer,
+        car: carInfo,
+        damage: damageInfo,
+        address,
+        paymentInfo: paymentInfo,
+        callbackTime: callbackTime,
+        meetingTime: meetingTime,
+        notes,
+        createdOn: ogQuote.createdOn,
+      };
+
+      const customerQuote = await CustomerQuoteModel.findOneAndUpdate(
+        { customerQuoteId },
+        customerQuoteData,
+      );
+      if (!customerQuote) throw new Error(`Could not edit customer.`);
+
+      res.send({ customer: customerQuote.toCustomerQuote() });
+    },
+    (err) => {
+      res.status(500).json({ error: err });
+    },
+  ),
+);
+
+const editStatus = ControllerFunc((req, res) =>
+  TryCatch(
+    async () => {
+      const { customerQuoteId: paramCustomerQuoteId } =
+        Validators.CustomerQuoteValidators.customerQuoteId(req.params);
+      const { userId } = Validators.TokenValidators.resLocalsTokenValues(
+        res.locals,
+      );
+      const { customerQuoteId, status } =
+        Validators.CustomerQuoteValidators.editStatus(req.body);
+
+      if (paramCustomerQuoteId !== customerQuoteId)
+        throw new Error(`Customer ID mismatch.`);
+
+      const ogQuote = await CustomerQuoteModel.findOne({ customerQuoteId });
+      if (!ogQuote) throw new Error(`Customer could not be found.`);
+
+      const teamMembers = [...ogQuote.teamMembers];
+      if (!teamMembers.includes(userId)) teamMembers.push(userId);
+
+      // Direct status manipulation
+      const customerQuote = await CustomerQuoteModel.findOneAndUpdate(
+        { customerQuoteId },
+        { status, teamMembers },
+      );
+      if (!customerQuote) throw new Error(`Could not edit customer.`);
+
+      res.send({ customer: customerQuote.toCustomerQuote() });
+    },
+    (err) => {
+      res.status(500).json({ error: err });
+    },
+  ),
+);
+
+const toggleTeamMember = ControllerFunc((req, res) =>
+  TryCatch(
+    async () => {
+      const { userId, customerQuoteId } =
+        Validators.CustomerQuoteValidators.toggleTeamMember(req.body);
+
+      const ogCustomer = await CustomerQuoteModel.findOne({ customerQuoteId });
+      if (!ogCustomer) throw new Error(`Could not find customer.`);
+
+      let teamMembers = [...ogCustomer.teamMembers];
+
+      if (teamMembers.includes(userId))
+        teamMembers = teamMembers.filter((mem) => mem !== userId);
+      else teamMembers.push(userId);
+
+      ogCustomer.teamMembers = teamMembers;
+      await ogCustomer.save();
+
+      res.send({ customer: ogCustomer.toCustomerQuote() });
+    },
+    (err) => {
+      res.status(500).json({ error: err });
+    },
+  ),
+);
+
 export const CustomerQuoteController = {
   create,
   getQuotes,
+  getQuote,
+  edit,
+  editStatus,
+  toggleTeamMember,
 };

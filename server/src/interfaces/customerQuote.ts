@@ -3,6 +3,7 @@ import type { ITimeBlock } from "./timeBlock";
 
 export const CustomerQuoteStatus = {
   NEW: "new",
+  QUOTED: "quoted",
   VALIDATED: "insurance_validated",
   SCHEDULED: "scheduled",
   DONE: "done",
@@ -13,6 +14,7 @@ export type CustomerQuoteStatus =
 
 export const CUSTOMER_QUOTE_STATUS = [
   CustomerQuoteStatus.NEW,
+  CustomerQuoteStatus.QUOTED,
   CustomerQuoteStatus.VALIDATED,
   CustomerQuoteStatus.SCHEDULED,
   CustomerQuoteStatus.DONE,
@@ -46,6 +48,8 @@ export interface ICustomerQuote {
   teamMembers: string[];
   status: CustomerQuoteStatus;
   customer: IPerson;
+  createdOn: number;
+  notes: string;
   car?: ICar;
   damage?: ICarDamage;
   address?: string;

@@ -8,6 +8,7 @@ import {
 import {
   MongoDoc,
   RefreshTokenModel,
+  RootFilterQuery,
   SeenCount,
   SeenCountModel,
   User,
@@ -21,7 +22,7 @@ import {
   SessionController,
   TokenUtils,
 } from "../utils";
-import Validators from "../validators";
+import Validators, { RULES, validationV2 } from "../validators";
 import ControllerFunc from "./controllerFunc";
 import CONSTANTS from "../constants";
 
@@ -105,14 +106,34 @@ const createUser = ControllerFunc((req, res) =>
 const getUsers = ControllerFunc((req, res) =>
   TryCatch(
     async () => {
-      const params = Validators.UserControllerValidators.getUsersValidation(
+      const { validData, errorMsg } = validationV2<{
+        userId?: string;
+        userIds?: string | string[];
+      }>(
+        {
+          userId: [RULES.common.optionalString, ""],
+          userIds: [
+            req.query.userIds !== undefined && Array.isArray(req.query.userIds)
+              ? RULES.common.optionalArray
+              : RULES.common.optionalString,
+            "",
+          ],
+        },
         req.query,
       );
 
-      let query = {};
+      let query: RootFilterQuery<IUser> = {
+        $and: [],
+      };
 
-      if (params.userId) {
-        query = { userId: { $in: params.userId.split(",") } };
+      if (validData?.userId) {
+        query.$and!.push({ userId: validData.userId });
+      }
+
+      if (validData?.userIds) {
+        if (Array.isArray(validData.userIds))
+          query.$and!.push({ userId: { $in: validData.userIds } });
+        else query.$and!.push({ userId: validData.userIds });
       }
 
       const users = (await UserModel.find(query)).map((userDoc) =>
@@ -387,9 +408,33 @@ const userHasAccess = ControllerFunc((req, res) =>
   ),
 );
 
+const getUser = ControllerFunc((req, res) =>
+  TryCatch(
+    async () => {
+      const { validData, errorMsg } = validationV2<{ userId: string }>(
+        { userId: [RULES.common.requiredString, ""] },
+        req.params,
+      );
+      if (errorMsg || !validData) throw new Error(errorMsg);
+
+      const { userId } = validData;
+
+      const user = await UserModel.findOne({ userId });
+
+      if (!user) throw new Error(`Team member could not be found`);
+
+      res.send({ user });
+    },
+    (err) => {
+      res.status(500).json({ error: err });
+    },
+  ),
+);
+
 export const UserController = {
   createUser,
   getUsers,
+  getUser,
   loginUser,
   refreshUserWithRefreshToken,
   logoutUser,

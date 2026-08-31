@@ -9,7 +9,9 @@ type BasicModalProps = {
 
   title: string;
   subtitle?: string;
+  centerSubtitle?: boolean;
   shrink?: boolean;
+  shrinkHeight?: boolean;
 };
 
 export const BasicModal = ({
@@ -17,8 +19,10 @@ export const BasicModal = ({
   onClose,
   title,
   subtitle,
+  centerSubtitle,
   children,
   shrink,
+  shrinkHeight,
 }: PropsWithChildren<BasicModalProps>) => {
   return (
     <Modal open={open} onClose={onClose}>
@@ -33,7 +37,7 @@ export const BasicModal = ({
         <Paper
           sx={{
             width: shrink ? "40vw" : "60vw",
-            height: shrink ? undefined : "70vh",
+            height: shrink || shrinkHeight ? undefined : "70vh",
             borderRadius: 5,
             borderWidth: 1,
             borderColor: CSS.colors.black,
@@ -43,7 +47,9 @@ export const BasicModal = ({
           <Stack sx={{ width: "100%", height: "100%", p: 4 }} spacing={2}>
             <Stack sx={{ width: "100%", alignItems: "center" }}>
               <THeading bungeeFill>{title}</THeading>
-              <TBody>{subtitle}</TBody>
+              <TBody align={centerSubtitle ? "center" : undefined}>
+                {subtitle}
+              </TBody>
             </Stack>
 
             {children}

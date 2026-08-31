@@ -24,6 +24,7 @@ import {
 } from "@/Constants";
 import { useState } from "react";
 import { toMidnight } from "@/utils";
+import moment from "moment";
 
 export const Reviews = () => {
   const {
@@ -50,14 +51,15 @@ export const Reviews = () => {
   const [to, setTo] = useState<Date | undefined>(undefined);
   const [rangeError, setRangeError] = useState<[string, string]>(["", ""]);
 
+  // Must be same as switch case in router controller
   const availableSortBy = [
     "",
     "Rating - High/Low",
     "Rating - Low/High",
     "First Name",
     "Last Name",
-    "Earliest First",
-    "Most Recent First",
+    "Most Recent",
+    "Date Created",
   ];
 
   const setAPISearchResult = (
@@ -85,7 +87,7 @@ export const Reviews = () => {
     }
     return {
       from: toMidnight(from!).getTime(),
-      to: toMidnight(to!).getTime(),
+      to: toMidnight(moment(to!).add(1, "day")).getTime(),
     };
   };
 
@@ -108,22 +110,6 @@ export const Reviews = () => {
 
     setAPISearchResult(res.data);
   };
-
-  // useEffect(() => {
-  //   setSortedReviews(
-  //     [...allReviews].sort((a, b) => {
-  //       if (sortBy === "Rating - High/Low") return b.rating - a.rating;
-  //       if (sortBy === "Rating - Low/High") return a.rating - b.rating;
-  //       if (sortBy === "First Name")
-  //         return a.person.firstName.localeCompare(b.person.firstName);
-  //       if (sortBy === "Last Name")
-  //         return a.person.lastName.localeCompare(b.person.lastName);
-  //       if (sortBy === "Creation Date") return a.createdOn - b.createdOn;
-
-  //       return 0;
-  //     }),
-  //   );
-  // }, [toString(allReviews.map((rev) => rev.reviewId)), sortBy]);
 
   useTimeoutEffect(
     () => {
