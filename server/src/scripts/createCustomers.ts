@@ -1,5 +1,5 @@
 import moment from "moment";
-import { CarDamageLocation, ICustomerQuote } from "../interfaces";
+import { CarDamageLocation, ICustomerQuote, IServiceType } from "../interfaces";
 import { HashUtils, Log, toNearestHalfHour } from "../utils";
 import { getAdmin } from "./createAdmin";
 import { CarDamage, CustomerQuoteModel } from "../models";
@@ -56,7 +56,15 @@ export const createCustomers = async () => {
       .toDate()
       .getTime();
 
+    const allServiceTypes: IServiceType[] = [
+      "ADAS Calibration",
+      "Auto Glass Replacement",
+      "Crack & Chip Repair",
+      "Windshield Replacement",
+    ];
+
     const customer: ICustomerQuote = {
+      serviceType: allServiceTypes[randBtwn(0, 3)],
       customerQuoteId: HashUtils.uniqueId(),
       teamMembers: [admin.userId],
       status: isScheduled
@@ -85,7 +93,7 @@ export const createCustomers = async () => {
         ? {
             serviceAmount: price,
             serviceAmountAfterTax: taxed,
-            type: isInsured ? "insurance" : "onsite",
+            type: isInsured ? "insurance" : "out_of_pocket",
             insurance: isInsured
               ? {
                   insuranceName: insurance.insuranceCompany,
@@ -235,7 +243,7 @@ const CARS = [
   },
   {
     make: "Nissan",
-    model: "Altima",
+    model: "Maxima",
     year: 2019,
   },
   {

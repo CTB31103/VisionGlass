@@ -15,13 +15,18 @@ type CustomerVehicleInfoProps = {
 };
 
 export const CustomerVehicleInfo = ({ customer }: CustomerVehicleInfoProps) => {
-  const damageMainLocation = customer.damage?.location ?? "";
+  const availableRows = ["1st Row", "2nd Row", "3rd Row", "4th Row"];
+  const damageMainLocation = customer.damage?.location
+    ? customer.damage.location
+    : "";
   const damageSide = customer.damage?.windowSide ?? "";
   const damageRows = customer.damage?.rows ?? [];
+
   const damageCardTitle =
     damageMainLocation === CarDamageLocation.SIDE
-      ? `${damageSide.length > 0 ? damageSide + " " : ""}${damageMainLocation}${damageRows.length === 1 ? " (" + damageRows[0] + ") " : damageRows.length > 1 ? ` (Multiple Rows)` : ""}`
-      : `${capitalize(damageMainLocation)} Windshield`;
+      ? `${damageSide.length > 0 ? damageSide + " " : ""}${damageMainLocation}${damageRows.length === 1 ? "<br/> (" + availableRows[damageRows[0] - 1] + ") " : damageRows.length > 1 ? `<br/> (Multiple Rows)` : ""}`
+      : `${capitalize(damageMainLocation ?? "")} Windshield`;
+
   return (
     <Stack direction={"row"} spacing={4} sx={{ alignItems: "start" }}>
       <LargeSquareIcon Icon={Icons.Car} />

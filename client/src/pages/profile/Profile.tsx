@@ -1,19 +1,22 @@
 import {
+  BorderButton,
   Divider,
   EditDeleteButtons,
   FullPage,
+  Icons,
   LargeUserImage,
+  LoadingPage,
   NoDataFound,
   PageHeader,
   TBody,
+  TEXT_SIZES,
   THeading,
 } from "@/components";
 import { ROUTES } from "@/Constants";
 import { useApi, useTimeoutEffect } from "@/hooks";
 import type { ICustomerQuote, IUser } from "@/interfaces";
-import { useUserStore } from "@/stores";
-import { Spinner } from "@chakra-ui/react";
-import { Stack } from "@mui/material";
+import { useAccessKeyStore, useUserStore } from "@/stores";
+import { Link, Stack } from "@mui/material";
 import { capitalize } from "lodash";
 import { useState } from "react";
 import { useParams } from "react-router";
@@ -23,7 +26,8 @@ import queryString from "query-string";
 export const Profile = () => {
   const params = useParams();
 
-  const authUser = useUserStore((state) => state.user);
+  const { user: authUser, logout: logoutState } = useUserStore();
+  const { setAccessKey } = useAccessKeyStore();
 
   const {
     snackbar: [_, errorSnack],
@@ -126,21 +130,7 @@ export const Profile = () => {
     50,
   );
 
-  if (loading || !userProfile)
-    return (
-      <FullPage screen>
-        <Stack
-          sx={{
-            width: "100%",
-            height: "100%",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Spinner size={"xl"} />
-        </Stack>
-      </FullPage>
-    );
+  if (loading || !userProfile) return <LoadingPage />;
 
   const isMyProfile = userProfile.userId === authUser.userId;
   const fullName = `${capitalize(userProfile.info.firstName)} ${capitalize(userProfile.info.lastName)}`;
@@ -149,22 +139,42 @@ export const Profile = () => {
 
   const onUserPhotoClick = () => {};
 
+  const onLogout = async () => {
+    await userRoutes.logout();
+    setAccessKey(null);
+    logoutState();
+  };
+
   return (
     <FullPage screen>
       <Stack
         sx={{ width: "100%", paddingBlock: 4, paddingInline: 8 }}
         spacing={4}
       >
-        <PageHeader text={`${isMyProfile ? "My" : "User"} Profile`} />
+        <PageHeader
+          backHref={ROUTES.TEAM}
+          text={`${isMyProfile ? "My" : "User"} Profile`}
+        />
 
         <Stack
-          sx={{ width: "100%", justifyContent: "space-between" }}
           direction={"row"}
+          spacing={4}
+          sx={{
+            position: "relative",
+            alignItems: "start",
+            width: "100%",
+          }}
         >
-          <Stack direction={"row"} spacing={4} sx={{ alignItems: "start" }}>
-            <LargeUserImage onUserPhotoClick={onUserPhotoClick} />
+          <LargeUserImage onUserPhotoClick={onUserPhotoClick} />
 
-            <Stack spacing={0} sx={{ alignItems: "start" }}>
+          <Stack
+            spacing={0}
+            sx={{
+              alignItems: "end",
+              justifyContent: "space-between",
+            }}
+          >
+            <Stack spacing={0} sx={{ width: "100%", alignItems: "start" }}>
               <THeading>{userProfile.username}</THeading>
               <TBody medium>{fullName.trim()}</TBody>
               {hasEmail && (
@@ -179,8 +189,28 @@ export const Profile = () => {
             </Stack>
           </Stack>
 
-          <Stack>
-            <EditDeleteButtons onEdit={() => {}} />
+          <Stack
+            sx={{
+              position: "absolute",
+              top: 0,
+              right: 0,
+              height: "100%",
+              alignItems: "end",
+              justifyContent: "space-between",
+            }}
+          >
+            <EditDeleteButtons
+              editHref={ROUTES.TEAM_EDIT + `/${userProfile.userId}`}
+              onEdit={() => {}}
+            />
+
+            {isMyProfile && (
+              <Link underline="none" color="inherit" href={ROUTES.HOME}>
+                <BorderButton onClick={onLogout} color="red">
+                  <Icons.Logout sx={{ fontSize: TEXT_SIZES.medium2 }} /> Logout
+                </BorderButton>
+              </Link>
+            )}
           </Stack>
         </Stack>
 

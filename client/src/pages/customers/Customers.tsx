@@ -238,13 +238,13 @@ export const Customers = () => {
               }
             />
           ) : (
-            allQuotes.map((quote, i, arr) => (
+            allQuotes.map((quote, i, _arr) => (
               <CustomerItem
                 key={i}
                 href={ROUTES.CUSTOMERS + `/${quote.customerQuoteId}`}
                 title={`Customer: ${quote.customer.firstName} ${quote.customer.lastName}`}
                 status={quote.status}
-                divider={i !== arr.length - 1}
+                divider
                 employees={allEmployees.filter((e) =>
                   quote.teamMembers.includes(e.userId),
                 )}

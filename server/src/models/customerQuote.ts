@@ -20,6 +20,7 @@ import {
   IInsuranceInfo,
   IPaymentInfo,
   IPerson,
+  IServiceType,
   ITimeBlock,
   PaymentType,
   WindowSide,
@@ -185,10 +186,12 @@ export class CustomerQuote implements ICustomerQuote {
   paymentInfo?: IPaymentInfo;
   @Prop({ type: CallbackInfo, _id: false })
   callbackTime?: ICallbackInfo;
-  @Prop({ type: Number, _id: false })
+  @Prop({ type: Number })
   createdOn: number;
-  @Prop({ type: String, _id: false })
+  @Prop({ type: String })
   notes: string;
+  @Prop({ type: String })
+  serviceType: IServiceType;
 
   constructor({
     customerQuoteId,
@@ -203,6 +206,7 @@ export class CustomerQuote implements ICustomerQuote {
     paymentInfo,
     notes,
     createdOn,
+    serviceType,
   }: ICustomerQuote) {
     this.customerQuoteId = customerQuoteId;
     this.status = status;
@@ -218,6 +222,7 @@ export class CustomerQuote implements ICustomerQuote {
     this.meetingTime = meetingTime ? new TimeBlock(meetingTime) : undefined;
     this.notes = notes;
     this.createdOn = createdOn;
+    this.serviceType = serviceType;
   }
 
   toCustomerQuote() {

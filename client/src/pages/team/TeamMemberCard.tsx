@@ -30,57 +30,73 @@ export const TeamMemberCard = ({ user, onClick }: TeamMemberCardProps) => {
 
   return (
     <Stack spacing={4} sx={{ width: "100%" }}>
-      <Link
-        underline="none"
-        color="inherit"
-        href={ROUTES.PROFILE + `/${user.userId}`}
-      >
-        <Stack
-          direction={"row"}
-          sx={{
-            width: "100%",
-            alignItems: "center",
-            cursor: "pointer",
-
-            "&:hover": { color: CSS.colors.blue },
-          }}
-          onClick={onClick}
-          spacing={2}
+      <Stack sx={{ width: "100%", position: "relative" }}>
+        <Link
+          underline="none"
+          color="inherit"
+          href={ROUTES.PROFILE + `/${user.userId}`}
         >
-          <SmallSquareUser />
+          <Stack
+            direction={"row"}
+            sx={{
+              width: "100%",
+              alignItems: "center",
+              cursor: "pointer",
 
-          <Stack sx={{ width: "100%", height: "100%" }} spacing={2}>
-            <Stack sx={{ width: "100%" }} direction={"row"}>
-              <Stack sx={{ width: "100%" }}>
-                <Stack
-                  direction={"row"}
-                  spacing={1}
-                  sx={{
-                    alignItems: "center",
-                  }}
-                >
-                  <Icons.Sales sx={{}} />
-                  <THeading>{`${user.info.firstName} ${user.info.lastName}`}</THeading>
+              "&:hover": { color: CSS.colors.blue },
+            }}
+            onClick={onClick}
+            spacing={2}
+          >
+            <SmallSquareUser />
+
+            <Stack sx={{ width: "100%", height: "100%" }} spacing={2}>
+              <Stack sx={{ width: "100%" }} direction={"row"}>
+                <Stack sx={{ width: "100%" }}>
+                  <Stack
+                    direction={"row"}
+                    spacing={1}
+                    sx={{
+                      alignItems: "center",
+                    }}
+                  >
+                    <Icons.Sales sx={{}} />
+                    <THeading>{`${user.info.firstName} ${user.info.lastName}`}</THeading>
+                  </Stack>
+                  <TBody color={CSS.colors.black} medium>
+                    {user.info.email}
+                  </TBody>
+                  <TBody color={CSS.colors.black} medium>
+                    {user.info.phone}
+                  </TBody>
                 </Stack>
-                <TBody color={CSS.colors.black} medium>
-                  {user.info.email}
-                </TBody>
-                <TBody color={CSS.colors.black} medium>
-                  {user.info.phone}
-                </TBody>
               </Stack>
 
-              {isAdmin && (
-                <EditDeleteButtons onEdit={() => {}} onDelete={() => {}} />
-              )}
-            </Stack>
-
-            <Stack sx={{ width: "100%" }} direction={"row"} spacing={1}>
-              <MyChip Icon={userTypeIcon} text={capitalize(user.userType)} />
+              <Stack sx={{ width: "100%" }} direction={"row"} spacing={1}>
+                <MyChip Icon={userTypeIcon} text={capitalize(user.userType)} />
+              </Stack>
             </Stack>
           </Stack>
+        </Link>
+
+        <Stack
+          sx={{
+            position: "absolute",
+            top: 0,
+            right: 0,
+            zIndex: 1,
+            pointerEvents: "all",
+          }}
+        >
+          {isAdmin && user.username !== "admin" && (
+            <EditDeleteButtons
+              editHref={ROUTES.TEAM_EDIT + `/${user.userId}`}
+              onEdit={() => {}}
+              onDelete={() => {}}
+            />
+          )}
         </Stack>
-      </Link>
+      </Stack>
 
       <Divider />
     </Stack>

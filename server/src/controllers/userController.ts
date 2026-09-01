@@ -4,6 +4,7 @@ import {
   ISeenCount,
   IUser,
   IUserStatistic,
+  UserType,
 } from "../interfaces";
 import {
   MongoDoc,
@@ -51,7 +52,7 @@ const createUser = ControllerFunc((req, res) =>
 
           const createdUser: IUser = {
             userId: HashUtils.uniqueId(),
-            username: validBody.username,
+            username: validBody.username.replaceAll(" ", "").toLowerCase(),
             password: await HashUtils.encrypt(validBody.password),
             userType: validBody.userType,
             profilePictureId: "",
@@ -90,7 +91,7 @@ const createUser = ControllerFunc((req, res) =>
           await RefreshTokenModel.create([createdRefreshToken], { session });
           await SeenCountModel.create([createdSeenCount], { session });
 
-          res.status(200).json({ newUser: userDoc.toClientUser() });
+          res.status(200).json({ user: userDoc.toClientUser() });
         },
         async (err) => (await abort(), res.status(500).json({ error: err })),
       ),
@@ -109,6 +110,9 @@ const getUsers = ControllerFunc((req, res) =>
       const { validData, errorMsg } = validationV2<{
         userId?: string;
         userIds?: string | string[];
+        query?: string;
+        sortBy?: string;
+        role?: string;
       }>(
         {
           userId: [RULES.common.optionalString, ""],
@@ -118,29 +122,91 @@ const getUsers = ControllerFunc((req, res) =>
               : RULES.common.optionalString,
             "",
           ],
+          query: [RULES.common.optionalString, ""],
+          sortBy: [RULES.common.optionalString, ""],
+          role: [RULES.common.optionalString, ""],
         },
         req.query,
       );
+      const { pageLimit, pageNumber } =
+        Validators.PaginationValidation.getPaginatedQuery(req.query);
 
-      let query: RootFilterQuery<IUser> = {
+      let databaseQuery: RootFilterQuery<IUser> = {
         $and: [],
       };
+      let sort: { [key: string]: number } = {};
 
       if (validData?.userId) {
-        query.$and!.push({ userId: validData.userId });
+        databaseQuery.$and!.push({ userId: validData.userId });
       }
 
       if (validData?.userIds) {
         if (Array.isArray(validData.userIds))
-          query.$and!.push({ userId: { $in: validData.userIds } });
-        else query.$and!.push({ userId: validData.userIds });
+          databaseQuery.$and!.push({ userId: { $in: validData.userIds } });
+        else databaseQuery.$and!.push({ userId: validData.userIds });
       }
 
-      const users = (await UserModel.find(query)).map((userDoc) =>
-        userDoc.toClientUser(),
-      );
+      if (validData?.query) {
+        const queryFirstWord = validData?.query.split(" ")[0];
+        const regexQuery = { $regex: validData?.query, $options: "i" };
+        databaseQuery.$and!.push({
+          $or: [
+            { "info.firstName": regexQuery },
+            { "info.email": regexQuery },
+            { "info.lastName": regexQuery },
+            { "info.phone": regexQuery },
+            { username: regexQuery },
+            {
+              $and: [
+                { "info.firstName": { $regex: queryFirstWord, $options: "i" } },
+                {
+                  "info.lastName": {
+                    $regex: validData?.query.replace(queryFirstWord + " ", ""),
+                  },
+                },
+              ],
+            },
+          ],
+        });
+      }
 
-      return res.status(200).json({ users: users });
+      if (validData?.role) {
+        databaseQuery.$and!.push({
+          userType: validData.role as UserType,
+        });
+      }
+
+      if (validData?.sortBy) {
+        switch (validData.sortBy) {
+          case "Position":
+            sort = { userType: 1 };
+            break;
+          case "Email":
+            sort = { "info.email": 1 };
+            break;
+          case "Last Name":
+            sort = { "info.lastName": 1 };
+            break;
+          case "First Name":
+          default:
+            sort = { "info.firstName": 1 };
+            break;
+        }
+      }
+
+      const userPaginationResult = await UserModel.paginate(databaseQuery, {
+        limit: pageLimit,
+        page: pageNumber,
+        sort: sort,
+      });
+
+      return res.status(200).json({
+        users: userPaginationResult.docs.map((u) => u.toClientUser()),
+        page: userPaginationResult.page ?? pageNumber,
+        pageLimit: userPaginationResult.limit,
+        total: userPaginationResult.totalDocs,
+        totalPages: userPaginationResult.totalPages,
+      });
     },
     (err) => res.status(500).json({ error: err }),
   ),
@@ -308,19 +374,20 @@ const logoutUser = ControllerFunc((req, res) =>
 const editUser = ControllerFunc((req, res) =>
   TryCatch(
     async () => {
-      const { userId } = Validators.TokenValidators.resLocalsTokenValues(
-        res.locals,
-      );
-      const { username, email, firstName, lastName, phone, profilePictureId } =
+      const { userId: authorId } =
+        Validators.TokenValidators.resLocalsTokenValues(res.locals);
+      const { userId } = Validators.UserControllerValidators.userId(req.params);
+      const { username, email, firstName, lastName, phone } =
         Validators.UserControllerValidators.editUser(req.body);
 
       const user: MongoDoc<User> | null = await UserModel.findOneAndUpdate(
         { userId },
         {
           username,
-          profilePictureId,
+          // profilePictureId,
           info: { firstName, lastName, email, phone },
         },
+        { returnDocument: "after" },
       );
       if (!user) throw new Error(`Could not find user`);
 

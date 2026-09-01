@@ -8,6 +8,7 @@ import {
   IPerson,
   ITimeBlock,
 } from "../interfaces";
+import { Log } from "../utils";
 import { CalendarEventValidators } from "./calendarEventValidators";
 import { USER_RULES } from "./userControllerValidators";
 import {
@@ -152,7 +153,7 @@ const validateCallbackTime = (data: any): ICallbackInfo => {
   const validCallbackTime = validationV2<Omit<ICallbackInfo, "timePreference">>(
     {
       asap: [RULES.common.requiredBool, "callback asap"],
-      dayPrefrence: [RULES.common.requiredArray, "callback day preference"],
+      dayPrefrence: [RULES.common.presentArray, "callback day preference"],
     },
     data,
   );
@@ -214,7 +215,14 @@ const create = (body: any) => {
 
   const { validData: validNotes, errorMsg: notesErr } = validationV2<{
     notes: string;
-  }>({ notes: [RULES.common.presentString, ""] }, body);
+    serviceType: string;
+  }>(
+    {
+      notes: [RULES.common.presentString, ""],
+      serviceType: [RULES.common.requiredString, ""],
+    },
+    body,
+  );
   if (notesErr || !validNotes) throw new Error(notesErr);
 
   return {
@@ -232,8 +240,16 @@ const create = (body: any) => {
 const edit = (body: any) => {
   const validCreate = create(body);
 
-  const { validData, errorMsg } = validationV2<{ customerQuoteId: string }>(
-    { customerQuoteId: [RULES.common.requiredString, ""] },
+  const { validData, errorMsg } = validationV2<{
+    customerQuoteId: string;
+    status: string;
+    forceStatus?: boolean;
+  }>(
+    {
+      customerQuoteId: [RULES.common.requiredString, ""],
+      status: [RULES.common.requiredString, ""],
+      forceStatus: [RULES.boolean, ""],
+    },
     body,
   );
   if (errorMsg || !validData) throw new Error(errorMsg);

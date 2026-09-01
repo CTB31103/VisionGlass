@@ -54,7 +54,7 @@ export const useCustomerQuotesApi = () => {
       "createdOn"
     >,
   ) => {
-    return await post<{ customerQuote: ICustomerQuote }>(
+    return await post<{ customer: ICustomerQuote }>(
       `/api/customer-quotes`,
       data,
       { signal: getNewSignal(`createCustomerQuoteService`) },
@@ -67,7 +67,7 @@ export const useCustomerQuotesApi = () => {
   ) => {
     return await put<{ customer: ICustomerQuote }>(
       `/api/customer-quotes/status/${customer.customerQuoteId}`,
-      { ...customer, status },
+      { customerQuoteId: customer.customerQuoteId, status },
       { signal: getNewSignal(`editStatus`) },
     );
   };
@@ -75,7 +75,7 @@ export const useCustomerQuotesApi = () => {
   const editNotes = async (customer: ICustomerQuote, notes: string) => {
     return await put<{ customer: ICustomerQuote }>(
       `/api/customer-quotes/${customer.customerQuoteId}`,
-      { ...customer, notes },
+      { ...customer, forceStatus: true, notes },
     );
   };
 

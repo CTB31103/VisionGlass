@@ -26,7 +26,7 @@ export const CustomerPaymentInfo = ({ customer }: CustomerPaymentInfoProps) => {
         />
         <LabledRowText
           bold="Payment Preference:"
-          text={capitalize(customer.paymentInfo.type)}
+          text={capitalize(customer.paymentInfo.type.replaceAll("_", " "))}
         />
         {customer.paymentInfo.insurance && (
           <Stack spacing={1} sx={{ width: "100%", alignItems: "start" }}>

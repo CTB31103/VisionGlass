@@ -1,5 +1,9 @@
 import moment from "moment";
-import { CustomerQuoteStatus, ICustomerQuote } from "../interfaces";
+import {
+  CustomerQuoteStatus,
+  ICustomerQuote,
+  IServiceType,
+} from "../interfaces";
 import { CustomerQuote, CustomerQuoteModel, RootFilterQuery } from "../models";
 import {
   ConditionalUtils,
@@ -17,8 +21,6 @@ const getQuotes = ControllerFunc((req, res) =>
   TryCatch(
     async () => {
       Validators.TokenValidators.resLocalsTokenValues(res.locals);
-      const { validData: validPagination, errorMsg: paginationErr } =
-        Validators.PaginationValidation.paginatedQuery(req.query);
       const { validData: validQueryData, errorMsg } = validationV2<{
         query?: string;
 
@@ -41,12 +43,8 @@ const getQuotes = ControllerFunc((req, res) =>
         req.query,
       );
 
-      const pageNumber = ConditionalUtils.getPageNumber(
-        validPagination?.pageNumber,
-      );
-      const pageLimit = ConditionalUtils.getPageLimit(
-        validPagination?.pageLimit,
-      );
+      const { pageLimit, pageNumber } =
+        Validators.PaginationValidation.getPaginatedQuery(req.query);
 
       let databaseQuery: RootFilterQuery<ICustomerQuote> = {
         $and: [],
@@ -179,9 +177,11 @@ const create = ControllerFunc((req, res) =>
         callbackTime,
         meetingTime,
         notes,
+        serviceType,
       } = Validators.CustomerQuoteValidators.create(req.body);
 
       const customerQuoteData: ICustomerQuote = {
+        serviceType: serviceType as IServiceType,
         customerQuoteId: HashUtils.uniqueId(),
         teamMembers: [userId],
         status:
@@ -208,7 +208,7 @@ const create = ControllerFunc((req, res) =>
       )[0].toCustomerQuote();
 
       res.send({
-        customerQuote,
+        customer: customerQuote,
       });
     },
     (err) => {
@@ -249,6 +249,7 @@ const edit = ControllerFunc((req, res) =>
         res.locals,
       );
       const {
+        status,
         customerQuoteId,
         customer,
         carInfo,
@@ -258,6 +259,9 @@ const edit = ControllerFunc((req, res) =>
         callbackTime,
         meetingTime,
         notes,
+        serviceType,
+
+        forceStatus,
       } = Validators.CustomerQuoteValidators.edit(req.body);
 
       if (paramCustomerQuoteId !== customerQuoteId)
@@ -271,10 +275,12 @@ const edit = ControllerFunc((req, res) =>
 
       // Auto infer status from fields
       const customerQuoteData: ICustomerQuote = {
+        serviceType: serviceType as IServiceType,
         customerQuoteId,
         teamMembers,
-        status:
-          meetingTime !== undefined
+        status: forceStatus
+          ? (status as CustomerQuoteStatus)
+          : meetingTime !== undefined
             ? "scheduled"
             : (paymentInfo?.insurance?.coverageAmount ?? 0) > 0
               ? "insurance_validated"
@@ -295,6 +301,7 @@ const edit = ControllerFunc((req, res) =>
       const customerQuote = await CustomerQuoteModel.findOneAndUpdate(
         { customerQuoteId },
         customerQuoteData,
+        { returnDocument: "after" },
       );
       if (!customerQuote) throw new Error(`Could not edit customer.`);
 
@@ -326,14 +333,12 @@ const editStatus = ControllerFunc((req, res) =>
       const teamMembers = [...ogQuote.teamMembers];
       if (!teamMembers.includes(userId)) teamMembers.push(userId);
 
-      // Direct status manipulation
-      const customerQuote = await CustomerQuoteModel.findOneAndUpdate(
-        { customerQuoteId },
-        { status, teamMembers },
-      );
-      if (!customerQuote) throw new Error(`Could not edit customer.`);
+      ogQuote.status = status as CustomerQuoteStatus;
+      ogQuote.teamMembers = teamMembers;
 
-      res.send({ customer: customerQuote.toCustomerQuote() });
+      await ogQuote.save();
+
+      res.send({ customer: ogQuote.toCustomerQuote() });
     },
     (err) => {
       res.status(500).json({ error: err });

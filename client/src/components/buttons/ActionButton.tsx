@@ -47,6 +47,7 @@ export const ActionButton = ({
       bg={buttonColorCSS(propColor)}
       color={buttonTextColorCSS(propColor)}
       onClick={onClick}
+      // paddingBlock={8}
       loading={loading}
       disabled={disabled}
     >

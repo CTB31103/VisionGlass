@@ -14,7 +14,7 @@ export const createTeam = async () => {
     const userTypeNum = randBtwn(1, 3);
     let user: IUser = {
       userId: HashUtils.uniqueId(),
-      username: `${person.firstName}${person.lastName}`,
+      username: `${person.firstName}${person.lastName}`.toLowerCase(),
       password: await HashUtils.encrypt(person.firstName),
       userType:
         userTypeNum === 1 && canBeAdmin

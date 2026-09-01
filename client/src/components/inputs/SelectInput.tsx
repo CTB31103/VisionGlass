@@ -39,6 +39,7 @@ export const SelectInput = (props: SelectInputProps) => {
           id={`${id}-select`}
           value={selectedItem}
           label={label}
+          disabled={disabled}
           onChange={({ target: { value } }: SelectChangeEvent) =>
             onSelect(value)
           }

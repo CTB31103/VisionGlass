@@ -38,6 +38,8 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import PersonIcon from "@mui/icons-material/Person";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 
+import LogoutIcon from "@mui/icons-material/Logout";
+
 export const Icons = {
   Close: CloseIcon,
 
@@ -78,6 +80,7 @@ export const Icons = {
   Person: PersonIcon,
 
   Car: DirectionsCarIcon,
+  Logout: LogoutIcon,
 };
 
 export type IconType = OverridableComponent<SvgIconTypeMap<object, "svg">> & {

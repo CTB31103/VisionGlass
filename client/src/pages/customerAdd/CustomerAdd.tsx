@@ -24,6 +24,7 @@ export const CustomerAdd = () => {
     meetingInfo,
 
     loading,
+    isEditingPage,
     createdQuote,
     successModelOpen,
 
@@ -36,7 +37,10 @@ export const CustomerAdd = () => {
         sx={{ width: "100%", paddingBlock: 4, paddingInline: 8 }}
         spacing={4}
       >
-        <PageHeader onGoBack={() => navigate(-1)} text="Add Customer" />
+        <PageHeader
+          onGoBack={() => navigate(-1)}
+          text={isEditingPage ? `Edit Customer` : "Add Customer"}
+        />
 
         <Stack spacing={4} sx={{ width: "100%" }}>
           <TitleWithSubtitle
@@ -85,7 +89,12 @@ export const CustomerAdd = () => {
         <BasicModal
           open={successModelOpen}
           title="Success"
-          subtitle="Customer added to the system"
+          subtitle={
+            isEditingPage
+              ? "Customer updated in the system"
+              : "Customer added to the system"
+          }
+          shrinkHeight
         >
           <Stack
             sx={{

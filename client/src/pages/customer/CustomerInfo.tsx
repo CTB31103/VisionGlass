@@ -42,10 +42,10 @@ export const CustomerInfo = ({
   const hasPhone = customer.customer.phone.length > 0;
 
   const markingBtnText = {
-    new: `Mark as quoted`,
-    quoted: `Schedule Customer`,
-    insurance_validated: `Schedule Customer`,
-    scheduled: `Mark as done`,
+    new: `Mark quoted`,
+    quoted: `Mark scheduled`,
+    insurance_validated: `Mark scheduled`,
+    scheduled: `Mark done`,
     done: ``,
   };
 
@@ -118,7 +118,6 @@ export const CustomerInfo = ({
       <Stack sx={{ position: "absolute", top: 0, right: 0 }}>
         <EditDeleteButtons
           editHref={ROUTES.CUSTOMERS_EDIT + `/${customer.customerQuoteId}`}
-          // onEdit={onEdit}
         />
       </Stack>
     </Stack>

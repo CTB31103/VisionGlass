@@ -1,6 +1,12 @@
 import type { IPerson } from "./person";
 import type { ITimeBlock } from "./timeBlock";
 
+export type IServiceType =
+  | "Windshield Replacement"
+  | "Auto Glass Replacement"
+  | "ADAS Calibration"
+  | "Crack & Chip Repair";
+
 export const CustomerQuoteStatus = {
   NEW: "new",
   QUOTED: "quoted",
@@ -22,7 +28,7 @@ export const CUSTOMER_QUOTE_STATUS = [
 
 export const PaymentType = {
   INSURANCE: "insurance",
-  ONSITE: "onsite",
+  OUTOFPOCKET: "out_of_pocket",
 } as const;
 
 export type PaymentType = (typeof PaymentType)[keyof typeof PaymentType];
@@ -50,6 +56,7 @@ export interface ICustomerQuote {
   customer: IPerson;
   createdOn: number;
   notes: string;
+  serviceType: IServiceType;
   car?: ICar;
   damage?: ICarDamage;
   address?: string;

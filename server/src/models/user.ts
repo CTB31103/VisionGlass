@@ -2,11 +2,16 @@ import {
   getModelForClass,
   index,
   modelOptions,
+  mongoose,
+  plugin,
   Prop,
+  ReturnModelType,
 } from "@typegoose/typegoose";
 import { IClientUser, IPerson, IUser, UserType } from "../interfaces";
 import { Person } from "./person";
 import { ImageUtils } from "../utils";
+import { MongoDoc } from "./mongoDoc";
+import mongoosePaginate from "mongoose-paginate-v2";
 
 @modelOptions({
   schemaOptions: {
@@ -14,6 +19,7 @@ import { ImageUtils } from "../utils";
   },
 })
 @index({ userId: 1, username: 1 }, { unique: true })
+@plugin(mongoosePaginate)
 export class User implements IUser {
   @Prop({ type: String, unique: true })
   userId: string;
@@ -81,4 +87,7 @@ class ClientUser implements IClientUser {
   }
 }
 
-export const UserModel = getModelForClass(User);
+type UserModel = ReturnModelType<typeof User> &
+  Pick<mongoose.PaginateModel<MongoDoc<User>>, "paginate">;
+
+export const UserModel = getModelForClass(User) as UserModel;

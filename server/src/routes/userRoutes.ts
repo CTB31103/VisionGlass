@@ -21,8 +21,6 @@ UserAuthRoutes.get("/", Controllers.UserController.getUsers);
 
 UserAuthRoutes.post("/", Controllers.UserController.createUser);
 
-UserAuthRoutes.put("/", Controllers.UserController.editUser);
-
 UserAuthRoutes.get("/search", Controllers.UserController.searchUsers);
 
 UserAuthRoutes.get("/access", Controllers.UserController.userHasAccess);
@@ -35,3 +33,5 @@ UserAuthRoutes.get(
 );
 
 UserAuthRoutes.get("/:userId", Controllers.UserController.getUser);
+
+UserAuthRoutes.put("/:userId", Controllers.UserController.editUser);

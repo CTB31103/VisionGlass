@@ -3,14 +3,15 @@ import { useTimeoutEffect } from "../utils";
 import { getBrands, getModelsByBrand } from "auto-parts-db";
 import { useRequestCallbackShortForm } from "../components";
 import { IMAGES } from "@/assets";
-import type {
+import {
   CarDamageLocation,
-  ICustomerQuote,
-  WindowSide,
+  type ICustomerQuote,
+  type IServiceType,
+  type WindowSide,
 } from "@/interfaces";
 import { useApi } from "../api";
 import moment from "moment";
-import { toNearestHalfHour } from "@/utils";
+import { capitalize, toNearestHalfHour, toString } from "@/utils";
 import {
   validateAddress,
   validatePayment,
@@ -18,6 +19,8 @@ import {
   validateTimeBlock,
   type ICombinedValidationResponse,
 } from "@/validation";
+import { useLocation, useParams } from "react-router";
+import { ROUTES } from "@/Constants";
 
 const availableDays = [
   "Weekdays",
@@ -29,10 +32,10 @@ const availableDays = [
   "Friday",
   "Saturday",
 ];
-const availableDamageOptions = [
-  "Front Windshield",
-  "Back Windshield",
-  "Side Window(s)",
+const availableDamageOptions: { value: string; text: string }[] = [
+  { value: CarDamageLocation.FRONT, text: "Front Windshield" },
+  { value: CarDamageLocation.BACK, text: "Back Windshield" },
+  { value: CarDamageLocation.SIDE, text: "Side Window(s)" },
 ];
 const availableSides = ["Left", "Right", "Both"];
 const availableSideImages = [
@@ -47,9 +50,12 @@ export type UseCreateCustomerQuoteServiceResponse = ReturnType<
 >;
 
 export const useCreateCustomerQuoteService = () => {
+  const params = useParams();
+  const location = useLocation();
+
   const {
     snackbar: [_, errorSnack],
-    customerQuoteRoutes: { createCustomerQuoteService },
+    customerQuoteRoutes: { createCustomerQuoteService, getCustomer, edit },
   } = useApi();
 
   const [loading, setLoading] = useState(false);
@@ -70,6 +76,7 @@ export const useCreateCustomerQuoteService = () => {
   } = useRequestCallbackShortForm();
   const [email, setEmail] = useState("");
   const [tellUsMore, setTellUsMore] = useState(false);
+  const [notes, setNotes] = useState("");
 
   const [carMake, setCarMake] = useState("");
   const [carModel, setCarModel] = useState("");
@@ -81,15 +88,15 @@ export const useCreateCustomerQuoteService = () => {
   const [shareDamage, setShareDamage] = useState(false);
 
   const [damageMainLocation, setDamageMainLocation] = useState(
-    availableDamageOptions[0],
+    availableDamageOptions[0].value,
   );
   const [damageImage, setDamageImage] = useState(availableSideImages[0]);
   const [damageSide, setDamageSide] = useState("");
   const [damageRows, setDamageRows] = useState<number[]>([]);
   const damageIsSideWindows =
     damageMainLocation ===
-    availableDamageOptions[availableDamageOptions.length - 1];
-  const damageCardTitle = `${damageSide.length > 0 ? damageSide + " " : ""}${damageMainLocation}${damageRows.length === 1 ? "<br/> (" + damageRows[0] + ") " : damageRows.length > 1 ? `<br/> (Multiple Rows)` : ""}`;
+    availableDamageOptions[availableDamageOptions.length - 1].value;
+  const damageCardTitle = `${damageSide.length > 0 ? damageSide + " " : ""}${damageMainLocation}${damageRows.length === 1 ? "<br/> (" + availableRows[damageRows[0] - 1] + ") " : damageRows.length > 1 ? `<br/> (Multiple Rows)` : ""}`;
   const damageCardSmallTitle = damageSide.length > 0 && damageRows.length > 0;
 
   const [payWithInsurance, setPayWithInsurance] = useState(false);
@@ -127,6 +134,10 @@ export const useCreateCustomerQuoteService = () => {
     undefined,
   );
 
+  const [editingCustomer, setEditingCustomer] = useState<
+    ICustomerQuote | undefined
+  >(undefined);
+
   const paymentOptional = readyToSchedule
     ? !readyToSchedule
     : payWithInsurance
@@ -137,6 +148,8 @@ export const useCreateCustomerQuoteService = () => {
     : payWithInsurance
       ? insuranceContacted
       : readyToSchedule;
+
+  const isEditingPage = location.pathname.includes(ROUTES.CUSTOMERS_EDIT);
 
   const setAvailableItems = () => {
     setAvailableTimes(
@@ -161,9 +174,95 @@ export const useCreateCustomerQuoteService = () => {
     );
   };
 
+  const getEditingCustomer = async (customerQuoteId: string) => {
+    setLoading(true);
+
+    const res = await getCustomer(customerQuoteId);
+    setLoading(false);
+
+    if (res.err || !res.data) return errorSnack(res.err);
+
+    setEditingCustomer(res.data.customer);
+  };
+
   useEffect(() => {
     setAvailableItems();
   }, []);
+
+  useEffect(() => {
+    if (editingCustomer?.customerQuoteId && isEditingPage) {
+      setFirstName(editingCustomer.customer.firstName);
+      setLastName(editingCustomer.customer.lastName);
+      setPhone(editingCustomer.customer.phone);
+      setService(editingCustomer.serviceType);
+      setEmail(editingCustomer.customer.email);
+      setTellUsMore(editingCustomer.car ? true : false);
+      setNotes(editingCustomer.notes);
+
+      setCarMake(editingCustomer.car?.make ?? "");
+      // setCarModel(editingCustomer.car?.model ?? "");
+      setCarYear(editingCustomer.car?.year ?? new Date().getFullYear());
+      setIdentifyBy(editingCustomer.car?.plateInfo ? "Plate" : "VIN");
+      setVin(editingCustomer.car?.vin ?? "");
+      setPlate(editingCustomer.car?.plateInfo?.plate ?? "");
+      setZip(editingCustomer.car?.plateInfo?.zip ?? "");
+      setShareDamage(editingCustomer.damage ? true : false);
+
+      setDamageMainLocation(editingCustomer.damage?.location ?? "");
+      setDamageSide(
+        editingCustomer.damage?.windowSide
+          ? capitalize(editingCustomer.damage.windowSide)
+          : "",
+      );
+      setDamageRows(editingCustomer.damage?.rows ?? []);
+
+      setPayWithInsurance(
+        editingCustomer.paymentInfo?.insurance ? true : false,
+      );
+      setInsuranceName(
+        editingCustomer.paymentInfo?.insurance?.insuranceName ?? "",
+      );
+      setPolicyNumber(
+        editingCustomer.paymentInfo?.insurance?.policyNumber ?? "",
+      );
+      setServicePrice(editingCustomer.paymentInfo?.serviceAmount ?? 0);
+      setAfterTaxPrice(editingCustomer.paymentInfo?.serviceAmountAfterTax ?? 0);
+      setInsuranceContacted(
+        (editingCustomer.paymentInfo?.insurance?.coverageAmount ?? 0) > 0,
+      );
+      setInsuranceAccepted(
+        (editingCustomer.paymentInfo?.insurance?.coverageAmount ?? 0) > 0,
+      );
+      setFullCoverage(
+        editingCustomer.paymentInfo?.insurance?.fullCoverage ?? false,
+      );
+      setInsuranceAmount(
+        editingCustomer.paymentInfo?.insurance?.coverageAmount ?? 0,
+      );
+
+      setCallbackAsap(editingCustomer.callbackTime?.asap ?? false);
+      setCallbackDays(
+        editingCustomer.callbackTime?.dayPrefrence ?? ["Weekdays"],
+      );
+      setCallbackFrom(
+        editingCustomer.callbackTime?.timePreference?.from.toString() ??
+          new Date().getTime().toString(),
+      );
+      setCallbackTo(
+        editingCustomer.callbackTime?.timePreference?.to.toString() ??
+          new Date().getTime().toString(),
+      );
+
+      setReadyToSchedule(editingCustomer.meetingTime ? true : false);
+      setCarAddress(editingCustomer.address ?? "");
+      setMeetingTime(
+        new Date(editingCustomer.meetingTime?.from ?? new Date().getTime()),
+      );
+      setEndMeetingTime(
+        new Date(editingCustomer.meetingTime?.to ?? new Date().getTime()),
+      );
+    }
+  }, [editingCustomer?.customerQuoteId, isEditingPage]);
 
   useEffect(() => {
     if (carMake.length === 0) return;
@@ -178,6 +277,8 @@ export const useCreateCustomerQuoteService = () => {
 
       const models = getModelsByBrand(carMake);
       setAvailableCarModels(models.map((m) => m.name));
+      if (editingCustomer?.car && carModel !== editingCustomer.car.model)
+        setCarModel(editingCustomer.car.model);
     },
     [carMake, carModel],
     50,
@@ -193,7 +294,7 @@ export const useCreateCustomerQuoteService = () => {
   useEffect(() => {
     setDamageImage(
       availableSideImages[
-        availableDamageOptions.findIndex((v) => v === damageMainLocation)
+        availableDamageOptions.findIndex((v) => v.value === damageMainLocation)
       ],
     );
   }, [damageMainLocation]);
@@ -208,7 +309,7 @@ export const useCreateCustomerQuoteService = () => {
       setPlate("");
       setZip("");
       setShareDamage(false);
-      setDamageMainLocation(availableDamageOptions[0]);
+      setDamageMainLocation(availableDamageOptions[0].value);
       setDamageImage(availableSideImages[0]);
       setDamageSide("");
       setDamageRows([]);
@@ -248,6 +349,16 @@ export const useCreateCustomerQuoteService = () => {
   useEffect(() => {
     setEndMeetingTime(moment(meetingTime).add(30, "minutes").toDate());
   }, [meetingTime.getTime()]);
+
+  useTimeoutEffect(
+    () => {
+      if (params.customerQuoteId && isEditingPage) {
+        getEditingCustomer(params.customerQuoteId);
+      }
+    },
+    [toString(params), isEditingPage],
+    50,
+  );
 
   const isValid = (
     data: Omit<
@@ -301,6 +412,7 @@ export const useCreateCustomerQuoteService = () => {
       >,
       "createdOn"
     > = {
+      serviceType: service as IServiceType,
       customer: {
         firstName,
         lastName,
@@ -325,7 +437,7 @@ export const useCreateCustomerQuoteService = () => {
             }
           : undefined,
       paymentInfo: {
-        type: payWithInsurance ? "insurance" : "onsite",
+        type: payWithInsurance ? "insurance" : "out_of_pocket",
         serviceAmount: servicePrice,
         serviceAmountAfterTax: afterTaxPrice,
         insurance: payWithInsurance
@@ -352,6 +464,7 @@ export const useCreateCustomerQuoteService = () => {
             to: endMeetingTime.getTime(),
           }
         : undefined,
+      notes,
     };
 
     return data;
@@ -366,13 +479,15 @@ export const useCreateCustomerQuoteService = () => {
       return;
     }
 
-    const res = await createCustomerQuoteService(data);
+    const res = await (isEditingPage && editingCustomer
+      ? edit({ ...editingCustomer, ...data })
+      : createCustomerQuoteService(data));
     setLoading(false);
 
     if (res.err || !res.data) return errorSnack(res.err);
 
     setSuccessModalOpen(true);
-    setCreatedQuote(res.data.customerQuote);
+    setCreatedQuote(res.data.customer);
   };
 
   return {
@@ -478,6 +593,7 @@ export const useCreateCustomerQuoteService = () => {
       setEndMeetingTime,
     },
 
+    isEditingPage,
     loading,
     createdQuote,
     successModelOpen,

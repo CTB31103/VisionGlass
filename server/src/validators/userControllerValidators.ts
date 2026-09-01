@@ -1,6 +1,12 @@
 import { UserType } from "../interfaces";
 import CONSTANTS from "../constants";
-import { ValidateFunc, Validator, requiredWith } from "./validate";
+import {
+  RULES,
+  ValidateFunc,
+  Validator,
+  requiredWith,
+  validationV2,
+} from "./validate";
 
 export const USER_RULES = {
   userId: "string|min:0|max:75",
@@ -113,7 +119,7 @@ const editUser = (body: any) => {
     lastName: USER_RULES.info.lastName,
     email: USER_RULES.info.email,
     phone: USER_RULES.info.phone,
-    profilePictureId: USER_RULES.profilePictureId,
+    // profilePictureId: USER_RULES.profilePictureId,
   };
 
   const validator = new Validator(body, rules);
@@ -125,7 +131,18 @@ const editUser = (body: any) => {
     lastName: body.lastName as string,
     email: body.email as string,
     phone: body.phone as string,
-    profilePictureId: body.profilePictureId as string,
+    // profilePictureId: body.profilePictureId as string,
+  };
+};
+
+const userId = (data: any) => {
+  const { validData, errorMsg } = validationV2<{ userId: string }>(
+    { userId: [RULES.common.requiredString, ""] },
+    data,
+  );
+  if (errorMsg || !validData) throw new Error(errorMsg);
+  return {
+    userId: validData.userId,
   };
 };
 
@@ -149,6 +166,7 @@ const UserControllerValidators = {
   refreshUserWithRefreshToken,
   editUser,
   searchUsers,
+  userId,
 };
 
 export default UserControllerValidators;

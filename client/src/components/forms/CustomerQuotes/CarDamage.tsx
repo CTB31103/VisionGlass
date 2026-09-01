@@ -43,9 +43,7 @@ export const CarDamage = ({
           required={!optional}
           optional={optional}
           label="Where is the vehicle damage?"
-          items={availableDamageOptions.map((option) => ({
-            value: option,
-          }))}
+          items={availableDamageOptions}
           selectedItem={damageMainLocation}
           onSelect={setDamageMainLocation}
         />

@@ -2,16 +2,27 @@ import {
   Filters,
   FullPage,
   PageHeader,
+  PaginationControl,
   SelectInput,
   TBody,
 } from "@/components";
-import { ROUTES } from "@/Constants";
+import {
+  DEFAULT_PAGINATION_LIMIT_OPTIONS,
+  DEFAULT_PAGINATION_OPTION,
+  ROUTES,
+} from "@/Constants";
 import { Stack } from "@mui/material";
 import { TeamMemberCard } from "./TeamMemberCard";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { USER_TYPES, type IUser } from "@/interfaces";
-import { useApi, useIsAdminService, useTimeoutEffect } from "@/hooks";
-import { capitalize, toString } from "@/utils";
+import {
+  useApi,
+  useIsAdminService,
+  usePaginatedState,
+  useTimeoutEffect,
+  type IPaginationResult,
+} from "@/hooks";
+import { capitalize } from "@/utils";
 
 export const Team = () => {
   const availableSortBy = ["", "First Name", "Last Name", "Email", "Position"];
@@ -19,7 +30,7 @@ export const Team = () => {
 
   const {
     snackbar: { errorSnack },
-    userRoutes: { getAllUsers, searchUsers },
+    userRoutes: { getAllUsers },
   } = useApi();
   const isAdmin = useIsAdminService();
 
@@ -28,65 +39,110 @@ export const Team = () => {
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("");
   const [role, setRole] = useState("");
-  const [allUsers, setAllUsers] = useState<IUser[]>([]);
-  const [users, setUsers] = useState<IUser[]>([]);
+  const {
+    docs: [users, setUsers],
+    totalDocs: [totalUsers, setTotalUsers],
+    totalPages,
+    setTotalPages,
+    pageLimit,
+    setPageLimit,
+    pageNumber,
+    setPageNumber,
+  } = usePaginatedState<IUser>({ initialData: [] });
+
+  const setAPISearchResult = ({
+    users,
+    page,
+    pageLimit,
+    total,
+    totalPages,
+  }: { users: IUser[] } & IPaginationResult) => {
+    setUsers(users);
+    setPageNumber(page);
+    setPageLimit(pageLimit);
+    setTotalPages(totalPages);
+    setTotalUsers(total);
+  };
+
+  const getPageUsers = async (
+    paginationOptions = DEFAULT_PAGINATION_OPTION,
+  ) => {
+    setLoading(true);
+
+    const res = await getAllUsers({
+      ...paginationOptions,
+      role: role.length > 0 ? role : undefined,
+      sortBy: sortBy.length > 0 ? sortBy : undefined,
+    });
+    setLoading(false);
+
+    if (res.err || !res.data) return errorSnack(res.err);
+    setAPISearchResult(res.data);
+  };
+
+  const onSearchUsers = async (
+    paginationOptions = DEFAULT_PAGINATION_OPTION,
+  ) => {
+    if (search.length === 0) return;
+    setLoading(true);
+
+    const res = await getAllUsers({
+      ...paginationOptions,
+      query: search,
+      role: role.length > 0 ? role : undefined,
+      sortBy: sortBy.length > 0 ? sortBy : undefined,
+    });
+    setLoading(false);
+
+    if (res.err || !res.data) return errorSnack(res.err);
+    setAPISearchResult(res.data);
+  };
+
+  const getUsersSearchOrAll = (
+    paginationOptions = DEFAULT_PAGINATION_OPTION,
+  ) =>
+    search.length > 0
+      ? onSearchUsers(paginationOptions)
+      : getPageUsers(paginationOptions);
 
   useTimeoutEffect(() => {
-    const callback = async () => {
-      setLoading(true);
-      const res = await getAllUsers();
-      setLoading(false);
-      if (res.err || !res.data) return errorSnack(res.err);
-      setAllUsers(res.data.users);
-    };
+    if (!loading) getUsersSearchOrAll();
+  }, [sortBy, role]);
 
-    if (search.length === 0 && !loading) callback();
-  }, [search]);
+  // useEffect(() => {
+  //   if (allUsers.length === 0) return;
+  //   setUsers(
+  //     allUsers
+  //       .filter((user) => (role.length === 0 ? true : user.userType === role))
+  //       .sort((a, b) => {
+  //         if (sortBy.length === 0) return 0;
 
-  useEffect(() => {
-    if (allUsers.length === 0) return;
-    setUsers(
-      allUsers
-        .filter((user) => (role.length === 0 ? true : user.userType === role))
-        .sort((a, b) => {
-          if (sortBy.length === 0) return 0;
+  //         let fieldA;
+  //         let fieldB;
 
-          let fieldA;
-          let fieldB;
+  //         switch (sortBy) {
+  //           case "Position":
+  //             fieldA = a.userType;
+  //             fieldB = b.userType;
+  //             break;
+  //           case "Email":
+  //             fieldA = a.info.email;
+  //             fieldB = b.info.email;
+  //             break;
+  //           case "Last Name":
+  //             fieldA = a.info.lastName;
+  //             fieldB = b.info.lastName;
+  //             break;
+  //           case "First Name":
+  //           default:
+  //             fieldA = a.info.firstName;
+  //             fieldB = b.info.firstName;
+  //         }
 
-          switch (sortBy) {
-            case "Position":
-              fieldA = a.userType;
-              fieldB = b.userType;
-              break;
-            case "Email":
-              fieldA = a.info.email;
-              fieldB = b.info.email;
-              break;
-            case "Last Name":
-              fieldA = a.info.lastName;
-              fieldB = b.info.lastName;
-              break;
-            case "First Name":
-            default:
-              fieldA = a.info.firstName;
-              fieldB = b.info.firstName;
-          }
-
-          return fieldA.localeCompare(fieldB);
-        }),
-    );
-  }, [toString(allUsers), sortBy, role]);
-
-  const onSearchUsers = async () => {
-    if (search.length === 0) return;
-
-    setLoading(true);
-    const res = await searchUsers({ query: search });
-    setLoading(false);
-    if (res.err || !res.data) return errorSnack(res.err);
-    setAllUsers(res.data.users);
-  };
+  //         return fieldA.localeCompare(fieldB);
+  //       }),
+  //   );
+  // }, [toString(allUsers), sortBy, role]);
 
   return (
     <FullPage screen>
@@ -123,7 +179,7 @@ export const Team = () => {
             onSelect={setRole}
             items={availableRoles.map((s) => ({
               value: s,
-              text: s.length === 0 ? "None" : capitalize(s),
+              text: s.length === 0 ? "Any" : capitalize(s),
             }))}
           />
         </Filters>
@@ -137,6 +193,30 @@ export const Team = () => {
             users.map((user, i) => <TeamMemberCard key={i} user={user} />)
           )}
         </Stack>
+
+        <PaginationControl
+          page={pageNumber}
+          totalPage={totalPages}
+          totalCount={totalUsers}
+          onNextPage={
+            pageNumber !== totalPages && !loading
+              ? () =>
+                  getUsersSearchOrAll({ pageLimit, pageNumber: pageNumber + 1 })
+              : undefined
+          }
+          onPrevPage={
+            pageNumber > 1 && !loading
+              ? () =>
+                  getUsersSearchOrAll({ pageLimit, pageNumber: pageNumber - 1 })
+              : undefined
+          }
+          pageLimit={{
+            value: pageLimit,
+            set: (newPageLimit) =>
+              getUsersSearchOrAll({ pageLimit: newPageLimit, pageNumber: 1 }),
+            available: DEFAULT_PAGINATION_LIMIT_OPTIONS,
+          }}
+        />
       </Stack>
     </FullPage>
   );

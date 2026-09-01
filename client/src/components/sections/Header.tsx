@@ -80,7 +80,7 @@ export const Header = () => {
 
   const [scrollExpanded, setScrollExpanded] = useState(true);
   const highUpDirection = useScrollDirection([5, -75]);
-  const lowRangeDirection = useScrollDirection();
+  const lowRangeDirection = useScrollDirection([5, 20]);
   const { top } = usePagePosition({
     allowableRange: 0,
   });
@@ -104,16 +104,21 @@ export const Header = () => {
   }, [scrollExpanded]);
 
   useEffect(() => {
-    if (lowRangeDirection === "down" && forceExpand) {
+    // If we scroll down in a lower range and are foricbly expanded
+    if (top && lowRangeDirection === "up") {
+      console.log(`Cancel prefer force`);
       setPreferForce(false);
     }
-  }, [lowRangeDirection]);
+  }, [top]);
 
   useTimeoutEffect(
     () => {
+      console.log(`Effect:`);
+      console.log(preferForce);
+      console.log(``);
       if (preferForce) return setScrollExpanded(forceExpand);
 
-      if (autoPreferForce && !(top || highUpDirection === "up")) return;
+      if (autoPreferForce && !top) return;
 
       if (top || highUpDirection === "up") {
         setScrollExpanded(true);
@@ -132,6 +137,8 @@ export const Header = () => {
   const onExpandContractBtn = () =>
     setForceExpand(() => {
       setPreferForce(true);
+      console.log(`Prefer Force: True`);
+      console.log(``);
       return !expanded;
     });
 
@@ -262,9 +269,17 @@ export const Header = () => {
       </div>
 
       {sizeAndUnder.md && (
-        <Stack sx={{ width: "100%" }}>
+        <Stack sx={{ width: "100%", position: "relative" }}>
           <HeaderSmallBar onDrawer={() => setOpenDrawer((prev) => !prev)} />
-          <Stack sx={{ width: "100%", alignItems: "center" }}>
+          <Stack
+            sx={{
+              position: "absolute",
+              top: "100%",
+              left: 0,
+              width: "100%",
+              alignItems: "center",
+            }}
+          >
             <Stack
               sx={{
                 p: 1,

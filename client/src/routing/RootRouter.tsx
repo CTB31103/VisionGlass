@@ -56,6 +56,10 @@ export const RootRouter = () => {
           <Route path={ROUTES.DASHBOARD_ADD} element={<DashboardAdd />} />
 
           <Route path={ROUTES.CUSTOMERS_ADD} element={<CustomerAdd />} />
+          <Route
+            path={ROUTES.CUSTOMERS_EDIT + "/:customerQuoteId"}
+            element={<CustomerAdd />}
+          />
           <Route path={ROUTES.CUSTOMERS} element={<Customers />} />
           <Route
             path={ROUTES.CUSTOMERS + "/:customerQuoteId"}
@@ -64,6 +68,7 @@ export const RootRouter = () => {
 
           <Route path={ROUTES.TEAM} element={<Team />} />
           <Route path={ROUTES.TEAM_ADD} element={<TeamAdd />} />
+          <Route path={ROUTES.TEAM_EDIT + "/:userId"} element={<TeamAdd />} />
 
           <Route path={ROUTES.REVIEWS} element={<Reviews />} />
 

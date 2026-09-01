@@ -68,7 +68,8 @@ export const ROUTES = {
   CUSTOMERS_EDIT: "/customers/edit",
 
   TEAM: "/team",
-  TEAM_ADD: "/team/admin-add",
+  TEAM_ADD: "/team/authorized-add",
+  TEAM_EDIT: "/team/authorized-edit",
 
   REVIEWS: "/reviews",
 
@@ -81,8 +82,10 @@ export const ALL_AUTH_ROUTES = [
   ROUTES.DASHBOARD_ADD,
   ROUTES.CUSTOMERS,
   ROUTES.CUSTOMERS_ADD,
+  ROUTES.CUSTOMERS_EDIT,
   ROUTES.TEAM,
   ROUTES.TEAM_ADD,
+  ROUTES.TEAM_EDIT,
   ROUTES.REVIEWS,
 ];
 

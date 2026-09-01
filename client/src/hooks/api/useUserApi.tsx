@@ -1,9 +1,11 @@
 import type { IPerson, IUser } from "@/interfaces";
 import queryString from "query-string";
 import { useAuthFetch, useHttpSignal } from "../http";
+import type { IPaginationOptions, IPaginationResult } from "../types";
+import { DEFAULT_PAGINATION_OPTION } from "@/Constants";
 
 export const useUserApi = () => {
-  const { get, post, setCustomHeaders } = useAuthFetch();
+  const { get, post, put, setCustomHeaders } = useAuthFetch();
   const { getNewSignal, abortSignal } = useHttpSignal();
 
   const validAccessKey = async () => {
@@ -15,14 +17,20 @@ export const useUserApi = () => {
   const createUser = async (
     data: IPerson & { username: string; password: string; userType: string },
   ) => {
-    return await post<{ newUser: IUser }>(`/api/users/`, data, {
+    return await post<{ user: IUser }>(`/api/users/`, data, {
       signal: getNewSignal("createUser"),
     });
   };
 
-  const getAllUsers = async () => {
-    return await get<{ users: IUser[] }>(
-      `/api/users/`,
+  const getAllUsers = async (
+    options: IPaginationOptions & {
+      query?: string;
+      role?: string;
+      sortBy?: string;
+    } = DEFAULT_PAGINATION_OPTION,
+  ) => {
+    return await get<{ users: IUser[] } & IPaginationResult>(
+      `/api/users?${queryString.stringify(options)}`,
       getNewSignal(`getAllUsers`),
     );
   };
@@ -37,11 +45,11 @@ export const useUserApi = () => {
     return await get<{ user: IUser }>(`/api/users/${userId}`);
   };
 
-  const searchUsers = async (data: { query: string }) => {
-    return await get<{ users: IUser[] }>(
-      `/api/users/search?${queryString.stringify(data)}`,
-    );
-  };
+  // const searchUsers = async (data: { query: string }) => {
+  //   return await get<{ users: IUser[] }>(
+  //     `/api/users?${queryString.stringify(data)}`,
+  //   );
+  // };
 
   const login = async (body: {
     username: string;
@@ -76,12 +84,22 @@ export const useUserApi = () => {
     return await get<object>("/api/users/logout", getNewSignal("logout"));
   };
 
+  const editUser = async (
+    userId: string,
+    data: IPerson & { username: string; password: string; userType: string },
+  ) => {
+    return await put<{ user: IUser }>(`/api/users/${userId}`, data, {
+      signal: getNewSignal(`editUser`),
+    });
+  };
+
   return {
     getAllUsers,
     getUsers,
 
-    searchUsers,
+    // searchUsers,
     createUser,
+    editUser,
     getUser,
     validAccessKey,
 

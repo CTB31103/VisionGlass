@@ -16,6 +16,7 @@ import { useUserStore } from "@/stores";
 
 export const Customer = () => {
   const params = useParams();
+  // const navigate = useNavigate();
 
   const user = useUserStore((state) => state.user);
 
@@ -167,7 +168,7 @@ export const Customer = () => {
         sx={{ width: "100%", paddingBlock: 4, paddingInline: 8 }}
         spacing={4}
       >
-        <PageHeader text="Customer" />
+        <PageHeader backHref={ROUTES.CUSTOMERS} text="Customer" />
 
         <CustomerInfo
           customer={customer}
