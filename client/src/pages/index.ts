@@ -19,3 +19,4 @@ export * from "./customerAdd";
 export * from "./teamAdd";
 export * from "./profile";
 export * from "./customer";
+export * from "./customerAttatchment";

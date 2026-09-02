@@ -17,6 +17,8 @@ const init = (folderLocation: string) => {
   return uploadLocation;
 };
 
+const getUploadsFolder = () => init(CONSTANTS.media.uploads.path());
+
 const join = (...paths: string[]) => path.join(...paths);
 
 const saveFile = async (
@@ -70,6 +72,7 @@ const toClientUrl = (fileName: string) =>
 
 export const ImageUtils = {
   init,
+  getUploadsFolder,
   join,
   saveFile,
   deleteFile,

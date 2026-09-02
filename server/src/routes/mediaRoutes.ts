@@ -4,12 +4,14 @@ import Middleware from "../middleware";
 
 export const MediaRoutes = Router();
 
+MediaRoutes.get("/attatchments", Controllers.MediaController.getAttatchments);
+
 MediaRoutes.get("/serve/:imageName", Controllers.MediaController.serveImage);
 
 MediaRoutes.post(
   "/upload",
   Middleware.apiAccess,
   Middleware.accessKeyOnly,
-  Middleware.upload.array("IMAGES_V1", 5),
+  Middleware.upload.array("files", 5),
   Controllers.MediaController.upload,
 );

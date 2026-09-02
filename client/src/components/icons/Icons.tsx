@@ -39,6 +39,7 @@ import PersonIcon from "@mui/icons-material/Person";
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 
 import LogoutIcon from "@mui/icons-material/Logout";
+import FileUploadIcon from "@mui/icons-material/FileUpload";
 
 export const Icons = {
   Close: CloseIcon,
@@ -81,6 +82,7 @@ export const Icons = {
 
   Car: DirectionsCarIcon,
   Logout: LogoutIcon,
+  Upload: FileUploadIcon,
 };
 
 export type IconType = OverridableComponent<SvgIconTypeMap<object, "svg">> & {

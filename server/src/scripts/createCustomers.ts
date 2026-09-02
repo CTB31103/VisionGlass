@@ -67,6 +67,7 @@ export const createCustomers = async () => {
       serviceType: allServiceTypes[randBtwn(0, 3)],
       customerQuoteId: HashUtils.uniqueId(),
       teamMembers: [admin.userId],
+      attatchments: [],
       status: isScheduled
         ? "scheduled"
         : isInsured

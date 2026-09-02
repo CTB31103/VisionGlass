@@ -19,9 +19,13 @@ export const PageHeader = ({ text, backHref, onGoBack }: PageHeaderProps) => {
         justifyContent: "center",
       }}
     >
-      <THeading bungeeFill large>
-        {text}
-      </THeading>
+      <Stack
+        sx={{ maxWidth: "80%", alignItems: "center", justifyContent: "center" }}
+      >
+        <THeading align="center" bungeeFill large>
+          {text}
+        </THeading>
+      </Stack>
 
       {(onGoBack || backHref) && (
         <Stack

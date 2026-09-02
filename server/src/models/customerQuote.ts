@@ -182,6 +182,8 @@ export class CustomerQuote implements ICustomerQuote {
   meetingTime?: ITimeBlock;
   @Prop({ type: String }, PropType.ARRAY)
   teamMembers: string[];
+  @Prop({ type: String }, PropType.ARRAY)
+  attatchments: string[];
   @Prop({ type: PaymentInfo, _id: false })
   paymentInfo?: IPaymentInfo;
   @Prop({ type: CallbackInfo, _id: false })
@@ -203,6 +205,7 @@ export class CustomerQuote implements ICustomerQuote {
     callbackTime,
     meetingTime,
     teamMembers,
+    attatchments,
     paymentInfo,
     notes,
     createdOn,
@@ -215,6 +218,7 @@ export class CustomerQuote implements ICustomerQuote {
     this.damage = damage ? new CarDamage(damage) : undefined;
     this.address = address;
     this.teamMembers = produce(teamMembers, (_draft) => {});
+    this.attatchments = produce(attatchments, (_draft) => {});
     this.paymentInfo = paymentInfo ? new PaymentInfo(paymentInfo) : undefined;
     this.callbackTime = callbackTime
       ? new CallbackInfo(callbackTime)

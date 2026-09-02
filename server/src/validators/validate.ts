@@ -28,6 +28,7 @@ export const RULES = {
     optionalArray: "array",
     optionalString: "string",
     optionalNumber: "numeric",
+    optionalBool: "boolean",
     optionalEmail: "email",
 
     presentString: "present|string|min:1",

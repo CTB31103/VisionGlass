@@ -106,16 +106,12 @@ export const Header = () => {
   useEffect(() => {
     // If we scroll down in a lower range and are foricbly expanded
     if (top && lowRangeDirection === "up") {
-      console.log(`Cancel prefer force`);
       setPreferForce(false);
     }
   }, [top]);
 
   useTimeoutEffect(
     () => {
-      console.log(`Effect:`);
-      console.log(preferForce);
-      console.log(``);
       if (preferForce) return setScrollExpanded(forceExpand);
 
       if (autoPreferForce && !top) return;
@@ -137,8 +133,7 @@ export const Header = () => {
   const onExpandContractBtn = () =>
     setForceExpand(() => {
       setPreferForce(true);
-      console.log(`Prefer Force: True`);
-      console.log(``);
+
       return !expanded;
     });
 

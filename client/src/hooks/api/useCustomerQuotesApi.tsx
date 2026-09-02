@@ -93,6 +93,16 @@ export const useCustomerQuotesApi = () => {
     );
   };
 
+  const toggleAttatchments = async (
+    customerQuoteId: string,
+    data: { attatchmentIds: string[]; deleteAttatchment?: boolean },
+  ) => {
+    return await put<{ customer: ICustomerQuote }>(
+      `/api/customer-quotes/attatchments/${customerQuoteId}`,
+      data,
+    );
+  };
+
   return {
     getAllCustomers,
     getCustomer,
@@ -102,5 +112,6 @@ export const useCustomerQuotesApi = () => {
     createCustomerQuoteService,
     edit,
     toggleTeamMember,
+    toggleAttatchments,
   };
 };

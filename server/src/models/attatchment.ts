@@ -14,11 +14,23 @@ export class Attatchment implements IAttatchment {
   createdOn: number;
   @Prop({ type: String })
   groupId: string;
+  @Prop({ type: String })
+  createdBy: string;
+  @Prop({ type: Boolean })
+  isPrivate: boolean;
 
-  constructor({ attachmentId, createdOn, groupId }: IAttatchment) {
+  constructor({
+    attachmentId,
+    createdOn,
+    groupId,
+    createdBy,
+    isPrivate,
+  }: IAttatchment) {
     this.attachmentId = attachmentId;
     this.createdOn = createdOn;
     this.groupId = groupId;
+    this.createdBy = createdBy;
+    this.isPrivate = isPrivate;
   }
 
   toAttatchment() {

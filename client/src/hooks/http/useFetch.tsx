@@ -35,9 +35,10 @@ export const useFetch = (props?: { authorization?: string | null }) => {
       if (["POST", "PUT"].includes(method) && body) {
         bodyToSend =
           isFormData && body instanceof FormData ? body : JSON.stringify(body);
-        headers["Content-Type"] = isFormData
-          ? "multipart/form-data"
-          : "application/json";
+        if (!isFormData) headers["Content-Type"] = "application/json";
+        // headers["Content-Type"] = isFormData
+        //   ? "multipart/form-data"
+        //   : "application/json";
       }
 
       if (props?.authorization) {

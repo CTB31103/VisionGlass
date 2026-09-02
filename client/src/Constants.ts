@@ -5,6 +5,9 @@ export const CONSTANTS = {
     key: () => import.meta.env.VITE_API_KEY as string,
 
     recaptcha: () => import.meta.env.VITE_GOOGLE_CAPTCHA_SITE_KEY || "",
+
+    image: (imageName: string) =>
+      `http://${import.meta.env.VITE_API_HOSTNAME as string}/api/media/serve/${imageName}`,
   },
 };
 
@@ -64,6 +67,9 @@ export const ROUTES = {
   DASHBOARD_ADD: "/dashboard/add",
 
   CUSTOMERS: "/customers",
+  CUSTOMER: (customerId: string) => `/customers/${customerId}`,
+  CUSTOMERS_ATTATCHMENT: (customerId: string, attatchmentId: string) =>
+    `/customers/${customerId}/attatchment/${attatchmentId}`,
   CUSTOMERS_ADD: "/customers/add",
   CUSTOMERS_EDIT: "/customers/edit",
 
@@ -119,3 +125,10 @@ export const LOCATIONS = [
 export const DEFAULT_PAGINATION_OPTION = { pageNumber: 1, pageLimit: 5 };
 
 export const DEFAULT_PAGINATION_LIMIT_OPTIONS = [5, 10, 20];
+
+export const ONE_MB = 1024 * 1024;
+
+export const MAX_FILE_SIZE = 15 * ONE_MB; // 15 MB max
+
+export const ACCEPTABLE_IMAGE_TYPES =
+  ".heic, .jpg, .jpeg, .png, .webp, image/jpeg, image/png, image/heic, image/webp";

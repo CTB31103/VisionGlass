@@ -1,14 +1,8 @@
 import CONSTANTS from "../constants";
 import { IAttatchment } from "../interfaces";
-import { AttatchmentModel } from "../models";
-import {
-  HashUtils,
-  ImageUtils,
-  Log,
-  SessionController,
-  TryCatch,
-} from "../utils";
-import Validators from "../validators";
+import { AttatchmentModel, RootFilterQuery } from "../models";
+import { HashUtils, ImageUtils, Log, TryCatch } from "../utils";
+import Validators, { RULES, validationV2 } from "../validators";
 import ControllerFunc from "./controllerFunc";
 
 const upload = ControllerFunc((req, res) => {
@@ -16,17 +10,24 @@ const upload = ControllerFunc((req, res) => {
 
   TryCatch(
     async () => {
-      if (!req.files || !Array.isArray(req.files))
-        throw new Error(`No image found in upload`);
+      const { userId } = Validators.TokenValidators.resLocalsTokenValues(
+        res.locals,
+      );
 
-      const files = req.files;
-      const diskFolder = ImageUtils.init(CONSTANTS.media.uploads.path);
+      if (!req.files) throw new Error(`No image found in upload`);
+
+      const files = Array.isArray(req.files) ? req.files : req.files["files"];
+      const diskFolder = ImageUtils.getUploadsFolder();
+
+      const isPrivate = req.body?.isPrivate
+        ? Boolean(req.body?.isPrivate)
+        : false;
 
       for await (let file of files) {
-        const fileName = HashUtils.uniqueId();
+        const fileNameId = HashUtils.uniqueId();
         const attatchmentId = await ImageUtils.saveFile(
           file.buffer,
-          ImageUtils.join(diskFolder, fileName),
+          ImageUtils.join(diskFolder, fileNameId),
         );
         savedUploads.push(attatchmentId);
       }
@@ -37,15 +38,23 @@ const upload = ControllerFunc((req, res) => {
         attachmentId,
         createdOn,
         groupId,
+        createdBy: userId,
+        isPrivate,
       }));
 
-      await AttatchmentModel.insertMany(attatchments);
+      const createdAttatchments =
+        await AttatchmentModel.insertMany(attatchments);
 
-      res.status(200).json({ attatchmentIds: savedUploads });
+      res.status(200).json({
+        attatchmentIds: savedUploads,
+        attatchments: createdAttatchments.map((attatch) =>
+          attatch.toAttatchment(),
+        ),
+      });
     },
     async (err) => {
       Log.colors.purpleSpace(`Aborting Upload`, savedUploads);
-      const diskFolder = ImageUtils.init(CONSTANTS.media.uploads.path);
+      const diskFolder = ImageUtils.getUploadsFolder();
       try {
         savedUploads.forEach((upload) =>
           ImageUtils.deleteFile(ImageUtils.join(diskFolder, upload)),
@@ -64,13 +73,20 @@ const serveImage = ControllerFunc((req, res) =>
       const imageName = Validators.MediaValidators.includesImageName(
         req.params,
       );
-      const diskFolder = ImageUtils.init(CONSTANTS.media.uploads.path);
+      const diskFolder = ImageUtils.getUploadsFolder();
 
       const filePath = ImageUtils.join(diskFolder, imageName);
 
       if (filePath.indexOf(diskFolder + ImageUtils.sep()) !== 0) {
         return res.status(403).end("Forbidden");
       }
+
+      const attatchment = await AttatchmentModel.find({
+        attachmentId: imageName,
+      });
+      Log.colors.purple(`Attatchment:`);
+      Log.colors.purple(attatchment);
+      Log.colors.purple(``);
 
       ImageUtils.mustExist(filePath);
 
@@ -90,7 +106,72 @@ const serveImage = ControllerFunc((req, res) =>
   ),
 );
 
+const getAttatchments = ControllerFunc((req, res) =>
+  TryCatch(
+    async () => {
+      const { validData, errorMsg } = validationV2<{
+        attatchmentIds?: string | string[];
+        groupIds?: string | string[];
+      }>(
+        {
+          attatchmentIds: [
+            Array.isArray(req.query?.attatchmentIds)
+              ? RULES.common.optionalArray
+              : RULES.common.optionalString,
+            "",
+          ],
+          groupIds: [
+            Array.isArray(req.query?.groupIds)
+              ? RULES.common.optionalArray
+              : RULES.common.optionalString,
+            "",
+          ],
+        },
+        req.query,
+      );
+
+      let databaseQuery: RootFilterQuery<IAttatchment> = {
+        $and: [],
+      };
+
+      if (validData?.attatchmentIds) {
+        if (Array.isArray(validData.attatchmentIds))
+          databaseQuery.$and!.push({
+            $or: validData.attatchmentIds.map(
+              (id): RootFilterQuery<IAttatchment> => ({ attachmentId: id }),
+            ),
+          });
+        else
+          databaseQuery.$and!.push({ attachmentId: validData.attatchmentIds });
+      }
+
+      if (validData?.groupIds) {
+        if (Array.isArray(validData.groupIds))
+          databaseQuery.$and!.push({
+            $or: validData.groupIds.map(
+              (id): RootFilterQuery<IAttatchment> => ({ attachmentId: id }),
+            ),
+          });
+        else databaseQuery.$and!.push({ attachmentId: validData.groupIds });
+      }
+
+      if ((databaseQuery.$and ?? []).length === 0)
+        return res.send({ attatchments: [] });
+
+      const attatchments = await AttatchmentModel.find(databaseQuery);
+
+      res.send({
+        attatchments: attatchments.map((attatch) => attatch.toAttatchment()),
+      });
+    },
+    (err) => {
+      res.status(500).json({ error: err });
+    },
+  ),
+);
+
 export const MediaController = {
   upload,
   serveImage,
+  getAttatchments,
 };

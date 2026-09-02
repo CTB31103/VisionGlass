@@ -29,7 +29,8 @@ const CONSTANTS = {
   },
   media: {
     uploads: {
-      path: "/uploads",
+      path: () =>
+        CONSTANTS.env.isProduction() ? "/uploads/public" : "/uploads/test",
     },
   },
 

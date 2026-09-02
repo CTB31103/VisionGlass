@@ -4,6 +4,7 @@ import {
   Contact,
   Customer,
   CustomerAdd,
+  CustomerAttatchment,
   Customers,
   Dashboard,
   DashboardAdd,
@@ -59,6 +60,13 @@ export const RootRouter = () => {
           <Route
             path={ROUTES.CUSTOMERS_EDIT + "/:customerQuoteId"}
             element={<CustomerAdd />}
+          />
+          <Route
+            path={ROUTES.CUSTOMERS_ATTATCHMENT(
+              ":customerQuoteId",
+              ":attatchmentId",
+            )}
+            element={<CustomerAttatchment />}
           />
           <Route path={ROUTES.CUSTOMERS} element={<Customers />} />
           <Route

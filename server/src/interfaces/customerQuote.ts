@@ -52,6 +52,7 @@ export type WindowSide = (typeof WindowSide)[keyof typeof WindowSide];
 export interface ICustomerQuote {
   customerQuoteId: string;
   teamMembers: string[];
+  attatchments: string[];
   status: CustomerQuoteStatus;
   customer: IPerson;
   createdOn: number;

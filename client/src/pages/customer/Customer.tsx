@@ -1,6 +1,14 @@
 import { Divider, FullPage, LoadingPage, PageHeader } from "@/components";
-import { useApi, useTimeoutEffect } from "@/hooks";
-import { type ICustomerQuote, type IUser } from "@/interfaces";
+import {
+  useApi,
+  useDeleteCustomerAttatchment,
+  useGetCustomerService,
+} from "@/hooks";
+import {
+  type IAttatchment,
+  type ICustomerQuote,
+  type IUser,
+} from "@/interfaces";
 import { toString } from "@/utils";
 import { Stack } from "@mui/material";
 import { useEffect, useState } from "react";
@@ -16,7 +24,6 @@ import { useUserStore } from "@/stores";
 
 export const Customer = () => {
   const params = useParams();
-  // const navigate = useNavigate();
 
   const user = useUserStore((state) => state.user);
 
@@ -24,54 +31,56 @@ export const Customer = () => {
     snackbar: [_, errorSnack],
     customerQuoteRoutes,
     userRoutes,
+    attatchmentRoutes,
   } = useApi();
 
-  const [loading, setLoading] = useState(false);
+  const {
+    customer,
+    setCustomer,
+    loading: customerLoading,
+  } = useGetCustomerService({ customerQuoteId: params.customerQuoteId });
+  const { loading: deleteCustomerLoading, onDeleteCustomerAttatchment } =
+    useDeleteCustomerAttatchment();
+
+  const [stateLoading, setStateLoading] = useState(false);
+  const [documentsLoading, setDocumentsLoading] = useState(false);
   const [saveLoading, setSaveLoading] = useState(false);
   const [memberLoading, setMemberLoading] = useState(false);
-  const [customer, setCustomer] = useState<ICustomerQuote | undefined>(
-    undefined,
-  );
+
   const [teamMembers, setTeamMembers] = useState<IUser[]>([]);
+  const [attatchments, setAttatchments] = useState<IAttatchment[]>([]);
   const [notes, setNotes] = useState("");
 
   const [showDoneWarning, setShowDoneWarning] = useState(false);
   const [showQuotedWarning, setShowQuotedWarning] = useState(false);
   const [showScheduledWarning, setShowScheduledWarning] = useState(false);
 
-  const getCustomer = async (customerId: string) => {
-    setLoading(true);
-
-    const res = await customerQuoteRoutes.getCustomer(customerId);
-    setLoading(false);
-
-    if (res.err || !res.data) return errorSnack(res.err);
-
-    setCustomer(res.data.customer);
-  };
+  const loading = stateLoading || customerLoading;
 
   const getTeamMembers = async (customer: ICustomerQuote) => {
-    setLoading(true);
+    setStateLoading(true);
 
     const res = await userRoutes.getUsers(customer.teamMembers);
 
-    setLoading(false);
+    setStateLoading(false);
 
     if (res.err || !res.data) return errorSnack(res.err);
 
     setTeamMembers(res.data.users);
   };
 
-  useTimeoutEffect(
-    () => {
-      if (!params.customerQuoteId) return;
-      (async () => {
-        await getCustomer(params.customerQuoteId as string);
-      })();
-    },
-    [toString(params)],
-    50,
-  );
+  const getAttatchments = async (customer: ICustomerQuote) => {
+    setStateLoading(true);
+
+    const res = await attatchmentRoutes.getAttatchments({
+      attatchmentIds: customer.attatchments,
+    });
+    setStateLoading(false);
+
+    if (res.err || !res.data) return errorSnack(res.err);
+
+    setAttatchments(res.data.attatchments);
+  };
 
   useEffect(() => {
     setNotes(customer?.notes ?? "");
@@ -82,14 +91,19 @@ export const Customer = () => {
     else setTeamMembers([]);
   }, [toString(customer?.teamMembers)]);
 
+  useEffect(() => {
+    if (customer && customer.attatchments.length > 0) getAttatchments(customer);
+    else setAttatchments([]);
+  }, [toString(customer?.attatchments)]);
+
   const updateCustomerStatus = async (
     customer: ICustomerQuote,
     status: ICustomerQuote["status"],
   ) => {
-    setLoading(true);
+    setStateLoading(true);
 
     const res = await customerQuoteRoutes.editStatus(customer, status);
-    setLoading(false);
+    setStateLoading(false);
 
     if (res.err || !res.data) return errorSnack(res.err);
 
@@ -160,7 +174,41 @@ export const Customer = () => {
     setCustomer(res.data.customer);
   };
 
-  if (loading || !customer) return <LoadingPage />;
+  const onAddDocumentIds = async (
+    customer: ICustomerQuote,
+    attatchmentIds: string[],
+  ) => {
+    setDocumentsLoading(true);
+
+    const res = await customerQuoteRoutes.toggleAttatchments(
+      customer.customerQuoteId,
+      { attatchmentIds },
+    );
+    setDocumentsLoading(false);
+
+    if (res.err || !res.data) return errorSnack(res.err);
+
+    setCustomer(res.data.customer);
+  };
+
+  // const onDeleteDocument = async (
+  //   customer: ICustomerQuote,
+  //   attatchmentId: string,
+  // ) => {
+  //   setDocumentsLoading(true);
+
+  //   const res = await customerQuoteRoutes.toggleAttatchments(
+  //     customer.customerQuoteId,
+  //     { attatchmentIds: [attatchmentId], deleteAttatchment: true },
+  //   );
+  //   setDocumentsLoading(false);
+
+  //   if (res.err || !res.data) return errorSnack(res.err);
+
+  //   setCustomer(res.data.customer);
+  // };
+
+  if (loading || deleteCustomerLoading || !customer) return <LoadingPage />;
 
   return (
     <FullPage screen>
@@ -203,9 +251,19 @@ export const Customer = () => {
 
         <Divider />
 
-        <CustomerDocuments />
-
-        <Divider />
+        <CustomerDocuments
+          customerId={customer.customerQuoteId}
+          loading={documentsLoading}
+          attatchments={attatchments}
+          onAddDocumentIds={(docIds) => onAddDocumentIds(customer, docIds)}
+          onDeleteDocument={(docId) =>
+            onDeleteCustomerAttatchment(
+              customer.customerQuoteId,
+              docId,
+              (cust) => setCustomer(cust),
+            )
+          }
+        />
 
         <WarningModal
           open={showDoneWarning}

@@ -8,6 +8,11 @@ CustomerQuoteRoutes.get("/", Controllers.CustomerQuoteController.getQuotes);
 CustomerQuoteRoutes.post("/", Controllers.CustomerQuoteController.create);
 
 CustomerQuoteRoutes.put(
+  "/attatchments/:customerQuoteId",
+  Controllers.CustomerQuoteController.toggleAttatchments,
+);
+
+CustomerQuoteRoutes.put(
   "/status/:customerQuoteId",
   Controllers.CustomerQuoteController.editStatus,
 );

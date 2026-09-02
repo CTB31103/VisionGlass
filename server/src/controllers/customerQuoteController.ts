@@ -4,11 +4,18 @@ import {
   ICustomerQuote,
   IServiceType,
 } from "../interfaces";
-import { CustomerQuote, CustomerQuoteModel, RootFilterQuery } from "../models";
+import {
+  AttatchmentModel,
+  CustomerQuote,
+  CustomerQuoteModel,
+  RootFilterQuery,
+} from "../models";
 import {
   ConditionalUtils,
   HashUtils,
+  ImageUtils,
   Log,
+  SessionController,
   toMidnight,
   TryCatch,
 } from "../utils";
@@ -16,6 +23,7 @@ import Validators from "../validators";
 import { RULES, validationV2 } from "../validators/validate";
 import ControllerFunc from "./controllerFunc";
 import CONSTANTS from "../constants";
+import { produce } from "immer";
 
 const getQuotes = ControllerFunc((req, res) =>
   TryCatch(
@@ -184,6 +192,7 @@ const create = ControllerFunc((req, res) =>
         serviceType: serviceType as IServiceType,
         customerQuoteId: HashUtils.uniqueId(),
         teamMembers: [userId],
+        attatchments: [],
         status:
           meetingTime !== undefined
             ? "scheduled"
@@ -278,6 +287,7 @@ const edit = ControllerFunc((req, res) =>
         serviceType: serviceType as IServiceType,
         customerQuoteId,
         teamMembers,
+        attatchments: ogQuote.attatchments,
         status: forceStatus
           ? (status as CustomerQuoteStatus)
           : meetingTime !== undefined
@@ -372,6 +382,79 @@ const toggleTeamMember = ControllerFunc((req, res) =>
   ),
 );
 
+const toggleAttatchments = ControllerFunc((req, res) =>
+  SessionController(
+    async ({ session }) =>
+      await TryCatch(
+        async () => {
+          const { customerQuoteId } =
+            Validators.CustomerQuoteValidators.customerQuoteId(req.params);
+          const { validData, errorMsg } = validationV2<{
+            attatchmentIds: string[];
+            deleteAttatchment?: boolean;
+          }>(
+            {
+              attatchmentIds: [
+                RULES.multiple(RULES.min(1), RULES.common.requiredArray),
+                "attatchments",
+              ],
+              deleteAttatchment: [RULES.common.optionalBool, ""],
+            },
+            req.body,
+          );
+          if (errorMsg || !validData) throw new Error(errorMsg);
+
+          const ogQuote = await CustomerQuoteModel.findOne({
+            customerQuoteId,
+          }).session(session);
+          if (!ogQuote) throw new Error(`Could not find customer.`);
+
+          const addingIds: string[] = [];
+          const removingIds: string[] = [];
+
+          validData.attatchmentIds.forEach((id) =>
+            ogQuote.attatchments.includes(id)
+              ? removingIds.push(id)
+              : addingIds.push(id),
+          );
+
+          if (removingIds.length > 0 && Boolean(validData.deleteAttatchment)) {
+            const diskFolder = ImageUtils.getUploadsFolder();
+
+            Log.colors.yellow(`Removing:`);
+            Log.colors.yellow(Log.json(removingIds));
+            Log.colors.yellow(``);
+
+            await Promise.all(
+              removingIds.map(
+                async (id) =>
+                  await ImageUtils.deleteFile(ImageUtils.join(diskFolder, id)),
+              ),
+            );
+
+            await AttatchmentModel.deleteMany(
+              { attachmentId: { $in: removingIds } },
+              { session },
+            );
+          }
+
+          ogQuote.attatchments = produce(ogQuote.attatchments, (draft) => {
+            return draft
+              .filter((ogId) => !removingIds.includes(ogId))
+              .concat(addingIds);
+          });
+
+          await ogQuote.save({ session });
+
+          res.send({ customer: ogQuote.toCustomerQuote() });
+        },
+        (err) => {
+          res.status(500).json({ error: err });
+        },
+      ),
+  ),
+);
+
 export const CustomerQuoteController = {
   create,
   getQuotes,
@@ -379,4 +462,5 @@ export const CustomerQuoteController = {
   edit,
   editStatus,
   toggleTeamMember,
+  toggleAttatchments,
 };
