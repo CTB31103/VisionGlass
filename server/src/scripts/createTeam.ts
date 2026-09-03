@@ -1,6 +1,7 @@
 import { IUser, UserType } from "../interfaces";
 import { UserModel } from "../models";
 import { HashUtils } from "../utils";
+import { ROOT_USERNAME } from "./createAdmin";
 
 const coinFlip = () => Math.round(Math.random()) === 1;
 
@@ -16,7 +17,7 @@ export const createTeam = async () => {
     let user: IUser = {
       userId: HashUtils.uniqueId(),
       username: `${person.firstName}${person.lastName}`.toLowerCase(),
-      password: await HashUtils.encrypt(person.firstName),
+      password: await HashUtils.encrypt(ROOT_USERNAME),
       userType:
         userTypeNum === 1 && canBeAdmin
           ? UserType.ADMIN

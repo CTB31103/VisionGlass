@@ -11,3 +11,4 @@ export * from "./NumberInput";
 export * from "./DateTextInput";
 export * from "./DateSelectInput";
 export * from "./StarInput";
+export * from "./ToggleSecureTextInput";

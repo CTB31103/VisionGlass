@@ -40,6 +40,10 @@ import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 
 import LogoutIcon from "@mui/icons-material/Logout";
 import FileUploadIcon from "@mui/icons-material/FileUpload";
+import PasswordIcon from "@mui/icons-material/Password";
+
+import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
+import VisibilityOnIcon from "@mui/icons-material/Visibility";
 
 export const Icons = {
   Close: CloseIcon,
@@ -83,6 +87,11 @@ export const Icons = {
   Car: DirectionsCarIcon,
   Logout: LogoutIcon,
   Upload: FileUploadIcon,
+
+  Password: PasswordIcon,
+
+  HideOn: VisibilityOffIcon,
+  HideOff: VisibilityOnIcon,
 };
 
 export type IconType = OverridableComponent<SvgIconTypeMap<object, "svg">> & {

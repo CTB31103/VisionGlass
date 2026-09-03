@@ -32,6 +32,16 @@ UserAuthRoutes.get(
   Controllers.UserController.loginUserWithAccessToken,
 );
 
+UserAuthRoutes.post(
+  "/:userId/verification",
+  Controllers.UserController.verifyPassword,
+);
+
+UserAuthRoutes.put(
+  "/:userId/authentication",
+  Controllers.UserController.changePassword,
+);
+
 UserAuthRoutes.get("/:userId", Controllers.UserController.getUser);
 
 UserAuthRoutes.put("/:userId", Controllers.UserController.editUser);

@@ -22,7 +22,11 @@ import {
   SessionController,
   TokenUtils,
 } from "../utils";
-import Validators, { RULES, validationV2 } from "../validators";
+import Validators, {
+  RULES,
+  validationV2,
+  validationV2Err,
+} from "../validators";
 import ControllerFunc from "./controllerFunc";
 import CONSTANTS from "../constants";
 
@@ -240,7 +244,7 @@ const loginUser = ControllerFunc((req, res) =>
         user.password,
         validBody.password,
       );
-      if (!pwdMatch) throw new Error(`Incorrect username or password...`);
+      if (!pwdMatch) throw new Error(`Incorrect username or password`);
 
       const token = TokenUtils.signJWTToken(
         {
@@ -522,6 +526,80 @@ const getUser = ControllerFunc((req, res) =>
   ),
 );
 
+const _verifyPasswordLogic = async (locals: any, params: any, body: any) => {
+  const { userId: tokenUserId } =
+    Validators.TokenValidators.resLocalsTokenValues(locals);
+  const { userId } = Validators.UserControllerValidators.userId(params);
+  const { currentPassword } = validationV2Err<{ currentPassword: string }>(
+    { currentPassword: [RULES.common.requiredString, ""] },
+    body,
+  );
+
+  if (tokenUserId !== userId)
+    throw new Error(`Cannot update another users password`);
+
+  const user = await UserModel.findOne({ userId });
+  if (!user) throw new Error(`Could not find user`);
+
+  const pwdMatch = await HashUtils.decrypt(user.password, currentPassword);
+
+  return {
+    user,
+    pwdMatch,
+    userId,
+    tokenUserId,
+    currentPassword,
+  };
+};
+
+const verifyPassword = ControllerFunc((req, res) =>
+  TryCatch(
+    async () => {
+      const { pwdMatch } = await _verifyPasswordLogic(
+        res.locals,
+        req.params,
+        req.body,
+      );
+
+      res.send({ verified: pwdMatch });
+    },
+    (err) => {
+      res.status(500).json({ error: err });
+    },
+  ),
+);
+
+const changePassword = ControllerFunc((req, res) =>
+  TryCatch(
+    async () => {
+      const { pwdMatch, user } = await _verifyPasswordLogic(
+        res.locals,
+        req.params,
+        req.body,
+      );
+      const { password } = validationV2Err<{ password: string }>(
+        {
+          password: [
+            Validators.UserControllerValidators.USER_RULES.password,
+            "",
+          ],
+        },
+        req.body,
+      );
+
+      if (!pwdMatch) throw new Error(`Invalid current password`);
+
+      user.password = await HashUtils.encrypt(password);
+      await user.save();
+
+      res.send({ success: true });
+    },
+    (err) => {
+      res.status(500).json({ error: err });
+    },
+  ),
+);
+
 export const UserController = {
   createUser,
   getUsers,
@@ -533,4 +611,6 @@ export const UserController = {
   editUser,
   searchUsers,
   userHasAccess,
+  verifyPassword,
+  changePassword,
 };

@@ -127,6 +127,15 @@ export const validationV2 = <T extends object>(
   return craftReturnObj(returnObj, errorMsg);
 };
 
+export const validationV2Err = <T extends object>(
+  funcRules: { [K in keyof T]: [string, string] },
+  data: unknown,
+) => {
+  const { validData, errorMsg } = validationV2<T>(funcRules, data);
+  if (errorMsg || !validData) throw new Error(errorMsg);
+  return validData;
+};
+
 export const requiredWith = (fields: string[]) =>
   fields
     .map(

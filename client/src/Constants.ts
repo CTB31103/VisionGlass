@@ -62,6 +62,7 @@ export const ROUTES = {
   LOGIN: "/login",
 
   PROFILE: "/profile",
+  PROFILE_PWD: (userId: string) => `/profile/${userId}/authorized-pwd`,
 
   DASHBOARD: "/dashboard",
   DASHBOARD_ADD: "/dashboard/add",

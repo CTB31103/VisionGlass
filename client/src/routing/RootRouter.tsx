@@ -1,6 +1,7 @@
 import { Route, Routes } from "react-router";
 import {
   About,
+  ChangePassword,
   Contact,
   Customer,
   CustomerAdd,
@@ -52,6 +53,10 @@ export const RootRouter = () => {
           {/* Auth */}
           <Route path={ROUTES.PROFILE} element={<Profile />} />
           <Route path={ROUTES.PROFILE + "/:userId"} element={<Profile />} />
+          <Route
+            path={ROUTES.PROFILE_PWD(":userId")}
+            element={<ChangePassword />}
+          />
 
           <Route path={ROUTES.DASHBOARD} element={<Dashboard />} />
           <Route path={ROUTES.DASHBOARD_ADD} element={<DashboardAdd />} />

@@ -17,10 +17,11 @@ export const Login = () => {
   const { toDashboard } = useNavigationService();
 
   const {
+    snackbar: [_, errorSnack],
     userRoutes: { login, abortSignal },
   } = useApi();
 
-  const { loggedIn, user, setUser } = useUserStore();
+  const { loggedIn, setUser } = useUserStore();
   const setAccessKey = useAccessKeyStore((state) => state.setAccessKey);
 
   const { control, handleSubmit } = useForm<{
@@ -37,7 +38,6 @@ export const Login = () => {
   });
 
   useEffect(() => {
-    console.log(`User:`, JSON.stringify(user, null, 2));
     if (loggedIn) toDashboard();
   }, [loggedIn, toDashboard]);
 
@@ -46,11 +46,7 @@ export const Login = () => {
 
     const res = await login(data);
 
-    if (res.err || !res.data) {
-      console.log(`Internal error: `);
-      console.log(res.err);
-      return;
-    }
+    if (res.err || !res.data) return errorSnack(res.err);
 
     setUser(res.data.user);
     setAccessKey(res.data.token);

@@ -168,6 +168,8 @@ const UserControllerValidators = {
   editUser,
   searchUsers,
   userId,
+
+  USER_RULES,
 };
 
 export default UserControllerValidators;

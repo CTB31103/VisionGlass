@@ -200,16 +200,34 @@ export const Profile = () => {
             }}
           >
             <EditDeleteButtons
-              editHref={ROUTES.TEAM_EDIT + `/${userProfile.userId}`}
-              onEdit={() => {}}
+              editToolTip="Edit profile"
+              editHref={
+                !userProfile.isRootUser
+                  ? ROUTES.TEAM_EDIT + `/${userProfile.userId}`
+                  : undefined
+              }
             />
 
             {isMyProfile && (
-              <Link underline="none" color="inherit" href={ROUTES.HOME}>
-                <BorderButton onClick={onLogout} color="red">
-                  <Icons.Logout sx={{ fontSize: TEXT_SIZES.medium2 }} /> Logout
-                </BorderButton>
-              </Link>
+              <Stack direction={"row"} spacing={2}>
+                <Link
+                  underline="none"
+                  color="inherit"
+                  href={ROUTES.PROFILE_PWD(userProfile.userId)}
+                >
+                  <BorderButton color="blue">
+                    <Icons.Password />
+                    Change Password
+                  </BorderButton>
+                </Link>
+
+                <Link underline="none" color="inherit" href={ROUTES.HOME}>
+                  <BorderButton onClick={onLogout} color="red">
+                    <Icons.Logout sx={{ fontSize: TEXT_SIZES.medium2 }} />{" "}
+                    Logout
+                  </BorderButton>
+                </Link>
+              </Stack>
             )}
           </Stack>
         </Stack>

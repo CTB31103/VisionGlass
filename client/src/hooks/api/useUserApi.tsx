@@ -45,11 +45,15 @@ export const useUserApi = () => {
     return await get<{ user: IUser }>(`/api/users/${userId}`);
   };
 
-  // const searchUsers = async (data: { query: string }) => {
-  //   return await get<{ users: IUser[] }>(
-  //     `/api/users?${queryString.stringify(data)}`,
-  //   );
-  // };
+  const verifyUser = async (data: {
+    currentPassword: string;
+    userId: string;
+  }) => {
+    return await post<{ verified: boolean }>(
+      `/api/users/${data.userId}/verification`,
+      data,
+    );
+  };
 
   const login = async (body: {
     username: string;
@@ -93,11 +97,22 @@ export const useUserApi = () => {
     });
   };
 
+  const changePassword = async (data: {
+    userId: string;
+    password: string;
+    currentPassword: string;
+  }) => {
+    return await put<{ success: boolean }>(
+      `/api/users/${data.userId}/authentication`,
+      data,
+    );
+  };
+
   return {
     getAllUsers,
     getUsers,
 
-    // searchUsers,
+    verifyUser,
     createUser,
     editUser,
     getUser,
@@ -106,6 +121,8 @@ export const useUserApi = () => {
     login,
     loginWithToken,
     refresh,
+
+    changePassword,
 
     abortSignal,
     logout,
