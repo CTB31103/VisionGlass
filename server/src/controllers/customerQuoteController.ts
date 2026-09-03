@@ -366,10 +366,13 @@ const toggleTeamMember = ControllerFunc((req, res) =>
       if (!ogCustomer) throw new Error(`Could not find customer.`);
 
       let teamMembers = [...ogCustomer.teamMembers];
+      const nonRemovableMembers = ogCustomer.attatchments.map(
+        (attatch) => attatch.userId,
+      );
 
-      if (teamMembers.includes(userId))
+      if (teamMembers.includes(userId) && !nonRemovableMembers.includes(userId))
         teamMembers = teamMembers.filter((mem) => mem !== userId);
-      else teamMembers.push(userId);
+      else if (!teamMembers.includes(userId)) teamMembers.push(userId);
 
       ogCustomer.teamMembers = teamMembers;
       await ogCustomer.save();
@@ -387,6 +390,9 @@ const toggleAttatchments = ControllerFunc((req, res) =>
     async ({ session }) =>
       await TryCatch(
         async () => {
+          const { userId } = Validators.TokenValidators.resLocalsTokenValues(
+            res.locals,
+          );
           const { customerQuoteId } =
             Validators.CustomerQuoteValidators.customerQuoteId(req.params);
           const { validData, errorMsg } = validationV2<{
@@ -413,17 +419,15 @@ const toggleAttatchments = ControllerFunc((req, res) =>
           const removingIds: string[] = [];
 
           validData.attatchmentIds.forEach((id) =>
-            ogQuote.attatchments.includes(id)
+            ogQuote.attatchments
+              .map((quote) => quote.attatchmentId)
+              .includes(id)
               ? removingIds.push(id)
               : addingIds.push(id),
           );
 
           if (removingIds.length > 0 && Boolean(validData.deleteAttatchment)) {
             const diskFolder = ImageUtils.getUploadsFolder();
-
-            Log.colors.yellow(`Removing:`);
-            Log.colors.yellow(Log.json(removingIds));
-            Log.colors.yellow(``);
 
             await Promise.all(
               removingIds.map(
@@ -438,15 +442,31 @@ const toggleAttatchments = ControllerFunc((req, res) =>
             );
           }
 
-          ogQuote.attatchments = produce(ogQuote.attatchments, (draft) => {
+          const attatchments = produce(ogQuote.attatchments, (draft) => {
             return draft
-              .filter((ogId) => !removingIds.includes(ogId))
-              .concat(addingIds);
+              .filter((ogId) => !removingIds.includes(ogId.attatchmentId))
+              .concat(
+                addingIds.map((addId) => ({
+                  attatchmentId: addId,
+                  userId,
+                })),
+              );
           });
 
-          await ogQuote.save({ session });
+          const teamMembers = ogQuote.teamMembers;
+          if (!teamMembers.includes(userId)) teamMembers.push(userId);
 
-          res.send({ customer: ogQuote.toCustomerQuote() });
+          const updatedQuote = await CustomerQuoteModel.findOneAndUpdate(
+            { customerQuoteId },
+            {
+              attatchments,
+              teamMembers,
+            },
+            { session, returnDocument: "after" },
+          );
+          if (!updatedQuote) throw new Error(`Could not update customer`);
+
+          res.send({ customer: updatedQuote.toCustomerQuote() });
         },
         (err) => {
           res.status(500).json({ error: err });

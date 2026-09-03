@@ -1,4 +1,11 @@
-import { Divider, FullPage, LoadingPage, PageHeader } from "@/components";
+import {
+  ActionButton,
+  BasicModal,
+  Divider,
+  FullPage,
+  LoadingPage,
+  PageHeader,
+} from "@/components";
 import {
   useApi,
   useDeleteCustomerAttatchment,
@@ -54,6 +61,9 @@ export const Customer = () => {
   const [showDoneWarning, setShowDoneWarning] = useState(false);
   const [showQuotedWarning, setShowQuotedWarning] = useState(false);
   const [showScheduledWarning, setShowScheduledWarning] = useState(false);
+  const [showLeaveTeamWarning, setShowLeaveTeamWarning] = useState(false);
+
+  const [disableLeaveTeam, setDisableLeaveTeam] = useState(false);
 
   const loading = stateLoading || customerLoading;
 
@@ -73,7 +83,9 @@ export const Customer = () => {
     setStateLoading(true);
 
     const res = await attatchmentRoutes.getAttatchments({
-      attatchmentIds: customer.attatchments,
+      attatchmentIds: customer.attatchments.map(
+        (attatch) => attatch.attatchmentId,
+      ),
     });
     setStateLoading(false);
 
@@ -95,6 +107,14 @@ export const Customer = () => {
     if (customer && customer.attatchments.length > 0) getAttatchments(customer);
     else setAttatchments([]);
   }, [toString(customer?.attatchments)]);
+
+  useEffect(() => {
+    setDisableLeaveTeam(
+      (customer?.attatchments ?? [])
+        .map((attatch) => attatch.userId)
+        .includes(user.userId),
+    );
+  }, [toString(customer?.attatchments), user.userId]);
 
   const updateCustomerStatus = async (
     customer: ICustomerQuote,
@@ -191,23 +211,6 @@ export const Customer = () => {
     setCustomer(res.data.customer);
   };
 
-  // const onDeleteDocument = async (
-  //   customer: ICustomerQuote,
-  //   attatchmentId: string,
-  // ) => {
-  //   setDocumentsLoading(true);
-
-  //   const res = await customerQuoteRoutes.toggleAttatchments(
-  //     customer.customerQuoteId,
-  //     { attatchmentIds: [attatchmentId], deleteAttatchment: true },
-  //   );
-  //   setDocumentsLoading(false);
-
-  //   if (res.err || !res.data) return errorSnack(res.err);
-
-  //   setCustomer(res.data.customer);
-  // };
-
   if (loading || deleteCustomerLoading || !customer) return <LoadingPage />;
 
   return (
@@ -246,7 +249,12 @@ export const Customer = () => {
           teamMemberIds={customer.teamMembers}
           teamMembers={teamMembers}
           loading={memberLoading}
-          onActionBtn={() => toggleTeamMember(customer)}
+          // disableActionBtn={disableLeaveTeam}
+          onActionBtn={() =>
+            disableLeaveTeam
+              ? setShowLeaveTeamWarning(true)
+              : toggleTeamMember(customer)
+          }
         />
 
         <Divider />
@@ -255,6 +263,7 @@ export const Customer = () => {
           customerId={customer.customerQuoteId}
           loading={documentsLoading}
           attatchments={attatchments}
+          users={teamMembers}
           onAddDocumentIds={(docIds) => onAddDocumentIds(customer, docIds)}
           onDeleteDocument={(docId) =>
             onDeleteCustomerAttatchment(
@@ -285,6 +294,25 @@ export const Customer = () => {
           href={ROUTES.CUSTOMERS_EDIT + `/${customer.customerQuoteId}`}
           onClose={() => setShowScheduledWarning(false)}
         />
+
+        <BasicModal
+          centerSubtitle
+          open={showLeaveTeamWarning}
+          shrinkHeight
+          title="Warning"
+          subtitle={
+            "Cannot leave this customer's team members while there are attatchments created by your profile for this customer. Please delete all created attatchments to leave this customer's team members."
+          }
+        >
+          <Stack sx={{ width: "100%", alignItems: "center" }}>
+            <ActionButton
+              color="red"
+              onClick={() => setShowLeaveTeamWarning(false)}
+            >
+              Okay
+            </ActionButton>
+          </Stack>
+        </BasicModal>
       </Stack>
     </FullPage>
   );

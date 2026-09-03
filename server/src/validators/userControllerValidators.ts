@@ -7,6 +7,7 @@ import {
   requiredWith,
   validationV2,
 } from "./validate";
+import { ROOT_USERNAME } from "../scripts";
 
 export const USER_RULES = {
   userId: "string|min:0|max:75",
@@ -75,7 +76,7 @@ const loginUser = (body: any) => {
   const rules = {
     username: USER_RULES.username,
     password:
-      body?.password === "admin"
+      body.username === ROOT_USERNAME
         ? "required|string|max:100"
         : "required|string|min:6|max:100",
     trustSource: "required|boolean",

@@ -16,4 +16,5 @@ export interface IUser {
   userType: UserType;
   profilePictureId: string;
   info: IPerson;
+  isRootUser: boolean;
 }

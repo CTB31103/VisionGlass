@@ -10,6 +10,7 @@ import {
 import { CSS, ROUTES } from "@/Constants";
 import { useIsAdminService } from "@/hooks";
 import { UserType, type IUser } from "@/interfaces";
+import { useUserStore } from "@/stores";
 import { Link, Stack } from "@mui/material";
 import { capitalize } from "lodash";
 
@@ -19,6 +20,8 @@ type TeamMemberCardProps = {
 };
 
 export const TeamMemberCard = ({ user, onClick }: TeamMemberCardProps) => {
+  const authUser = useUserStore((state) => state.user);
+
   const isAdmin = useIsAdminService();
 
   const userTypeIcon =
@@ -88,11 +91,11 @@ export const TeamMemberCard = ({ user, onClick }: TeamMemberCardProps) => {
             pointerEvents: "all",
           }}
         >
-          {isAdmin && user.username !== "admin" && (
+          {(isAdmin || user.userId === authUser.userId) && !user.isRootUser && (
             <EditDeleteButtons
               editHref={ROUTES.TEAM_EDIT + `/${user.userId}`}
-              onEdit={() => {}}
-              onDelete={() => {}}
+              // onEdit={() => {}}
+              // onDelete={() => {}}
             />
           )}
         </Stack>

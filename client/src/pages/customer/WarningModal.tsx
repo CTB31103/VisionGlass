@@ -4,6 +4,7 @@ import {
   BorderButton,
   Icons,
   TEXT_SIZES,
+  type IconType,
 } from "@/components";
 import { Link, Stack } from "@mui/material";
 
@@ -13,6 +14,9 @@ type WarningModalProps = {
 
   href?: string;
 
+  updateText?: string;
+  UpdateIcon?: IconType;
+
   onClose?: () => void;
   onUpdate?: () => void;
 };
@@ -21,6 +25,8 @@ export const WarningModal = ({
   open,
   subtitle,
   href,
+  updateText = "Update",
+  UpdateIcon = Icons.Edit,
   onClose,
   onUpdate,
 }: WarningModalProps) => {
@@ -48,9 +54,9 @@ export const WarningModal = ({
           <ActionButton
             color="red"
             onClick={onUpdate}
-            EndIcon={<Icons.Edit sx={{ fontSize: TEXT_SIZES.medium2 }} />}
+            EndIcon={<UpdateIcon sx={{ fontSize: TEXT_SIZES.medium2 }} />}
           >
-            Update
+            {updateText}
           </ActionButton>
         </Link>
       </Stack>

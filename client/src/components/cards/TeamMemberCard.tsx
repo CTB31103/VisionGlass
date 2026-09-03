@@ -3,6 +3,7 @@ import { SmallSquareUser } from "../shapes";
 import type { IUser } from "@/interfaces";
 import { CSS } from "@/Constants";
 import { TBody } from "../typography";
+import { capitalize } from "@/utils";
 
 type TeamMemberCardProps = {
   user: IUser;
@@ -48,7 +49,8 @@ export const TeamMemberCard = ({
         <TBody bold medium>
           {fullName}
         </TBody>
-        <TBody>{user.username}</TBody>
+        {/* <TBody>{user.username}</TBody> */}
+        <TBody opacity={0.5}>({capitalize(user.userType)})</TBody>
       </Stack>
     </Link>
   );

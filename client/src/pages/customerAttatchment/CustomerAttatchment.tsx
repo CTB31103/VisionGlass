@@ -5,6 +5,7 @@ import {
   Icons,
   LoadingPage,
   PageHeader,
+  TBody,
   TEXT_SIZES,
 } from "@/components";
 import { CONSTANTS, CSS, ROUTES } from "@/Constants";
@@ -12,6 +13,7 @@ import {
   useDeleteCustomerAttatchment,
   useGetAttatchment,
   useGetCustomerService,
+  useGetUserService,
 } from "@/hooks";
 import { Stack } from "@mui/material";
 import { useNavigate, useParams } from "react-router";
@@ -29,13 +31,17 @@ export const CustomerAttatchment = () => {
   const { loading: deleteCustomerLoading, onDeleteCustomerAttatchment } =
     useDeleteCustomerAttatchment();
 
-  if (
+  const { loading: getUserLoading, user: createdByUser } = useGetUserService({
+    userId: attatchment?.createdBy,
+  });
+
+  const loading =
     customerLoading ||
     attatchmentLoading ||
     deleteCustomerLoading ||
-    !attatchment ||
-    !customer
-  )
+    getUserLoading;
+
+  if (loading || !attatchment || !customer || !createdByUser)
     return <LoadingPage />;
 
   const onDelete = () =>
@@ -104,6 +110,16 @@ export const CustomerAttatchment = () => {
               src={CONSTANTS.api.image(attatchment.attachmentId)}
               alt={"Image - " + attatchment.attachmentId}
             />
+          </Stack>
+        </Stack>
+
+        <Stack sx={{}}>
+          <TBody opacity={0.5}>Added By:</TBody>
+          <Stack spacing={-1}>
+            <TBody bold large>
+              {`${createdByUser.info.firstName} ${createdByUser.info.lastName}`.trim()}
+            </TBody>
+            <TBody medium>{`${createdByUser.username}`.trim()}</TBody>
           </Stack>
         </Stack>
 

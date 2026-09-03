@@ -13,6 +13,7 @@ export interface IUser {
   userType: UserType;
   profilePictureId: string;
   info: IPerson;
+  isRootUser: boolean;
 }
 
 export interface IClientUser extends Omit<IUser, "password"> {}

@@ -5,6 +5,7 @@ import Validators from "../validators";
 export type JWTPayload = {
   id: string;
   role: string;
+  isRootUser: boolean;
   createdOn: number;
 };
 

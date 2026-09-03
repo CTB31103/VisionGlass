@@ -52,7 +52,7 @@ export type WindowSide = (typeof WindowSide)[keyof typeof WindowSide];
 export interface ICustomerQuote {
   customerQuoteId: string;
   teamMembers: string[];
-  attatchments: string[];
+  attatchments: ICustomerAttatchment[];
   status: CustomerQuoteStatus;
   customer: IPerson;
   createdOn: number;
@@ -64,6 +64,11 @@ export interface ICustomerQuote {
   paymentInfo?: IPaymentInfo;
   callbackTime?: ICallbackInfo;
   meetingTime?: ITimeBlock;
+}
+
+export interface ICustomerAttatchment {
+  attatchmentId: string;
+  userId: string;
 }
 
 export interface ICallbackInfo {

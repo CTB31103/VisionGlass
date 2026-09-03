@@ -28,6 +28,8 @@ export class User implements IUser {
   @Prop({ type: String })
   password: string;
   @Prop({ type: String })
+  isRootUser: boolean;
+  @Prop({ type: String })
   userType: UserType;
   @Prop({ type: String })
   profilePictureId: string;
@@ -41,6 +43,7 @@ export class User implements IUser {
     userType,
     profilePictureId,
     info,
+    isRootUser,
   }: IUser) {
     this.userId = userId;
     this.username = username;
@@ -48,6 +51,7 @@ export class User implements IUser {
     this.userType = userType;
     this.profilePictureId = profilePictureId;
     this.info = info;
+    this.isRootUser = isRootUser;
   }
 
   toUser() {
@@ -71,6 +75,7 @@ class ClientUser implements IClientUser {
   userType: UserType;
   profilePictureId: string;
   info: IPerson;
+  isRootUser: boolean;
 
   constructor({
     userId,
@@ -78,12 +83,14 @@ class ClientUser implements IClientUser {
     userType,
     profilePictureId,
     info,
+    isRootUser,
   }: IClientUser) {
     this.userId = userId;
     this.username = username;
     this.userType = userType;
     this.profilePictureId = profilePictureId;
     this.info = info;
+    this.isRootUser = isRootUser;
   }
 }
 

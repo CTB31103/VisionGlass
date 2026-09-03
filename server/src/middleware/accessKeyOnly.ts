@@ -12,6 +12,7 @@ export const accessKeyOnly = MiddlewareFunc((req, res, next) =>
 
       res.locals.userId = decoded.id;
       res.locals.role = decoded.role;
+      res.locals.isRootUser = decoded.isRootUser;
       next();
     },
     (err) => res.status(401).json({ error: err }),

@@ -10,3 +10,4 @@ export * from "./useSessionService";
 export * from "./useGetCustomerService";
 export * from "./useGetAttatchment";
 export * from "./useDeleteCustomerAttatchment";
+export * from "./useGetUserService";

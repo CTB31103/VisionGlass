@@ -9,6 +9,7 @@ const randBtwn = (min: number, max: number): number => {
 };
 
 export const createTeam = async () => {
+  const userIds: string[] = [];
   for await (let person of PEOPLE) {
     const canBeAdmin = coinFlip();
     const userTypeNum = randBtwn(1, 3);
@@ -24,9 +25,12 @@ export const createTeam = async () => {
             : UserType.SALES,
       profilePictureId: "",
       info: person,
+      isRootUser: false,
     };
     await UserModel.create(user);
+    userIds.push(user.userId);
   }
+  return userIds;
 };
 
 /**

@@ -3,19 +3,22 @@ import { HashUtils, Log } from "../utils";
 import { UserModel } from "../models";
 import { UserType } from "../interfaces";
 
+export const ROOT_USERNAME = "root";
+
 export const createAdmin = async () => {
   await UserModel.create([
     {
       userId: HashUtils.uniqueId(),
       info: {
-        firstName: "admin",
-        lastName: "",
+        firstName: ROOT_USERNAME,
+        lastName: "administrator",
         email: "",
         phone: "",
       },
-      password: await HashUtils.encrypt("admin"),
-      username: "admin",
+      password: await HashUtils.encrypt(ROOT_USERNAME),
+      username: ROOT_USERNAME,
       userType: UserType.ADMIN,
+      isRootUser: true,
     },
   ]);
   Log.colors.green(`Admin account created`);
@@ -23,7 +26,7 @@ export const createAdmin = async () => {
 };
 
 export const getAdmin = async () => {
-  const admin = await UserModel.find({ username: "admin" });
+  const admin = await UserModel.find({ username: ROOT_USERNAME });
   if (!admin || admin.length === 0) throw new Error(`Could not find admin`);
 
   return admin[0];

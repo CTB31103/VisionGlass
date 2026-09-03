@@ -1,8 +1,13 @@
 import moment from "moment";
-import { CarDamageLocation, ICustomerQuote, IServiceType } from "../interfaces";
+import {
+  CarDamageLocation,
+  ICustomerQuote,
+  IServiceType,
+  UserType,
+} from "../interfaces";
 import { HashUtils, Log, toNearestHalfHour } from "../utils";
 import { getAdmin } from "./createAdmin";
-import { CarDamage, CustomerQuoteModel } from "../models";
+import { CarDamage, CustomerQuoteModel, UserModel } from "../models";
 
 const coinFlip = () => Math.round(Math.random()) === 1;
 
@@ -13,6 +18,12 @@ const randBtwn = (min: number, max: number): number => {
 export const createCustomers = async () => {
   const customers: ICustomerQuote[] = [];
   const admin = await getAdmin();
+
+  const salesUsers = await UserModel.find({ userType: UserType.SALES });
+  const technicians = await UserModel.find({ userType: UserType.TECH });
+
+  const randSales = () => salesUsers[randBtwn(0, salesUsers.length - 1)];
+  const randTech = () => technicians[randBtwn(0, technicians.length - 1)];
 
   for (let i = 0; i < 10; i++) {
     const isScheduled = coinFlip();
@@ -63,10 +74,16 @@ export const createCustomers = async () => {
       "Windshield Replacement",
     ];
 
+    const teamMembers = [randSales().userId];
+
+    if (isScheduled && coinFlip()) {
+      teamMembers.push(randTech().userId);
+    }
+
     const customer: ICustomerQuote = {
       serviceType: allServiceTypes[randBtwn(0, 3)],
       customerQuoteId: HashUtils.uniqueId(),
-      teamMembers: [admin.userId],
+      teamMembers: teamMembers,
       attatchments: [],
       status: isScheduled
         ? "scheduled"

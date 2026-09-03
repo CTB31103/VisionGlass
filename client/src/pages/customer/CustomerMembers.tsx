@@ -13,6 +13,7 @@ type CustomerMembersProps = {
   teamMemberIds: string[];
   teamMembers: IUser[];
   loading?: boolean;
+
   onActionBtn?: () => void;
 };
 
@@ -20,6 +21,7 @@ export const CustomerMembers = ({
   teamMemberIds,
   teamMembers,
   loading,
+
   onActionBtn,
 }: CustomerMembersProps) => {
   const user = useUserStore((state) => state.user);
@@ -34,6 +36,7 @@ export const CustomerMembers = ({
         <ActionButton loading={loading} onClick={onActionBtn} color="red">
           {teamMemberIds.includes(user.userId) ? "Leave" : "Join"}
         </ActionButton>
+        {/* TODO: Should user who has added an attatchment be able to remove themselves from working with customer */}
       </Stack>
 
       {teamMembers.length === 0 ? (

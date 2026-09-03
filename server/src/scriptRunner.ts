@@ -25,10 +25,10 @@ mongoose
 
       await clearDB();
       await createAdmin();
+      await createTeam();
       await createCustomers();
       await createCustomers();
       await createReviews();
-      await createTeam();
 
       await printDB(false);
 

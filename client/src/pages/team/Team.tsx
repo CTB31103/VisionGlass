@@ -109,41 +109,6 @@ export const Team = () => {
     if (!loading) getUsersSearchOrAll();
   }, [sortBy, role]);
 
-  // useEffect(() => {
-  //   if (allUsers.length === 0) return;
-  //   setUsers(
-  //     allUsers
-  //       .filter((user) => (role.length === 0 ? true : user.userType === role))
-  //       .sort((a, b) => {
-  //         if (sortBy.length === 0) return 0;
-
-  //         let fieldA;
-  //         let fieldB;
-
-  //         switch (sortBy) {
-  //           case "Position":
-  //             fieldA = a.userType;
-  //             fieldB = b.userType;
-  //             break;
-  //           case "Email":
-  //             fieldA = a.info.email;
-  //             fieldB = b.info.email;
-  //             break;
-  //           case "Last Name":
-  //             fieldA = a.info.lastName;
-  //             fieldB = b.info.lastName;
-  //             break;
-  //           case "First Name":
-  //           default:
-  //             fieldA = a.info.firstName;
-  //             fieldB = b.info.firstName;
-  //         }
-
-  //         return fieldA.localeCompare(fieldB);
-  //       }),
-  //   );
-  // }, [toString(allUsers), sortBy, role]);
-
   return (
     <FullPage screen>
       <Stack

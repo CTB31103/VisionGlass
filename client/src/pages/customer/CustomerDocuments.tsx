@@ -16,7 +16,7 @@ import {
   ONE_MB,
 } from "@/Constants";
 import { useApi } from "@/hooks";
-import type { IAttatchment } from "@/interfaces";
+import type { IAttatchment, IUser } from "@/interfaces";
 import { Stack } from "@mui/material";
 import { useEffect, useRef, useState } from "react";
 
@@ -25,6 +25,7 @@ type CustomerDocumentsProps = {
 
   loading?: boolean;
   attatchments?: IAttatchment[];
+  users?: IUser[];
 
   onAddDocumentIds: (documentIds: string[]) => void;
   onDeleteDocument?: (documentId: string) => void;
@@ -34,6 +35,7 @@ export const CustomerDocuments = ({
   customerId,
   loading: parentLoading,
   attatchments = [],
+  users = [],
   onAddDocumentIds,
   onDeleteDocument,
 }: CustomerDocumentsProps) => {
@@ -164,6 +166,7 @@ export const CustomerDocuments = ({
               key={i}
               customerId={customerId}
               attatchment={doc}
+              user={users.find((user) => user.userId === doc.createdBy)}
               onDelete={() =>
                 onDeleteDocument && onDeleteDocument(doc.attachmentId)
               }

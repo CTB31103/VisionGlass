@@ -10,7 +10,6 @@ import {
   MongoDoc,
   RefreshTokenModel,
   RootFilterQuery,
-  SeenCount,
   SeenCountModel,
   User,
   UserModel,
@@ -62,6 +61,7 @@ const createUser = ControllerFunc((req, res) =>
               email: validBody.email,
               phone: validBody.phone,
             },
+            isRootUser: false,
           };
 
           const createdUserStatistic: IUserStatistic = {
@@ -107,6 +107,9 @@ const createUser = ControllerFunc((req, res) =>
 const getUsers = ControllerFunc((req, res) =>
   TryCatch(
     async () => {
+      const { isRootUser } = Validators.TokenValidators.resLocalsTokenValues(
+        res.locals,
+      );
       const { validData, errorMsg } = validationV2<{
         userId?: string;
         userIds?: string | string[];
@@ -132,7 +135,7 @@ const getUsers = ControllerFunc((req, res) =>
         Validators.PaginationValidation.getPaginatedQuery(req.query);
 
       let databaseQuery: RootFilterQuery<IUser> = {
-        $and: [],
+        $and: isRootUser ? [] : [{ isRootUser: false }], // Only the root user can ever see root user information
       };
       let sort: { [key: string]: number } = {};
 
@@ -243,13 +246,14 @@ const loginUser = ControllerFunc((req, res) =>
         {
           id: user.userId,
           role: user.userType,
+          isRootUser: user.isRootUser,
         },
         "short",
       );
 
       if (validBody.trustSource) {
         const refreshTokenJWT = TokenUtils.signJWTToken(
-          { id: user.userId, role: user.userType },
+          { id: user.userId, role: user.userType, isRootUser: user.isRootUser },
           "long",
         );
         const refreshToken: IRefreshToken = {
@@ -309,7 +313,7 @@ const refreshUserWithRefreshToken = ControllerFunc((req, res) =>
       if (!user) throw new Error(`Provided user does not exist`);
 
       const accessToken = TokenUtils.signJWTToken(
-        { id: decoded.id, role: decoded.role },
+        { id: decoded.id, role: decoded.role, isRootUser: decoded.isRootUser },
         "short",
       );
       res.status(200).json({ user: user.toClientUser(), token: accessToken });
@@ -423,6 +427,9 @@ const loginUserWithAccessToken = ControllerFunc((req, res) =>
 const searchUsers = ControllerFunc((req, res) =>
   TryCatch(
     async () => {
+      const { isRootUser } = Validators.TokenValidators.resLocalsTokenValues(
+        res.locals,
+      );
       const { query } = Validators.UserControllerValidators.searchUsers(
         req.query,
       );
@@ -430,27 +437,39 @@ const searchUsers = ControllerFunc((req, res) =>
       const queryFirstWord = query.split(" ")[0];
       const regexQuery = { $regex: query, $options: "i" };
 
-      const users = (
-        await UserModel.find({
-          $or: [
-            { "info.firstName": regexQuery },
-            { "info.email": regexQuery },
-            { "info.lastName": regexQuery },
-            { "info.phone": regexQuery },
-            { username: regexQuery },
-            {
-              $and: [
-                { "info.firstName": { $regex: queryFirstWord, $options: "i" } },
-                {
-                  "info.lastName": {
-                    $regex: query.replace(queryFirstWord + " ", ""),
-                  },
+      const databaseQuery: RootFilterQuery<IUser> = {
+        $and: [],
+      };
+
+      if (!isRootUser) {
+        databaseQuery.$and!.push({
+          isRootUser: false,
+        });
+      }
+
+      databaseQuery.$and!.push({
+        $or: [
+          { "info.firstName": regexQuery },
+          { "info.email": regexQuery },
+          { "info.lastName": regexQuery },
+          { "info.phone": regexQuery },
+          { username: regexQuery },
+          {
+            $and: [
+              { "info.firstName": { $regex: queryFirstWord, $options: "i" } },
+              {
+                "info.lastName": {
+                  $regex: query.replace(queryFirstWord + " ", ""),
                 },
-              ],
-            },
-          ],
-        })
-      ).map((user) => user.toClientUser());
+              },
+            ],
+          },
+        ],
+      });
+
+      const users = (await UserModel.find(databaseQuery)).map((user) =>
+        user.toClientUser(),
+      );
 
       res.status(200).json({ users });
     },
@@ -478,6 +497,9 @@ const userHasAccess = ControllerFunc((req, res) =>
 const getUser = ControllerFunc((req, res) =>
   TryCatch(
     async () => {
+      const { isRootUser } = Validators.TokenValidators.resLocalsTokenValues(
+        res.locals,
+      );
       const { validData, errorMsg } = validationV2<{ userId: string }>(
         { userId: [RULES.common.requiredString, ""] },
         req.params,
@@ -486,11 +508,13 @@ const getUser = ControllerFunc((req, res) =>
 
       const { userId } = validData;
 
-      const user = await UserModel.findOne({ userId });
+      const user = await UserModel.findOne(
+        isRootUser ? { userId } : { userId, isRootUser: false },
+      );
 
       if (!user) throw new Error(`Team member could not be found`);
 
-      res.send({ user });
+      res.send({ user: user.toClientUser() });
     },
     (err) => {
       res.status(500).json({ error: err });

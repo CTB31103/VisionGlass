@@ -54,6 +54,7 @@ const resLocalsTokenValues = (locals: any) => {
   const rules = {
     userId: "required|string",
     role: "required|in:admin,technician,sales",
+    isRootUser: "required|boolean",
   };
 
   const validator = new Validator(locals, rules);
@@ -62,6 +63,7 @@ const resLocalsTokenValues = (locals: any) => {
   return {
     userId: locals.userId as string,
     role: locals.role as UserType,
+    isRootUser: Boolean(locals.isRootUser) as boolean,
   };
 };
 
