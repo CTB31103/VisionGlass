@@ -91,7 +91,9 @@ export const ContactForm = () => {
 
   const submit = async () => {
     const firstName = fullName.split(" ")[0];
-    const lastName = fullName.replace(`${firstName} `, "");
+    const lastName = (
+      fullName.trim() === firstName ? "" : fullName.replace(`${firstName}`, "")
+    ).trim();
     const data: Omit<Omit<IReview, "reviewId">, "createdOn"> = {
       person: {
         firstName,

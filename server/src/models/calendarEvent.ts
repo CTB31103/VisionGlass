@@ -1,7 +1,15 @@
-import { getModelForClass, Prop, PropType } from "@typegoose/typegoose";
+import {
+  getModelForClass,
+  mongoose,
+  Prop,
+  PropType,
+  ReturnModelType,
+} from "@typegoose/typegoose";
 import { ICalendarEvent, ITimeBlock } from "../interfaces";
 import { Log } from "../utils";
 import { TimeBlock } from "./timeBlock";
+import { CustomerQuote } from "./customerQuote";
+import { MongoDoc } from "./mongoDoc";
 
 export class CalendarEvent implements ICalendarEvent {
   @Prop({ type: String })
@@ -18,8 +26,8 @@ export class CalendarEvent implements ICalendarEvent {
   title: string;
   @Prop({ type: String })
   desc: string;
-  @Prop({ type: () => [String] }, PropType.ARRAY)
-  visibleUserIds: string[];
+  @Prop({ type: String })
+  eventType: string;
 
   constructor({
     calendarEventId,
@@ -29,7 +37,7 @@ export class CalendarEvent implements ICalendarEvent {
     timeBlock,
     title,
     desc,
-    visibleUserIds,
+    eventType,
   }: ICalendarEvent) {
     this.calendarEventId = calendarEventId;
     this.creatorId = creatorId;
@@ -38,7 +46,7 @@ export class CalendarEvent implements ICalendarEvent {
     this.timeBlock = timeBlock;
     this.title = title;
     this.desc = desc;
-    this.visibleUserIds = visibleUserIds;
+    this.eventType = eventType;
   }
 
   toCalendarEvent() {
@@ -50,4 +58,9 @@ export class CalendarEvent implements ICalendarEvent {
   }
 }
 
-export const CalendarEventModel = getModelForClass(CalendarEvent);
+type CalendarEventModel = ReturnModelType<typeof CalendarEvent> &
+  Pick<mongoose.PaginateModel<MongoDoc<CalendarEvent>>, "paginate">;
+
+export const CalendarEventModel = getModelForClass(
+  CalendarEvent,
+) as CalendarEventModel;

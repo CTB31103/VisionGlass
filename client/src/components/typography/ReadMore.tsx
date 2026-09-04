@@ -55,10 +55,10 @@ export const ReadMore = ({
           pointerEvents: "none",
         }}
       >
-        <TBody trunk={trunk}>{text}</TBody>
+        <TBody trunk={trunk} innerHtml={text}></TBody>
       </Stack>
 
-      <TBody trunk={open ? undefined : trunk}>{text}</TBody>
+      <TBody trunk={open ? undefined : trunk} innerHtml={text}></TBody>
 
       {canExpand && (
         <Stack sx={{ width: "100%", alignItems: "end" }}>

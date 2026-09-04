@@ -187,6 +187,8 @@ export class CustomerQuote implements ICustomerQuote {
   customerQuoteId: string;
   @Prop({ type: String })
   status: CustomerQuoteStatus;
+  @Prop({ type: Boolean })
+  fromCustomer: boolean;
   @Prop({ type: Person, _id: false })
   customer: IPerson;
   @Prop({ type: Car, _id: false })
@@ -199,6 +201,8 @@ export class CustomerQuote implements ICustomerQuote {
   meetingTime?: ITimeBlock;
   @Prop({ type: String }, PropType.ARRAY)
   teamMembers: string[];
+  @Prop({ type: String }, PropType.ARRAY)
+  calendarEvents: string[];
   @Prop({ type: CustomerAttatchment, _id: false }, PropType.ARRAY)
   attatchments: ICustomerAttatchment[];
   @Prop({ type: PaymentInfo, _id: false })
@@ -227,6 +231,8 @@ export class CustomerQuote implements ICustomerQuote {
     notes,
     createdOn,
     serviceType,
+    calendarEvents,
+    fromCustomer,
   }: ICustomerQuote) {
     this.customerQuoteId = customerQuoteId;
     this.status = status;
@@ -235,6 +241,7 @@ export class CustomerQuote implements ICustomerQuote {
     this.damage = damage ? new CarDamage(damage) : undefined;
     this.address = address;
     this.teamMembers = produce(teamMembers, (_draft) => {});
+    this.calendarEvents = produce(calendarEvents, (_draft) => {});
     this.attatchments = produce(attatchments, (_draft) => {
       return _draft.map((attatch) => new CustomerAttatchment(attatch));
     });
@@ -246,10 +253,15 @@ export class CustomerQuote implements ICustomerQuote {
     this.notes = notes;
     this.createdOn = createdOn;
     this.serviceType = serviceType;
+    this.fromCustomer = fromCustomer;
   }
 
   toCustomerQuote() {
     return new CustomerQuote(this);
+  }
+
+  fullName() {
+    return `${this.customer.firstName} ${this.customer.lastName}`.trim();
   }
 }
 

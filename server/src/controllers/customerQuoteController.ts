@@ -3,17 +3,22 @@ import {
   CustomerQuoteStatus,
   ICustomerQuote,
   IServiceType,
+  SYSTEM_EVENTS,
 } from "../interfaces";
 import {
   AttatchmentModel,
+  CalendarEventModel,
   CustomerQuote,
   CustomerQuoteModel,
+  MongoDoc,
   RootFilterQuery,
+  UserModel,
 } from "../models";
 import {
-  ConditionalUtils,
+  CalendarEventUtils,
   HashUtils,
   ImageUtils,
+  ISession,
   Log,
   SessionController,
   toMidnight,
@@ -22,7 +27,6 @@ import {
 import Validators from "../validators";
 import { RULES, validationV2 } from "../validators/validate";
 import ControllerFunc from "./controllerFunc";
-import CONSTANTS from "../constants";
 import { produce } from "immer";
 
 const getQuotes = ControllerFunc((req, res) =>
@@ -106,12 +110,6 @@ const getQuotes = ControllerFunc((req, res) =>
           })),
         };
         databaseQuery.$and!.push(statusOr);
-
-        // validQueryData.status.forEach((status) =>
-        //   databaseQuery.$and!.push({
-        //     status: status as CustomerQuoteStatus,
-        //   }),
-        // );
       }
 
       if (validQueryData?.employee) {
@@ -170,59 +168,130 @@ const getQuotes = ControllerFunc((req, res) =>
   ),
 );
 
-const create = ControllerFunc((req, res) =>
-  TryCatch(
-    async () => {
-      const { userId } = Validators.TokenValidators.resLocalsTokenValues(
-        res.locals,
-      );
-      const {
-        customer,
-        carInfo,
-        damageInfo,
-        address,
-        paymentInfo,
-        callbackTime,
-        meetingTime,
-        notes,
-        serviceType,
-      } = Validators.CustomerQuoteValidators.create(req.body);
+const _createCustomerQuoteController = async (
+  session: ISession,
+  body: any,
+  teamMembers: string[] = [],
+  fromCustomer: boolean = false,
+) => {
+  const {
+    customer,
+    carInfo,
+    damageInfo,
+    address,
+    paymentInfo,
+    callbackTime,
+    meetingTime,
+    notes,
+    serviceType,
+  } = Validators.CustomerQuoteValidators.create(body);
 
-      const customerQuoteData: ICustomerQuote = {
-        serviceType: serviceType as IServiceType,
-        customerQuoteId: HashUtils.uniqueId(),
-        teamMembers: [userId],
-        attatchments: [],
-        status:
-          meetingTime !== undefined
-            ? "scheduled"
-            : (paymentInfo?.insurance?.coverageAmount ?? 0) > 0
-              ? "insurance_validated"
-              : (paymentInfo?.serviceAmount ?? 0) > 0
-                ? "quoted"
-                : "new",
-        customer,
-        car: carInfo,
-        damage: damageInfo,
-        address,
-        paymentInfo: paymentInfo,
-        callbackTime: callbackTime,
-        meetingTime: meetingTime,
-        createdOn: new Date().getTime(),
-        notes,
-      };
+  const customerQuoteData: ICustomerQuote = {
+    fromCustomer,
+    serviceType: serviceType as IServiceType,
+    customerQuoteId: HashUtils.uniqueId(),
+    teamMembers,
+    calendarEvents: [],
+    attatchments: [],
+    status:
+      meetingTime !== undefined
+        ? "scheduled"
+        : (paymentInfo?.insurance?.coverageAmount ?? 0) > 0
+          ? "insurance_validated"
+          : (paymentInfo?.serviceAmount ?? 0) > 0
+            ? "quoted"
+            : "new",
+    customer,
+    car: carInfo,
+    damage: damageInfo,
+    address,
+    paymentInfo: paymentInfo,
+    callbackTime: callbackTime,
+    meetingTime: meetingTime,
+    createdOn: new Date().getTime(),
+    notes,
+  };
 
-      const customerQuote: CustomerQuote = (
-        await CustomerQuoteModel.create([customerQuoteData], {})
-      )[0].toCustomerQuote();
+  // Create new event and add to customer list
+  const newEvent = await CalendarEventUtils.createNewCustomerMessage(
+    session,
+    customerQuoteData,
+    { date: new Date().getTime() },
+    !fromCustomer,
+  );
+  customerQuoteData.calendarEvents = [newEvent.calendarEventId];
 
-      res.send({
-        customer: customerQuote,
-      });
-    },
-    (err) => {
-      res.status(500).json({ error: err });
-    },
+  const customerQuote: CustomerQuote = (
+    await CustomerQuoteModel.create([customerQuoteData], {
+      session,
+      ordered: true,
+    })
+  )[0].toCustomerQuote();
+
+  return {
+    customerQuote,
+  };
+};
+
+const create = ControllerFunc(async (req, res) =>
+  SessionController(
+    async ({ session, commit, abort }) =>
+      await TryCatch(
+        async () => {
+          const { userId } = Validators.TokenValidators.resLocalsTokenValues(
+            res.locals,
+          );
+
+          const { customerQuote } = await _createCustomerQuoteController(
+            session,
+            req.body,
+            [userId],
+          );
+
+          await commit();
+
+          res.send({
+            customer: customerQuote,
+          });
+        },
+        (err) => {
+          abort();
+          res.status(500).json({ error: err });
+        },
+      ),
+  ),
+);
+
+const createWithNoTeam = ControllerFunc(async (req, res) =>
+  SessionController(
+    async ({ session, commit, abort }) =>
+      await TryCatch(
+        async () => {
+          // const { userId } = Validators.TokenValidators.resLocalsTokenValues(
+          //   res.locals,
+          // );
+
+          const { customerQuote } = await _createCustomerQuoteController(
+            session,
+            req.body,
+            // [userId],
+            [],
+            true,
+          );
+
+          await commit();
+
+          res.send({
+            success: true,
+            newCustomer: customerQuote.customer,
+            customer: customerQuote,
+          });
+        },
+        (err) => {
+          abort();
+          res.status(500).json({ error: err });
+        },
+      ),
   ),
 );
 
@@ -249,111 +318,198 @@ const getQuote = ControllerFunc((req, res) =>
   ),
 );
 
-const edit = ControllerFunc((req, res) =>
-  TryCatch(
-    async () => {
-      const { customerQuoteId: paramCustomerQuoteId } =
-        Validators.CustomerQuoteValidators.customerQuoteId(req.params);
-      const { userId } = Validators.TokenValidators.resLocalsTokenValues(
-        res.locals,
-      );
-      const {
-        status,
-        customerQuoteId,
-        customer,
-        carInfo,
-        damageInfo,
-        address,
-        paymentInfo,
-        callbackTime,
-        meetingTime,
-        notes,
-        serviceType,
+const _editQuoteSendSystemMessages = async (
+  session: ISession,
+  userId: string,
+  customerQuoteData: ICustomerQuote,
+) => {
+  if (
+    customerQuoteData.status === CustomerQuoteStatus.SCHEDULED &&
+    customerQuoteData.meetingTime
+  ) {
+    const prevSysEvent = await CalendarEventModel.findOneAndDelete(
+      {
+        calendarEventId: { $in: customerQuoteData.calendarEvents },
+        eventType: SYSTEM_EVENTS.SCHED_CUST,
+      },
+      { session },
+    );
+    if (prevSysEvent) {
+      customerQuoteData.calendarEvents =
+        customerQuoteData.calendarEvents.filter(
+          (calId) => prevSysEvent.calendarEventId !== calId,
+        );
+    }
 
-        forceStatus,
-      } = Validators.CustomerQuoteValidators.edit(req.body);
-
-      if (paramCustomerQuoteId !== customerQuoteId)
-        throw new Error(`Customer ID mismatch.`);
-
-      const ogQuote = await CustomerQuoteModel.findOne({ customerQuoteId });
-      if (!ogQuote) throw new Error(`Customer could not be found.`);
-
-      const teamMembers = [...ogQuote.teamMembers];
-      if (!teamMembers.includes(userId)) teamMembers.push(userId);
-
-      // Auto infer status from fields
-      const customerQuoteData: ICustomerQuote = {
-        serviceType: serviceType as IServiceType,
-        customerQuoteId,
-        teamMembers,
-        attatchments: ogQuote.attatchments,
-        status: forceStatus
-          ? (status as CustomerQuoteStatus)
-          : meetingTime !== undefined
-            ? "scheduled"
-            : (paymentInfo?.insurance?.coverageAmount ?? 0) > 0
-              ? "insurance_validated"
-              : (paymentInfo?.serviceAmount ?? 0) > 0
-                ? "quoted"
-                : "new",
-        customer,
-        car: carInfo,
-        damage: damageInfo,
-        address,
-        paymentInfo: paymentInfo,
-        callbackTime: callbackTime,
-        meetingTime: meetingTime,
-        notes,
-        createdOn: ogQuote.createdOn,
-      };
-
-      const customerQuote = await CustomerQuoteModel.findOneAndUpdate(
-        { customerQuoteId },
+    const scheduledSystemEvent =
+      await CalendarEventUtils.createScheduledMessage(
+        session,
+        userId,
         customerQuoteData,
-        { returnDocument: "after" },
+        {
+          date: customerQuoteData.meetingTime.from,
+          timeBlock: customerQuoteData.meetingTime,
+        },
       );
-      if (!customerQuote) throw new Error(`Could not edit customer.`);
 
-      res.send({ customer: customerQuote.toCustomerQuote() });
-    },
-    (err) => {
-      res.status(500).json({ error: err });
-    },
-  ),
+    customerQuoteData.calendarEvents.push(scheduledSystemEvent.calendarEventId);
+  }
+
+  if (customerQuoteData.status === CustomerQuoteStatus.DONE) {
+    const user = await UserModel.findOne({ userId }).session(session);
+    if (!user) throw new Error(`Could not find user`);
+
+    const prevSysEvent = await CalendarEventModel.findOneAndDelete(
+      {
+        calendarEventId: { $in: customerQuoteData.calendarEvents },
+        eventType: SYSTEM_EVENTS.DONE_CUST,
+      },
+      { session },
+    );
+    if (prevSysEvent) {
+      customerQuoteData.calendarEvents =
+        customerQuoteData.calendarEvents.filter(
+          (calId) => prevSysEvent.calendarEventId !== calId,
+        );
+    }
+
+    const doneSystemEvent = await CalendarEventUtils.createDoneMessage(
+      session,
+      user,
+      customerQuoteData,
+      { date: new Date().getTime() },
+    );
+
+    customerQuoteData.calendarEvents.push(doneSystemEvent.calendarEventId);
+  }
+};
+
+const edit = ControllerFunc(
+  async (req, res) =>
+    await SessionController(
+      async ({ session, abort }) =>
+        await TryCatch(
+          async () => {
+            const { customerQuoteId: paramCustomerQuoteId } =
+              Validators.CustomerQuoteValidators.customerQuoteId(req.params);
+            const { userId } = Validators.TokenValidators.resLocalsTokenValues(
+              res.locals,
+            );
+            const {
+              status,
+              customerQuoteId,
+              customer,
+              carInfo,
+              damageInfo,
+              address,
+              paymentInfo,
+              callbackTime,
+              meetingTime,
+              notes,
+              serviceType,
+
+              forceStatus,
+            } = Validators.CustomerQuoteValidators.edit(req.body);
+
+            if (paramCustomerQuoteId !== customerQuoteId)
+              throw new Error(`Customer ID mismatch.`);
+
+            const ogQuote: MongoDoc<CustomerQuote> | null =
+              await CustomerQuoteModel.findOne({
+                customerQuoteId,
+              }).session(session);
+            if (!ogQuote) throw new Error(`Customer could not be found.`);
+
+            const teamMembers = [...ogQuote.teamMembers];
+            if (!teamMembers.includes(userId)) teamMembers.push(userId);
+
+            // Auto infer status from fields
+            const customerQuoteData: ICustomerQuote = {
+              fromCustomer: ogQuote.fromCustomer,
+              serviceType: serviceType as IServiceType,
+              customerQuoteId,
+              teamMembers,
+              calendarEvents: ogQuote.calendarEvents,
+              attatchments: ogQuote.attatchments,
+              status: forceStatus
+                ? (status as CustomerQuoteStatus)
+                : meetingTime !== undefined
+                  ? "scheduled"
+                  : (paymentInfo?.insurance?.coverageAmount ?? 0) > 0
+                    ? "insurance_validated"
+                    : (paymentInfo?.serviceAmount ?? 0) > 0
+                      ? "quoted"
+                      : "new",
+              customer,
+              car: carInfo,
+              damage: damageInfo,
+              address,
+              paymentInfo: paymentInfo,
+              callbackTime: callbackTime,
+              meetingTime: meetingTime,
+              notes,
+              createdOn: ogQuote.createdOn,
+            };
+
+            await _editQuoteSendSystemMessages(session, userId, ogQuote);
+
+            const customerQuote = await CustomerQuoteModel.findOneAndUpdate(
+              { customerQuoteId },
+              customerQuoteData,
+              { returnDocument: "after", session },
+            );
+            if (!customerQuote) throw new Error(`Could not edit customer.`);
+
+            res.send({ customer: customerQuote.toCustomerQuote() });
+          },
+          async (err) => {
+            await abort();
+            res.status(500).json({ error: err });
+          },
+        ),
+    ),
 );
 
-const editStatus = ControllerFunc((req, res) =>
-  TryCatch(
-    async () => {
-      const { customerQuoteId: paramCustomerQuoteId } =
-        Validators.CustomerQuoteValidators.customerQuoteId(req.params);
-      const { userId } = Validators.TokenValidators.resLocalsTokenValues(
-        res.locals,
-      );
-      const { customerQuoteId, status } =
-        Validators.CustomerQuoteValidators.editStatus(req.body);
+const editStatus = ControllerFunc(
+  async (req, res) =>
+    await SessionController(
+      async ({ session, abort }) =>
+        await TryCatch(
+          async () => {
+            const { customerQuoteId: paramCustomerQuoteId } =
+              Validators.CustomerQuoteValidators.customerQuoteId(req.params);
+            const { userId } = Validators.TokenValidators.resLocalsTokenValues(
+              res.locals,
+            );
+            const { customerQuoteId, status } =
+              Validators.CustomerQuoteValidators.editStatus(req.body);
 
-      if (paramCustomerQuoteId !== customerQuoteId)
-        throw new Error(`Customer ID mismatch.`);
+            if (paramCustomerQuoteId !== customerQuoteId)
+              throw new Error(`Customer ID mismatch.`);
 
-      const ogQuote = await CustomerQuoteModel.findOne({ customerQuoteId });
-      if (!ogQuote) throw new Error(`Customer could not be found.`);
+            const ogQuote: MongoDoc<CustomerQuote> | null =
+              await CustomerQuoteModel.findOne({
+                customerQuoteId,
+              }).session(session);
+            if (!ogQuote) throw new Error(`Customer could not be found.`);
 
-      const teamMembers = [...ogQuote.teamMembers];
-      if (!teamMembers.includes(userId)) teamMembers.push(userId);
+            const teamMembers = [...ogQuote.teamMembers];
+            if (!teamMembers.includes(userId)) teamMembers.push(userId);
 
-      ogQuote.status = status as CustomerQuoteStatus;
-      ogQuote.teamMembers = teamMembers;
+            ogQuote.status = status as CustomerQuoteStatus;
+            ogQuote.teamMembers = teamMembers;
 
-      await ogQuote.save();
+            await _editQuoteSendSystemMessages(session, userId, ogQuote);
 
-      res.send({ customer: ogQuote.toCustomerQuote() });
-    },
-    (err) => {
-      res.status(500).json({ error: err });
-    },
-  ),
+            await ogQuote.save({ session });
+
+            res.send({ customer: ogQuote.toCustomerQuote() });
+          },
+          (err) => {
+            res.status(500).json({ error: err });
+          },
+        ),
+    ),
 );
 
 const toggleTeamMember = ControllerFunc((req, res) =>
@@ -477,6 +633,7 @@ const toggleAttatchments = ControllerFunc((req, res) =>
 
 export const CustomerQuoteController = {
   create,
+  createWithNoTeam,
   getQuotes,
   getQuote,
   edit,

@@ -97,11 +97,11 @@ export const CarInfo = ({
       {identifyBy === "VIN" && (
         <Stack direction={sizeUnder.xs ? "column" : "row"} spacing={2}>
           <TextInput
-            required={!optional}
+            // required={!optional}
             label="VIN"
             value={vin}
             setValue={setVin}
-            optional={optional}
+            optional
           />
           {tellUsMoreRadio ? (
             <RadioInput
@@ -109,7 +109,7 @@ export const CarInfo = ({
               boxLabel="Tell us where the damage is"
               checked={shareDamage}
               onClick={() => setShareDamage((prev) => !prev)}
-              optional={optional}
+              optional
             />
           ) : (
             <Stack sx={{ width: "100%" }} />
@@ -121,18 +121,18 @@ export const CarInfo = ({
         <Stack spacing={2}>
           <Stack direction={sizeUnder.xs ? "column" : "row"} spacing={2}>
             <TextInput
-              required={!optional}
+              // required={!optional}
               label="Plate Number"
               value={plate}
               setValue={setPlate}
-              optional={optional}
+              optional
             />
             <TextInput
-              required={!optional}
+              // required={!optional}
               label="Zipcode"
               value={zip}
               setValue={setZip}
-              optional={optional}
+              optional
             />
           </Stack>
 

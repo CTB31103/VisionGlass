@@ -1,6 +1,6 @@
 import { ICalendarEvent, UserType } from "../interfaces";
-import { CalendarEvent, CalendarEventModel } from "../models";
-import { HashUtils, Log, TryCatch } from "../utils";
+import { CalendarEventModel, RootFilterQuery } from "../models";
+import { HashUtils, TryCatch } from "../utils";
 import Validators from "../validators";
 import ControllerFunc from "./controllerFunc";
 
@@ -10,18 +10,18 @@ const getEvents = ControllerFunc((req, res) =>
       const { calendarEventId, dateRange } =
         Validators.CalendarEventValidators.getEventsValidation(req.query);
 
-      let mongoQuery = {
-        $or: [],
+      let mongoQuery: RootFilterQuery<ICalendarEvent> = {
+        $and: [],
       };
 
       if (calendarEventId) {
-        (mongoQuery["$or"] as unknown[]).push({
+        mongoQuery.$and!.push({
           calendarEventId: { $in: calendarEventId.split(",") },
         });
       }
 
       if (dateRange) {
-        (mongoQuery["$or"] as unknown[]).push({
+        mongoQuery.$and!.push({
           $and: [
             {
               date: { $gte: dateRange.from },
@@ -33,11 +33,13 @@ const getEvents = ControllerFunc((req, res) =>
         });
       }
 
-      const calendarEvents = (await CalendarEventModel.find(mongoQuery)).map(
-        (calEvent) => calEvent.toCalendarEvent(),
-      );
+      const calendarEvents = await CalendarEventModel.find(mongoQuery);
 
-      res.send({ calendarEvents });
+      res.send({
+        calendarEvents: calendarEvents.map((calEvent) =>
+          calEvent.toCalendarEvent(),
+        ),
+      });
     },
     (err) => {
       res.status(500).json({ error: err });
@@ -61,7 +63,7 @@ const createEvent = ControllerFunc((req, res) =>
         timeBlock,
         title,
         desc,
-        visibleUserIds: [],
+        eventType: "other", // TODO: allow user to select type
       };
 
       const calendarEvent = (

@@ -116,23 +116,13 @@ export const RefreshAuthOverlay = () => {
     let timeoutKey = null;
     const publicRoute = isPublicRoute();
     const isAccessKeyValid = await validAccessKey();
-    const refreshKey = cookieService.getCookie(TOKEN_KEYS.REFRESH_KEY);
+    // const refreshKey = cookieService.getCookie(TOKEN_KEYS.REFRESH_KEY);
 
     const shouldRefreshWithAccess =
       (accessKey && !isAccessKeyValid) || // Has access key but access key is invalid
       (isAccessKeyValid && user.userId.length === 0); // Has valid access key but no user data
 
-    // const shouldRefreshWithRefresh =
-    //   refreshKey && refreshKey.length > 0 ? true : false;
-
     if (publicRoute) {
-      console.log(`Refresh Auth Overlay:`);
-      console.log(`Public Route`);
-      console.log(`shouldRefreshWithAccess: ${shouldRefreshWithAccess}`);
-      // console.log(`shouldRefreshWithRefresh: ${shouldRefreshWithRefresh}`);
-      console.log(`refreshKey: ${refreshKey}`);
-      console.log(`TOKEN_KEYS.REFRESH_KEY: ${TOKEN_KEYS.REFRESH_KEY}`);
-      console.log(``);
       if (shouldRefreshWithAccess) refreshUserViaAccessToken();
       else refreshKeys();
       return timeoutKey;

@@ -15,7 +15,6 @@ import { MongoDoc } from "./mongoDoc";
 @modelOptions({
   schemaOptions: { collection: "Reviews" },
 })
-@index({ reviewId: 1 }, { unique: true })
 @plugin(mongoosePaginate)
 export class Review implements IReview {
   @Prop({ type: String, unique: true })

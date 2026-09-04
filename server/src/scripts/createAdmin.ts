@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { HashUtils, Log } from "../utils";
+import { HashUtils, ISession, Log } from "../utils";
 import { UserModel } from "../models";
 import { UserType } from "../interfaces";
 
@@ -25,8 +25,10 @@ export const createAdmin = async () => {
   Log.log(``);
 };
 
-export const getAdmin = async () => {
-  const admin = await UserModel.find({ username: ROOT_USERNAME });
+export const getAdmin = async (session?: ISession) => {
+  const admin = session
+    ? await UserModel.find({ username: ROOT_USERNAME }).session(session)
+    : await UserModel.find({ username: ROOT_USERNAME });
   if (!admin || admin.length === 0) throw new Error(`Could not find admin`);
 
   return admin[0];

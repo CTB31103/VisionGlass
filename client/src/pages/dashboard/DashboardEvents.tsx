@@ -1,13 +1,21 @@
-import { ActionButton, Icons, TBody, THeading } from "@/components";
+import {
+  ActionButton,
+  Icons,
+  PaginationControl,
+  TBody,
+  THeading,
+} from "@/components";
 import { Link, Stack } from "@mui/material";
 import moment from "moment";
 import { useEffect, useState } from "react";
 import { DashboardEventCard } from "./DashboardEventCard";
-import { ROUTES } from "@/Constants";
-import type { ICalendarEvent } from "@/interfaces";
+import { DEFAULT_PAGINATION_LIMIT_OPTIONS, ROUTES } from "@/Constants";
+import { type ICalendarEvent } from "@/interfaces";
 import { Spinner } from "@chakra-ui/react";
 import { useIsAdminService } from "@/hooks";
 import { useUserStore } from "@/stores";
+
+import { usePagination } from "react-use-pagination";
 
 type DashboardEventsProps = {
   date: Date;
@@ -33,6 +41,28 @@ export const DashboardEvents = ({
   }, [date.getTime()]);
 
   const href = ROUTES.DASHBOARD_ADD + `?date=${date.getTime()}`;
+
+  const {
+    currentPage,
+    totalPages,
+    startIndex,
+    endIndex,
+    pageSize,
+    nextEnabled,
+    previousEnabled,
+    setPageSize,
+    setNextPage,
+    setPreviousPage,
+    setPage,
+  } = usePagination({
+    totalItems: daysEvents.length,
+    initialPage: 0,
+    initialPageSize: DEFAULT_PAGINATION_LIMIT_OPTIONS[0],
+  });
+
+  useEffect(() => {
+    setPage(0);
+  }, []);
 
   return (
     <Stack spacing={4}>
@@ -86,20 +116,12 @@ export const DashboardEvents = ({
             )}
           </Stack>
         ) : (
-          daysEvents.map((dE, i, arr) => {
+          daysEvents.slice(startIndex, endIndex + 1).map((dE, i, arr) => {
             const canAlter = isAdmin || dE.creatorId === user.userId;
             return (
               <DashboardEventCard
                 key={dE.calendarEventId}
-                title={dE.title}
-                desc={dE.desc}
-                date={new Date(dE.date)}
-                startDate={
-                  dE.timeBlock?.from ? new Date(dE.timeBlock?.from) : undefined
-                }
-                endDate={
-                  dE.timeBlock?.to ? new Date(dE.timeBlock.to) : undefined
-                }
+                calendarEvent={dE}
                 divider={i !== arr.length - 1}
                 onEdit={() => {}}
                 onDelete={
@@ -112,6 +134,19 @@ export const DashboardEvents = ({
           })
         )}
       </Stack>
+
+      <PaginationControl
+        page={currentPage + 1}
+        totalCount={daysEvents.length}
+        pageLimit={{
+          value: pageSize,
+          set: setPageSize,
+          available: DEFAULT_PAGINATION_LIMIT_OPTIONS,
+        }}
+        totalPage={totalPages}
+        onNextPage={nextEnabled ? setNextPage : undefined}
+        onPrevPage={previousEnabled ? setPreviousPage : undefined}
+      />
     </Stack>
   );
 };

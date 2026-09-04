@@ -7,6 +7,7 @@ import {
   createReviews,
   createTeam,
   printDB,
+  printNamespace,
 } from "./scripts";
 import { Log } from "./utils";
 import { exit } from "node:process";
@@ -23,14 +24,19 @@ mongoose
     (async () => {
       // await printDB();
 
-      await clearDB();
-      await createAdmin();
-      await createTeam();
-      await createCustomers();
-      await createCustomers();
-      await createReviews();
+      await clearDB(false);
+
+      // await createAdmin();
+      // await createTeam();
+
+      // await createCustomers();
+      // await createCustomers();
+      // await createReviews();
 
       await printDB(false);
+
+      // await printNamespace("vision_auto_glass.CustomerQuotes");
+      // await printNamespace("vision_auto_glass.calendarevents");
 
       exit();
     })();

@@ -5,13 +5,19 @@ import { useRequestCallbackShortForm } from "../components";
 import { IMAGES } from "@/assets";
 import {
   CarDamageLocation,
+  Service,
   type ICustomerQuote,
   type IServiceType,
   type WindowSide,
 } from "@/interfaces";
 import { useApi } from "../api";
 import moment from "moment";
-import { capitalize, toNearestHalfHour, toString } from "@/utils";
+import {
+  capitalize,
+  fromTimeString,
+  toNearestHalfHour,
+  toString,
+} from "@/utils";
 import {
   validateAddress,
   validatePayment,
@@ -49,13 +55,20 @@ export type UseCreateCustomerQuoteServiceResponse = ReturnType<
   typeof useCreateCustomerQuoteService
 >;
 
-export const useCreateCustomerQuoteService = () => {
+export const useCreateCustomerQuoteService = (
+  isCustomerForm: boolean = false,
+) => {
   const params = useParams();
   const location = useLocation();
 
   const {
     snackbar: [_, errorSnack],
-    customerQuoteRoutes: { createCustomerQuoteService, getCustomer, edit },
+    customerQuoteRoutes: {
+      createCustomerQuoteServiceAuth,
+      createCustomerQuoteService,
+      getCustomer,
+      edit,
+    },
   } = useApi();
 
   const [loading, setLoading] = useState(false);
@@ -111,8 +124,8 @@ export const useCreateCustomerQuoteService = () => {
 
   const [callbackAsap, setCallbackAsap] = useState(true);
   const [callbackDays, setCallbackDays] = useState(["Weekdays"]);
-  const [callbackFrom, setCallbackFrom] = useState("");
-  const [callbackTo, setCallbackTo] = useState("");
+  const [callbackFrom, setCallbackFrom] = useState<Date | undefined>(undefined);
+  const [callbackTo, setCallbackTo] = useState(new Date());
 
   const [readyToSchedule, setReadyToSchedule] = useState(false);
   const [carAddress, setCarAddress] = useState("");
@@ -157,7 +170,7 @@ export const useCreateCustomerQuoteService = () => {
         .fill(0)
         .map((_v, i) => {
           const num = (8 + i) % 12;
-          const amPm = 8 + i >= 12 ? "PM" : "AM";
+          const amPm = 8 + i >= 12 ? "pm" : "am";
 
           if (num === 0) return `12 ${amPm}`;
 
@@ -244,13 +257,12 @@ export const useCreateCustomerQuoteService = () => {
       setCallbackDays(
         editingCustomer.callbackTime?.dayPrefrence ?? ["Weekdays"],
       );
+      const editingCallback = editingCustomer.callbackTime?.timePreference;
       setCallbackFrom(
-        editingCustomer.callbackTime?.timePreference?.from.toString() ??
-          new Date().getTime().toString(),
+        editingCallback ? new Date(editingCallback.from) : undefined,
       );
       setCallbackTo(
-        editingCustomer.callbackTime?.timePreference?.to.toString() ??
-          new Date().getTime().toString(),
+        editingCallback ? new Date(editingCallback.to) : new Date(),
       );
 
       setReadyToSchedule(editingCustomer.meetingTime ? true : false);
@@ -263,6 +275,15 @@ export const useCreateCustomerQuoteService = () => {
       );
     }
   }, [editingCustomer?.customerQuoteId, isEditingPage]);
+
+  useEffect(() => {
+    if (isCustomerForm) {
+      setCallbackFrom(
+        callbackAsap ? undefined : fromTimeString("8:00 am", new Date()),
+      );
+      setCallbackTo(fromTimeString("8:00 pm", new Date()));
+    }
+  }, [isCustomerForm, callbackAsap]);
 
   useEffect(() => {
     if (carMake.length === 0) return;
@@ -360,15 +381,7 @@ export const useCreateCustomerQuoteService = () => {
     50,
   );
 
-  const isValid = (
-    data: Omit<
-      Omit<
-        Omit<Omit<ICustomerQuote, "customerQuoteId">, "teamMembers">,
-        "status"
-      >,
-      "createdOn"
-    >,
-  ) => {
+  const isValid = (data: ReturnType<typeof createData>) => {
     const validObjects: ICombinedValidationResponse<unknown>[] = [];
 
     const validCustomer = validatePerson(data.customer);
@@ -405,14 +418,9 @@ export const useCreateCustomerQuoteService = () => {
   };
 
   const createData = () => {
-    const data: Omit<
-      Omit<
-        Omit<Omit<ICustomerQuote, "customerQuoteId">, "teamMembers">,
-        "status"
-      >,
-      "createdOn"
-    > = {
+    const data: Parameters<typeof createCustomerQuoteServiceAuth>[0] = {
       serviceType: service as IServiceType,
+      fromCustomer: isCustomerForm,
       customer: {
         firstName,
         lastName,
@@ -420,43 +428,50 @@ export const useCreateCustomerQuoteService = () => {
         phone,
       },
       car:
-        carMake.length > 0 || carModel.length > 0
-          ? {
-              make: carMake,
-              model: carModel,
-              year: carYear,
+        isCustomerForm && !tellUsMore
+          ? undefined
+          : carMake.length > 0 || carModel.length > 0
+            ? {
+                make: carMake,
+                model: carModel,
+                year: carYear,
 
-              vin: vin.length > 0 ? vin : undefined,
-              plateInfo:
-                plate.length > 0 || zip.length > 0
-                  ? {
-                      plate,
-                      zip,
-                    }
-                  : undefined,
-            }
-          : undefined,
-      paymentInfo: {
-        type: payWithInsurance ? "insurance" : "out_of_pocket",
-        serviceAmount: servicePrice,
-        serviceAmountAfterTax: afterTaxPrice,
-        insurance: payWithInsurance
-          ? {
-              insuranceName,
-              coverageAmount: insuranceAmount,
-              fullCoverage,
-              policyNumber,
-            }
-          : undefined,
-      },
+                vin: vin.length > 0 ? vin : undefined,
+                plateInfo:
+                  plate.length > 0 || zip.length > 0
+                    ? {
+                        plate,
+                        zip,
+                      }
+                    : undefined,
+              }
+            : undefined,
+      paymentInfo:
+        isCustomerForm && !tellUsMore
+          ? undefined
+          : {
+              type: payWithInsurance ? "insurance" : "out_of_pocket",
+              serviceAmount: servicePrice,
+              serviceAmountAfterTax: afterTaxPrice,
+              insurance: payWithInsurance
+                ? {
+                    insuranceName,
+                    coverageAmount: insuranceAmount,
+                    fullCoverage,
+                    policyNumber,
+                  }
+                : undefined,
+            },
       damage:
-        damageMainLocation.length > 0
-          ? {
-              location: damageMainLocation as CarDamageLocation,
-              rows: damageRows,
-              windowSide: damageSide as WindowSide,
-            }
-          : undefined,
+        isCustomerForm && !shareDamage
+          ? undefined
+          : damageMainLocation.length > 0
+            ? {
+                location: damageMainLocation as CarDamageLocation,
+                rows: damageRows,
+                windowSide: damageSide as WindowSide,
+              }
+            : undefined,
       address: readyToSchedule ? carAddress : undefined,
       meetingTime: readyToSchedule
         ? {
@@ -465,6 +480,18 @@ export const useCreateCustomerQuoteService = () => {
           }
         : undefined,
       notes,
+      callbackTime: isCustomerForm
+        ? {
+            asap: callbackAsap,
+            dayPrefrence: callbackDays,
+            timePreference: callbackFrom
+              ? {
+                  from: callbackFrom.getTime(),
+                  to: callbackTo.getTime(),
+                }
+              : undefined,
+          }
+        : undefined,
     };
 
     return data;
@@ -481,13 +508,45 @@ export const useCreateCustomerQuoteService = () => {
 
     const res = await (isEditingPage && editingCustomer
       ? edit({ ...editingCustomer, ...data })
-      : createCustomerQuoteService(data));
+      : isCustomerForm
+        ? createCustomerQuoteService(data)
+        : createCustomerQuoteServiceAuth(data));
     setLoading(false);
 
     if (res.err || !res.data) return errorSnack(res.err);
 
     setSuccessModalOpen(true);
-    setCreatedQuote(res.data.customer);
+    if (res.data.customer) setCreatedQuote(res.data.customer);
+  };
+
+  const clearState = () => {
+    setLoading(false);
+    setSuccessModalOpen(false);
+
+    setFirstName("");
+    setLastName("");
+    setPhone("");
+    setService(Service.Windshield);
+    setEmail("");
+    setTellUsMore(false); // UseEffect above clears more state values when this is false
+    setNotes("");
+
+    setServicePrice(0);
+    setAfterTaxPrice(0);
+    setInsuranceContacted(false);
+    setInsuranceAccepted(false);
+    setFullCoverage(false);
+    setInsuranceAmount(0);
+
+    setCallbackAsap(true);
+    setCallbackDays([]);
+    setCallbackFrom(undefined);
+    setCallbackTo(new Date());
+
+    setReadyToSchedule(false);
+    setCarAddress("");
+    setMeetingTime(toNearestHalfHour(new Date()));
+    setEndMeetingTime(moment(meetingTime).add(30, "minutes").toDate());
   };
 
   return {
@@ -598,6 +657,7 @@ export const useCreateCustomerQuoteService = () => {
     createdQuote,
     successModelOpen,
     setSuccessModalOpen,
+    clearState,
 
     submitToAPI,
   };

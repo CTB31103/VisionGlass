@@ -3,6 +3,7 @@ import {
   useScreenSize,
   type UseCreateCustomerQuoteServiceResponse,
 } from "@/hooks";
+import { fromTimeString, toTimeString } from "@/utils";
 import { Stack } from "@mui/material";
 
 type CallbackInfoProps = {
@@ -24,6 +25,7 @@ export const CallbackInfo = ({
   },
 }: CallbackInfoProps) => {
   const { lessThanEqualTo: sizeUnder } = useScreenSize();
+
   return (
     <Stack spacing={2}>
       <Stack spacing={2} direction={sizeUnder.xs ? "column" : "row"}>
@@ -64,26 +66,42 @@ export const CallbackInfo = ({
               )
             }
           />
-          <Stack
-            direction={sizeUnder.xs ? "column" : "row"}
-            sx={{ width: "100%" }}
-            spacing={2}
-          >
-            <SelectInput
-              required
-              label="From:"
-              items={availableTimes.map((time) => ({ value: time }))}
-              selectedItem={callbackFrom}
-              onSelect={setCallbackFrom}
-            />
-            <SelectInput
-              required
-              label="To:"
-              items={availableTimes.map((time) => ({ value: time }))}
-              selectedItem={callbackTo}
-              onSelect={setCallbackTo}
-            />
-          </Stack>
+          {callbackFrom && (
+            <Stack
+              direction={sizeUnder.xs ? "column" : "row"}
+              sx={{ width: "100%" }}
+              spacing={2}
+            >
+              <SelectInput
+                required
+                label="From:"
+                items={availableTimes.map((time) => ({ value: time }))}
+                selectedItem={toTimeString(callbackFrom, false).replace(
+                  ":00",
+                  "",
+                )}
+                onSelect={(v) =>
+                  setCallbackFrom((prev) =>
+                    fromTimeString(v.split(" ").join(":00 "), prev, false),
+                  )
+                }
+              />
+              <SelectInput
+                required
+                label="To:"
+                items={availableTimes.map((time) => ({ value: time }))}
+                selectedItem={toTimeString(callbackTo, false).replace(
+                  ":00",
+                  "",
+                )}
+                onSelect={(v) =>
+                  setCallbackTo((prev) =>
+                    fromTimeString(v.split(" ").join(":00 "), prev, false),
+                  )
+                }
+              />
+            </Stack>
+          )}
         </Stack>
       )}
     </Stack>

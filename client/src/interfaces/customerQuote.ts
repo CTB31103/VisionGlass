@@ -54,6 +54,7 @@ export interface ICustomerQuote {
   teamMembers: string[];
   attatchments: ICustomerAttatchment[];
   status: CustomerQuoteStatus;
+  fromCustomer: boolean;
   customer: IPerson;
   createdOn: number;
   notes: string;

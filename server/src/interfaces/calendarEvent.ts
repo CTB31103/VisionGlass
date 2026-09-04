@@ -1,10 +1,11 @@
 import { ITimeBlock } from "./timeBlock";
 
-export enum Visibility {
-  PERSONAL = "personal",
-  SELECT = "select",
-  ALL = "all",
-}
+export const SYSTEM_EVENTS = {
+  NEW_CUST: "system_new_customer",
+  SALES_NEW_CUST: "system_sales_new_customer",
+  SCHED_CUST: "system_scheduled_customer",
+  DONE_CUST: "system_customer_done",
+};
 
 export interface ICalendarEvent {
   calendarEventId: string;
@@ -14,5 +15,5 @@ export interface ICalendarEvent {
   timeBlock?: ITimeBlock;
   title: string;
   desc: string;
-  visibleUserIds: string[];
+  eventType: string;
 }

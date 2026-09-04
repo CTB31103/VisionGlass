@@ -1,14 +1,16 @@
 import queryString from "query-string";
 import {
   useAuthFetch,
+  useFetch,
   useHttpSignal,
   type IPaginationOptions,
   type IPaginationResult,
 } from "..";
-import type { ICustomerQuote } from "@/interfaces";
+import type { ICustomerQuote, IPerson } from "@/interfaces";
 import { DEFAULT_PAGINATION_OPTION } from "@/Constants";
 
 export const useCustomerQuotesApi = () => {
+  const regFetch = useFetch();
   const { get, post, put } = useAuthFetch();
   const { getNewSignal } = useHttpSignal();
 
@@ -45,20 +47,35 @@ export const useCustomerQuotesApi = () => {
     );
   };
 
-  const createCustomerQuoteService = async (
+  const createCustomerQuoteServiceAuth = async (
     data: Omit<
       Omit<
-        Omit<Omit<ICustomerQuote, "customerQuoteId">, "teamMembers">,
-        "status"
+        Omit<
+          Omit<Omit<ICustomerQuote, "customerQuoteId">, "teamMembers">,
+          "status"
+        >,
+        "createdOn"
       >,
-      "createdOn"
+      "attatchments"
     >,
   ) => {
     return await post<{ customer: ICustomerQuote }>(
       `/api/customer-quotes`,
       data,
-      { signal: getNewSignal(`createCustomerQuoteService`) },
+      { signal: getNewSignal(`createCustomerQuoteServiceAuth`) },
     );
+  };
+
+  const createCustomerQuoteService = async (
+    data: Parameters<typeof createCustomerQuoteServiceAuth>[0],
+  ) => {
+    return await regFetch.post<{
+      success: boolean;
+      newCustomer: IPerson;
+      customer?: ICustomerQuote;
+    }>(`/api/quote`, data, {
+      signal: getNewSignal(`createCustomerQuoteService`),
+    });
   };
 
   const editStatus = async (
@@ -109,6 +126,7 @@ export const useCustomerQuotesApi = () => {
     editStatus,
     editNotes,
     search,
+    createCustomerQuoteServiceAuth,
     createCustomerQuoteService,
     edit,
     toggleTeamMember,

@@ -1,35 +1,56 @@
 import { Divider, ReadMore, TBody, THeading } from "@/components";
 import { EditDeleteButtons } from "@/components/buttons/EditDeleteButtons";
+import { SYSTEM_EVENTS_ARRAY, type ICalendarEvent } from "@/interfaces";
 import { Chip, Stack } from "@mui/material";
 import moment from "moment";
 
 type DashboardEventCardProps = {
-  title: string;
-  desc: string;
+  calendarEvent: ICalendarEvent;
 
-  date: Date;
+  // title: string;
+  // desc: string;
 
-  startDate?: Date;
-  endDate?: Date;
+  // date: Date;
+
+  // startDate?: Date;
+  // endDate?: Date;
+  isSystemEvent?: boolean;
+
   divider?: boolean;
-
   onEdit?: () => void;
   onDelete?: () => void;
 };
 
+const TIME_FORMAT_STR = "h:mm a";
+
 export const DashboardEventCard = ({
-  title,
-  desc,
-  date,
-  startDate,
-  endDate,
+  // title,
+  // desc,
+  // date,
+  // startDate,
+  // endDate,
+  // isSystemEvent,
+  calendarEvent,
   divider,
   onEdit,
   onDelete,
 }: DashboardEventCardProps) => {
-  const mStartDate = moment(startDate);
-  const mDate = moment(date);
-  const mEndDate = endDate ? moment(endDate) : undefined;
+  const mStartDate = calendarEvent.timeBlock?.from
+    ? moment(calendarEvent.timeBlock?.from)
+    : undefined;
+  const mDate = moment(calendarEvent.date);
+  const mEndDate = calendarEvent.timeBlock?.to
+    ? moment(calendarEvent.timeBlock?.to)
+    : undefined;
+
+  const isSystemEvent = SYSTEM_EVENTS_ARRAY.includes(calendarEvent.eventType);
+
+  const formattedStartEndDate = mStartDate
+    ? `, ${mStartDate.format(TIME_FORMAT_STR)}${mEndDate ? ` - ${mEndDate.format(TIME_FORMAT_STR)}` : ``}`
+    : "";
+  const formattedDateTime = isSystemEvent
+    ? `, ${mDate.format(TIME_FORMAT_STR)}`
+    : "";
   return (
     <Stack sx={{ width: "100%" }} spacing={4}>
       <Stack sx={{ width: "100%" }} spacing={1}>
@@ -38,23 +59,26 @@ export const DashboardEventCard = ({
           sx={{ alignItems: "center", justifyContent: "space-between" }}
         >
           <Stack>
-            <THeading bold>{title}</THeading>
+            <THeading bold>{calendarEvent.title}</THeading>
             <Stack direction={"row"} spacing={1}>
-              {!mEndDate && (
+              {isSystemEvent && (
+                <Chip variant="outlined" size="small" label="System Event" />
+              )}
+              {calendarEvent.allDay && (
                 <Chip variant="outlined" size="small" label="All Day" />
               )}
               <TBody>
-                {`${mDate.format("MMM Do")}${mStartDate ? `, ${mStartDate.format("H:mm a")}${mEndDate ? ` - ${mEndDate.format("H:mm a")}` : ""}` : ``}`}
+                {`${mDate.format("MMM Do")}${mStartDate ? formattedStartEndDate : formattedDateTime}`}
               </TBody>
             </Stack>
           </Stack>
 
-          {(onEdit || onDelete) && (
+          {(onEdit || onDelete) && !isSystemEvent && (
             <EditDeleteButtons onEdit={onEdit} onDelete={onDelete} />
           )}
         </Stack>
 
-        <ReadMore text={desc} />
+        <ReadMore text={calendarEvent.desc.replaceAll("\n", "<br/>")} />
       </Stack>
 
       {divider && <Divider />}

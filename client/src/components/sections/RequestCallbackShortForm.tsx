@@ -12,11 +12,14 @@ import {
 } from "@mui/material";
 import { ActionButton } from "../buttons";
 import { Text } from "@chakra-ui/react";
-import { useNavigationService, useRequestCallbackShortForm } from "@/hooks";
+import { useCreateCustomerQuoteService, useNavigationService } from "@/hooks";
+import { QuoteRequestSuccessModal } from "../modals";
 
 export const RequestCallbackShortForm = () => {
   const { toQuote } = useNavigationService();
 
+  const { contactInfo, loading, successModelOpen, clearState, submitToAPI } =
+    useCreateCustomerQuoteService(true);
   const {
     firstName,
     setFirstName,
@@ -29,7 +32,9 @@ export const RequestCallbackShortForm = () => {
 
     service,
     setService,
-  } = useRequestCallbackShortForm();
+  } = contactInfo;
+
+  const closeModal = () => clearState();
 
   return (
     <Stack
@@ -121,8 +126,17 @@ export const RequestCallbackShortForm = () => {
           </Link>
         </Stack>
 
-        <ActionButton color="red">Request Call Now</ActionButton>
+        <ActionButton loading={loading} onClick={submitToAPI} color="red">
+          Request Call Now
+        </ActionButton>
       </Stack>
+
+      <QuoteRequestSuccessModal
+        open={successModelOpen}
+        onClick={closeModal}
+        onClose={closeModal}
+        asap={true}
+      />
     </Stack>
   );
 };

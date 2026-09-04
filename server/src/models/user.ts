@@ -64,6 +64,10 @@ export class User implements IUser {
     return new ClientUser(user);
   }
 
+  fullName() {
+    return `${this.info.firstName} ${this.info.lastName}`.trim();
+  }
+
   toString() {
     return JSON.stringify(this);
   }

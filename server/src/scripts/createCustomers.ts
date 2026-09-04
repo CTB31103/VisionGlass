@@ -5,7 +5,14 @@ import {
   IServiceType,
   UserType,
 } from "../interfaces";
-import { HashUtils, Log, toNearestHalfHour } from "../utils";
+import {
+  CalendarEventUtils,
+  HashUtils,
+  Log,
+  SessionController,
+  toNearestHalfHour,
+  TryCatch,
+} from "../utils";
 import { getAdmin } from "./createAdmin";
 import { CarDamage, CustomerQuoteModel, UserModel } from "../models";
 
@@ -15,146 +22,208 @@ const randBtwn = (min: number, max: number): number => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
-export const createCustomers = async () => {
-  const customers: ICustomerQuote[] = [];
-  const admin = await getAdmin();
+export const createCustomers = () =>
+  SessionController(
+    async ({ session, commit, abort }) =>
+      await TryCatch(
+        async () => {
+          {
+            const customers: ICustomerQuote[] = [];
+            const admin = await getAdmin(session);
 
-  const salesUsers = await UserModel.find({ userType: UserType.SALES });
-  const technicians = await UserModel.find({ userType: UserType.TECH });
+            const salesUsers = await UserModel.find({
+              userType: UserType.SALES,
+            }).session(session);
+            const technicians = await UserModel.find({
+              userType: UserType.TECH,
+            }).session(session);
 
-  const randSales = () => salesUsers[randBtwn(0, salesUsers.length - 1)];
-  const randTech = () => technicians[randBtwn(0, technicians.length - 1)];
+            const randSales = () =>
+              salesUsers[randBtwn(0, salesUsers.length - 1)];
+            const randTech = () =>
+              technicians[randBtwn(0, technicians.length - 1)];
 
-  for (let i = 0; i < 10; i++) {
-    const isScheduled = coinFlip();
-    const isInsured = coinFlip();
-    const callbackAsap = coinFlip();
-    const gaveVin = coinFlip();
-    const quoted = coinFlip();
+            for (let i = 0; i < 10; i++) {
+              const isScheduled = coinFlip();
+              const isInsured = coinFlip();
+              const callbackAsap = coinFlip();
+              const gaveVin = coinFlip();
+              const quoted = coinFlip();
 
-    const sideDamage = coinFlip();
+              const isNew = !isScheduled || !isInsured || !quoted;
 
-    const fullCoverage = i % 2 === 0;
-    const price = randBtwn(100, 300);
-    const taxed = price * (1 + randBtwn(7, 13) / 100);
-    const shouldHavePrice = isScheduled || isInsured || quoted;
+              const sideDamage = coinFlip();
 
-    const insurance = INSURANCE[i];
-    const from = moment(toNearestHalfHour(new Date()))
-      .hours(randBtwn(7, 19))
-      .add(randBtwn(0, 3), "days")
-      .toDate();
-    const to = moment(from).add(30, "minutes").toDate();
+              const fullCoverage = i % 2 === 0;
+              const price = randBtwn(100, 300);
+              const taxed = price * (1 + randBtwn(7, 13) / 100);
+              const shouldHavePrice = isScheduled || isInsured || quoted;
 
-    const eightAM = moment()
-      .hours(7)
-      .minutes(0)
-      .seconds(0)
-      .milliseconds(0)
-      .toDate();
-    const eightPM = moment()
-      .hours(7 + 12)
-      .minutes(0)
-      .seconds(0)
-      .milliseconds(0)
-      .toDate();
-    const createdOn = moment()
-      .subtract(randBtwn(0, 5), "days")
-      .hours(randBtwn(7, 19))
-      .minutes(0)
-      .seconds(0)
-      .milliseconds(0)
-      .toDate()
-      .getTime();
+              const insurance = INSURANCE[i];
+              const from = moment(toNearestHalfHour(new Date()))
+                .hours(randBtwn(7, 19))
+                .add(randBtwn(2, 6), "days")
+                .toDate();
+              const to = moment(from).add(30, "minutes").toDate();
 
-    const allServiceTypes: IServiceType[] = [
-      "ADAS Calibration",
-      "Auto Glass Replacement",
-      "Crack & Chip Repair",
-      "Windshield Replacement",
-    ];
+              const eightAM = moment()
+                .hours(7)
+                .minutes(0)
+                .seconds(0)
+                .milliseconds(0)
+                .toDate();
+              const eightPM = moment()
+                .hours(7 + 12)
+                .minutes(0)
+                .seconds(0)
+                .milliseconds(0)
+                .toDate();
 
-    const teamMembers = [randSales().userId];
+              const createdOn = moment()
+                .subtract(randBtwn(0, 5), "days")
+                .hours(randBtwn(7, 19))
+                .minutes(randBtwn(0, 60))
+                .seconds(0)
+                .milliseconds(0)
+                .toDate()
+                .getTime();
 
-    if (isScheduled && coinFlip()) {
-      teamMembers.push(randTech().userId);
-    }
+              const allServiceTypes: IServiceType[] = [
+                "ADAS Calibration",
+                "Auto Glass Replacement",
+                "Crack & Chip Repair",
+                "Windshield Replacement",
+              ];
 
-    const customer: ICustomerQuote = {
-      serviceType: allServiceTypes[randBtwn(0, 3)],
-      customerQuoteId: HashUtils.uniqueId(),
-      teamMembers: teamMembers,
-      attatchments: [],
-      status: isScheduled
-        ? "scheduled"
-        : isInsured
-          ? "insurance_validated"
-          : quoted
-            ? "quoted"
-            : "new",
-      customer: PEOPLE[i],
+              const teamMembers = [];
+              const salesmen = randSales();
+              const technician = randTech();
 
-      car: {
-        ...CARS[i],
-        vin: gaveVin ? VINS[i] : undefined,
-        plateInfo: !gaveVin ? CAR_PLATES[i] : undefined,
-      },
-      damage: {
-        location: sideDamage
-          ? LOCATIONS[LOCATIONS.length - 1]
-          : LOCATIONS[coinFlip() ? 1 : 0],
-        windowSide: sideDamage ? (coinFlip() ? "left" : "right") : undefined,
-        rows: sideDamage ? (coinFlip() ? [3] : [1, 2]) : undefined,
-      },
+              if ((isNew && coinFlip()) || !isNew) {
+                teamMembers.push(salesmen.userId);
+              }
 
-      paymentInfo: shouldHavePrice
-        ? {
-            serviceAmount: price,
-            serviceAmountAfterTax: taxed,
-            type: isInsured ? "insurance" : "out_of_pocket",
-            insurance: isInsured
-              ? {
-                  insuranceName: insurance.insuranceCompany,
-                  policyNumber: insurance.policyNumber,
-                  coverageAmount: fullCoverage
-                    ? taxed
-                    : randBtwn(price * 0.1, price * 0.75),
-                  fullCoverage,
-                }
-              : undefined,
-          }
-        : undefined,
+              if (isScheduled && coinFlip()) {
+                teamMembers.push(technician.userId);
+              }
 
-      address: isScheduled ? ADDRESSES[i] : undefined,
-      meetingTime: isScheduled
-        ? {
-            from: from.getTime(),
-            to: to.getTime(),
-          }
-        : undefined,
+              const customer: ICustomerQuote = {
+                serviceType: allServiceTypes[randBtwn(0, 3)],
+                customerQuoteId: HashUtils.uniqueId(),
+                teamMembers: teamMembers,
+                attatchments: [],
+                calendarEvents: [],
+                status: isScheduled
+                  ? "scheduled"
+                  : isInsured
+                    ? "insurance_validated"
+                    : quoted
+                      ? "quoted"
+                      : "new",
+                fromCustomer: isNew,
+                customer: PEOPLE[i],
 
-      callbackTime:
-        !isScheduled && !isInsured
-          ? {
-              asap: callbackAsap,
-              dayPrefrence: callbackAsap ? [] : ["Monday", "Tuesday", "Friday"],
-              timePreference: callbackAsap
-                ? undefined
-                : {
-                    from: eightAM.getTime(),
-                    to: eightPM.getTime(),
-                  },
+                car: {
+                  ...CARS[i],
+                  vin: gaveVin ? VINS[i] : undefined,
+                  plateInfo: !gaveVin ? CAR_PLATES[i] : undefined,
+                },
+                damage: {
+                  location: sideDamage
+                    ? LOCATIONS[LOCATIONS.length - 1]
+                    : LOCATIONS[coinFlip() ? 1 : 0],
+                  windowSide: sideDamage
+                    ? coinFlip()
+                      ? "left"
+                      : "right"
+                    : undefined,
+                  rows: sideDamage ? (coinFlip() ? [3] : [1, 2]) : undefined,
+                },
+
+                paymentInfo: shouldHavePrice
+                  ? {
+                      serviceAmount: price,
+                      serviceAmountAfterTax: taxed,
+                      type: isInsured ? "insurance" : "out_of_pocket",
+                      insurance: isInsured
+                        ? {
+                            insuranceName: insurance.insuranceCompany,
+                            policyNumber: insurance.policyNumber,
+                            coverageAmount: fullCoverage
+                              ? taxed
+                              : randBtwn(price * 0.1, price * 0.75),
+                            fullCoverage,
+                          }
+                        : undefined,
+                    }
+                  : undefined,
+
+                address: isScheduled ? ADDRESSES[i] : undefined,
+                meetingTime: isScheduled
+                  ? {
+                      from: from.getTime(),
+                      to: to.getTime(),
+                    }
+                  : undefined,
+
+                callbackTime:
+                  !isScheduled && !isInsured
+                    ? {
+                        asap: callbackAsap,
+                        dayPrefrence: callbackAsap
+                          ? []
+                          : ["Monday", "Tuesday", "Friday"],
+                        timePreference: callbackAsap
+                          ? undefined
+                          : {
+                              from: eightAM.getTime(),
+                              to: eightPM.getTime(),
+                            },
+                      }
+                    : undefined,
+                createdOn,
+                notes: "",
+              };
+
+              const newCustEvent =
+                await CalendarEventUtils.createNewCustomerMessage(
+                  session,
+                  customer,
+                  { date: createdOn },
+                  customer.teamMembers.length > 0,
+                );
+              customer.calendarEvents.push(newCustEvent.calendarEventId);
+
+              if (isScheduled) {
+                const scheduledEvent =
+                  await CalendarEventUtils.createScheduledMessage(
+                    session,
+                    salesmen.userId,
+                    customer,
+                    {
+                      date: from.getTime(),
+                      timeBlock: { from: from.getTime(), to: to.getTime() },
+                    },
+                  );
+                customer.calendarEvents.push(scheduledEvent.calendarEventId);
+              }
+
+              customers.push(customer);
             }
-          : undefined,
-      createdOn,
-      notes: "",
-    };
 
-    customers.push(customer);
-  }
+            await CustomerQuoteModel.create(customers, {
+              session,
+              ordered: true,
+            });
+          }
 
-  await CustomerQuoteModel.create(customers, {});
-};
+          commit();
+        },
+        () => {
+          abort();
+        },
+      ),
+  );
 
 const LOCATIONS = [
   CarDamageLocation.BACK,

@@ -175,13 +175,13 @@ const create = (body: any) => {
   let customer = validatePerson(body.customer);
 
   let carInfo: ICar | undefined = undefined;
-  if (body.carInfo) {
-    carInfo = validateCarInfo(body.carInfo);
+  if (body.car) {
+    carInfo = validateCarInfo(body.car);
   }
 
   let damageInfo: ICarDamage | undefined;
-  if (body.damageInfo) {
-    damageInfo = validateDamageInfo(body.damageInfo);
+  if (body.damage) {
+    damageInfo = validateDamageInfo(body.damage);
   }
 
   let address: string | undefined = undefined;

@@ -6,9 +6,10 @@ import {
   TBody,
   THeading,
 } from "@/components";
+import { ROUTES } from "@/Constants";
 import { CarDamageLocation, type ICustomerQuote } from "@/interfaces";
 import { capitalize } from "@/utils";
-import { Stack } from "@mui/material";
+import { Link, Stack } from "@mui/material";
 
 type CustomerVehicleInfoProps = {
   customer: ICustomerQuote;
@@ -24,7 +25,7 @@ export const CustomerVehicleInfo = ({ customer }: CustomerVehicleInfoProps) => {
 
   const damageCardTitle =
     damageMainLocation === CarDamageLocation.SIDE
-      ? `${damageSide.length > 0 ? damageSide + " " : ""}${damageMainLocation}${damageRows.length === 1 ? "<br/> (" + availableRows[damageRows[0] - 1] + ") " : damageRows.length > 1 ? `<br/> (Multiple Rows)` : ""}`
+      ? `${damageSide.length > 0 ? damageSide + " " : ""}${damageMainLocation}${damageRows.length === 1 ? " (" + availableRows[damageRows[0] - 1] + ") " : damageRows.length > 1 ? `<br/> (Multiple Rows)` : ""}`
       : `${capitalize(damageMainLocation ?? "")} Windshield`;
 
   return (
@@ -73,7 +74,13 @@ export const CustomerVehicleInfo = ({ customer }: CustomerVehicleInfoProps) => {
         ) : (
           <Stack spacing={2} sx={{ width: "100%", alignItems: "center" }}>
             <TBody>No vehicle information provided</TBody>
-            <ActionButton color="red">Add Vehicle Information</ActionButton>
+            <Link
+              color="inherit"
+              underline="none"
+              href={ROUTES.CUSTOMERS_EDIT + `/${customer.customerQuoteId}`}
+            >
+              <ActionButton color="red">Add Vehicle Information</ActionButton>
+            </Link>
           </Stack>
         )}
       </Stack>

@@ -81,7 +81,7 @@ export const CustomerAdd = () => {
             }}
           >
             <ActionButton loading={loading} onClick={submitToAPI} color="red">
-              Create Customer
+              {isEditingPage ? "Edit" : "Create"} Customer
             </ActionButton>
           </Stack>
         </Stack>

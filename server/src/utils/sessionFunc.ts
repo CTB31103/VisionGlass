@@ -1,8 +1,10 @@
 import mongoose from "mongoose";
 import { Log } from "./log";
 
+export type ISession = mongoose.mongo.ClientSession;
+
 export type SessionFunctionParams = {
-  session: mongoose.mongo.ClientSession;
+  session: ISession;
   commit: () => Promise<void>;
   abort: () => Promise<void>;
 };

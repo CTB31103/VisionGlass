@@ -2,16 +2,26 @@ import {
   ActionButton,
   CustomerQuoteForms,
   FullPage,
+  QuoteRequestSuccessModal,
   TitleWithSubtitle,
 } from "@/components";
+import { ROUTES } from "@/Constants";
 import { useCreateCustomerQuoteService, useScreenSize } from "@/hooks";
 import { Stack } from "@mui/material";
 
 export const Quote = () => {
   const { lessThanEqualTo: sizeUnder } = useScreenSize();
 
-  const { contactInfo, carInfo, carDamage, paymentOptions, callbackInfo } =
-    useCreateCustomerQuoteService();
+  const {
+    contactInfo,
+    carInfo,
+    carDamage,
+    paymentOptions,
+    callbackInfo,
+    loading,
+    successModelOpen,
+    submitToAPI,
+  } = useCreateCustomerQuoteService(true);
 
   return (
     <FullPage screen>
@@ -84,8 +94,16 @@ export const Quote = () => {
             justifyContent: "center",
           }}
         >
-          <ActionButton color="red">Request Quote</ActionButton>
+          <ActionButton onClick={submitToAPI} loading={loading} color="red">
+            Request Quote
+          </ActionButton>
         </Stack>
+
+        <QuoteRequestSuccessModal
+          open={successModelOpen}
+          href={ROUTES.HOME}
+          asap={callbackInfo.callbackAsap}
+        />
       </Stack>
     </FullPage>
   );
