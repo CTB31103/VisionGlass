@@ -12,6 +12,7 @@ MediaRoutes.post(
   "/upload",
   Middleware.apiAccess,
   Middleware.accessKeyOnly,
+  Middleware.DiskSpaceMiddleware,
   Middleware.upload.array("files", 5),
   Controllers.MediaController.upload,
 );
