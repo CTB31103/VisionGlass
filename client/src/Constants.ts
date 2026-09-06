@@ -8,6 +8,7 @@ export const CONSTANTS = {
 
     image: (imageName: string) =>
       `http://${import.meta.env.VITE_API_HOSTNAME as string}/api/media/serve/${imageName}`,
+    fairImageName: `fairs-schedule.webp`,
   },
 };
 

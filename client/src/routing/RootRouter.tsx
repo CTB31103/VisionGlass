@@ -9,6 +9,7 @@ import {
   Customers,
   Dashboard,
   DashboardAdd,
+  Fairs,
   Home,
   Login,
   PageNotFound,
@@ -37,6 +38,7 @@ export const RootRouter = () => {
           <Route path={ROUTES.ABOUT} element={<About />} />
           <Route path={ROUTES.CONTACT} element={<Contact />} />
           <Route path={ROUTES.QUOTES} element={<Quote />} />
+          <Route path={ROUTES.FAIRS} element={<Fairs />} />
 
           <Route path={ROUTES.SERVICES} element={<ServicesPage />} />
           <Route

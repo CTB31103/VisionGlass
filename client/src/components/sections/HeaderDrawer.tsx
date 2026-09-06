@@ -100,22 +100,6 @@ export const HeaderDrawer = ({
           {routes.map((route, i, arr) => (
             <DrawerItem key={i} {...route} divider={i !== arr.length - 1} />
           ))}
-
-          {/* {SMALL_PUBLIC_ROUTES.map((route, i, arr) => (
-                  <DrawerItem
-                    key={i}
-                    {...route}
-                    divider={i !== arr.length - 1 || isLoggedIn}
-                  />
-                ))}
-                {isLoggedIn &&
-                  AUTH_ROUTES.map((route, i, arr) => (
-                    <DrawerItem
-                      key={i}
-                      {...route}
-                      divider={i !== arr.length - 1}
-                    />
-                  ))} */}
         </Stack>
       </Stack>
     </Drawer>

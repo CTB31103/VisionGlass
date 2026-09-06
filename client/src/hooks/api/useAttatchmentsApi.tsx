@@ -17,6 +17,13 @@ export const useAttatchmentsApi = () => {
     );
   };
 
+  const uploadFairs = async (files: FormData) => {
+    return await post<{ success: boolean }>(`/api/media/fairs`, files, {
+      isFormData: true,
+      signal: getNewSignal(`uploadFairs`),
+    });
+  };
+
   const getAttatchments = async (data: {
     attatchmentIds?: string[];
     groupIds?: string[];
@@ -30,5 +37,6 @@ export const useAttatchmentsApi = () => {
   return {
     upload,
     getAttatchments,
+    uploadFairs,
   };
 };

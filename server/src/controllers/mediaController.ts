@@ -67,6 +67,60 @@ const upload = ControllerFunc((req, res) => {
   );
 });
 
+const uploadFairSchedule = ControllerFunc((req, res) =>
+  TryCatch(
+    async () => {
+      const { userId, isRootUser } =
+        Validators.TokenValidators.resLocalsTokenValues(res.locals);
+
+      if (!req.file) throw new Error(`No image found in upload`);
+
+      if (!isRootUser) throw new Error(`Unauthorized action`);
+
+      const diskFolder = ImageUtils.getUploadsFolder();
+      await ImageUtils.saveFile(
+        req.file.buffer,
+        ImageUtils.join(diskFolder, CONSTANTS.media.uploads.fairImageName),
+      );
+
+      res.send({
+        success: true,
+      });
+    },
+    (err) => {
+      res.status(500).json({ error: err });
+    },
+  ),
+);
+
+const serveFairsSchedule = ControllerFunc((req, res) =>
+  TryCatch(
+    async () => {
+      const imageName = CONSTANTS.media.uploads.fairImageName + ".webp";
+      const diskFolder = ImageUtils.getUploadsFolder();
+
+      const filePath = ImageUtils.join(diskFolder, imageName);
+
+      ImageUtils.mustExist(filePath);
+
+      const mimeType = ImageUtils.mimeType(imageName);
+      const stream = ImageUtils.createReadStream(filePath);
+
+      stream.on("open", function () {
+        res.set("Content-Type", mimeType);
+        stream.pipe(res);
+      });
+      stream.on("error", function () {
+        res.set("Content-Type", "text/plain");
+        res.status(404).end("Not found");
+      });
+    },
+    (err) => {
+      res.status(500).json({ error: err });
+    },
+  ),
+);
+
 const serveImage = ControllerFunc((req, res) =>
   TryCatch(
     async () => {
@@ -81,12 +135,11 @@ const serveImage = ControllerFunc((req, res) =>
         return res.status(403).end("Forbidden");
       }
 
-      const attatchment = await AttatchmentModel.find({
+      const attatchment = await AttatchmentModel.findOne({
         attachmentId: imageName,
       });
-      Log.colors.purple(`Attatchment:`);
-      Log.colors.purple(attatchment);
-      Log.colors.purple(``);
+
+      if (!attatchment) return res.status(401).send({});
 
       ImageUtils.mustExist(filePath);
 
@@ -174,4 +227,6 @@ export const MediaController = {
   upload,
   serveImage,
   getAttatchments,
+  uploadFairSchedule,
+  serveFairsSchedule,
 };

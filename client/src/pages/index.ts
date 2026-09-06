@@ -21,3 +21,4 @@ export * from "./profile";
 export * from "./customer";
 export * from "./customerAttatchment";
 export * from "./changePassword";
+export * from "./fairs";

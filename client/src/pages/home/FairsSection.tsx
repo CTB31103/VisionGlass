@@ -44,7 +44,7 @@ export const FairsSection = () => {
         }}
         spacing={2}
       >
-        <THeading align="center">Catch Us at a Fair Near You!</THeading>
+        <THeading align="center">Meet us at the Fair!</THeading>
 
         <Stack spacing={1}>
           <TBody align="center">

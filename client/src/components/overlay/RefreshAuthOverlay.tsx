@@ -24,7 +24,7 @@ import {
 } from "@/hooks";
 import { useState } from "react";
 
-const WHITE_LIST = [ROUTES.HOME, ROUTES.ABOUT, ROUTES.CONTACT, ROUTES.QUOTES];
+// const WHITE_LIST = [ROUTES.HOME, ROUTES.ABOUT, ROUTES.CONTACT, ROUTES.QUOTES];
 
 // const AUTH_LIST = [
 //   ROUTES.DASHBOARD,
@@ -51,7 +51,7 @@ export const RefreshAuthOverlay = () => {
   const sessionService = useSessionService();
 
   const isPublicRoute = () =>
-    pathname === ROUTES.LOGIN || WHITE_LIST.includes(pathname);
+    pathname === ROUTES.LOGIN || !ALL_AUTH_ROUTES.includes(pathname);
 
   const clearBothStorages = (key: string) => (
     cookieService.clearCookie(key),

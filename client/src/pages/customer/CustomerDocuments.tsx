@@ -8,17 +8,13 @@ import {
   NoDataFound,
   TBody,
   THeading,
+  Uploader,
 } from "@/components";
-import {
-  ACCEPTABLE_IMAGE_TYPES,
-  CSS,
-  MAX_FILE_SIZE,
-  ONE_MB,
-} from "@/Constants";
-import { useApi } from "@/hooks";
+import { CSS, MAX_FILE_SIZE, ONE_MB } from "@/Constants";
+import { useApi, useUploaderState } from "@/hooks";
 import type { IAttatchment, IUser } from "@/interfaces";
 import { Stack } from "@mui/material";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 
 type CustomerDocumentsProps = {
   customerId: string;
@@ -39,18 +35,13 @@ export const CustomerDocuments = ({
   onAddDocumentIds,
   onDeleteDocument,
 }: CustomerDocumentsProps) => {
-  const inputRef = useRef<HTMLInputElement>(null);
-
   const {
     snackbar: [_, errorSnack],
     attatchmentRoutes,
   } = useApi();
   const [loading, setLoading] = useState(false);
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-  const [someFileTooLarge, setSomeFileTooLarge] = useState(0);
-  const [autoUpload, setAutoUpload] = useState(false);
 
-  const uploadFiles = async () => {
+  const uploadFiles = async (selectedFiles: File[]) => {
     if (selectedFiles.length === 0) return;
     setLoading(true);
 
@@ -69,48 +60,14 @@ export const CustomerDocuments = ({
     onAddDocumentIds(res.data.attatchments.map((doc) => doc.attachmentId));
   };
 
-  const onFileSelect = ({
-    target: { files },
-  }: React.ChangeEvent<HTMLInputElement, HTMLInputElement>) => {
-    setSomeFileTooLarge(0);
-    setAutoUpload(false);
-    if (!files) return;
-
-    const filesArr: File[] = [];
-    let largeCounter = 0;
-
-    for (let i = 0; i < files.length; i++) {
-      const file = files.item(i);
-      if (!file) continue;
-      filesArr.push(file);
-
-      if (file.size > MAX_FILE_SIZE) largeCounter += 1;
-    }
-
-    if (filesArr.length === 1 && largeCounter === 1)
-      return errorSnack(`File size is larger 15 MB and cannot be uploaded.`);
-
-    if (filesArr.length === largeCounter)
-      return errorSnack(
-        `File size of all selected files is larger than 15 MB and cannot be uploaded.`,
-      );
-
-    setSelectedFiles(filesArr);
-    setSomeFileTooLarge(largeCounter);
-
-    if (largeCounter === 0) {
-      setAutoUpload(true);
-    }
-  };
-
-  useEffect(() => {
-    if (autoUpload && selectedFiles.length > 0) uploadFiles();
-  }, [autoUpload]);
-
-  const resetFiles = () => {
-    setSelectedFiles([]);
-    setSomeFileTooLarge(0);
-  };
+  const {
+    inputRef,
+    onFileSelect,
+    setAutoUpload,
+    resetFiles,
+    selectedFiles,
+    someFileTooLarge,
+  } = useUploaderState(uploadFiles);
 
   return (
     <Stack spacing={4} sx={{ pb: 4 }}>
@@ -133,24 +90,7 @@ export const CustomerDocuments = ({
           Add Document
         </ActionButton>
 
-        <Stack
-          sx={{
-            position: "absolute",
-            top: 0,
-            right: 0,
-            opacity: 0,
-            pointerEvents: "none",
-          }}
-        >
-          <input
-            ref={inputRef}
-            type="file"
-            max={5}
-            multiple
-            accept={ACCEPTABLE_IMAGE_TYPES}
-            onChange={onFileSelect}
-          />
-        </Stack>
+        <Uploader ref={inputRef} multipleFiles onFileSelect={onFileSelect} />
       </Stack>
 
       {parentLoading || loading || attatchments.length === 0 ? (
@@ -177,7 +117,7 @@ export const CustomerDocuments = ({
 
       <BasicModal
         title="Warning"
-        subtitle={`${"One or more of your"} selected files is larger than 15 MB and cannot be uploaded. Do you want to upload without the larger files?`}
+        subtitle={`${selectedFiles.length > 1 ? "One or more of your selected files is" : "Selected file is"} larger than 15 MB and cannot be uploaded.${selectedFiles.length > 1 ? " Do you want to upload the smaller files on their own?" : ""}`}
         open={someFileTooLarge > 0}
         centerSubtitle
         onClose={() => {}}
@@ -214,20 +154,26 @@ export const CustomerDocuments = ({
             );
           })}
         </Stack>
-        <Stack
-          direction={"row"}
-          sx={{ width: "100%", justifyContent: "space-between" }}
-        >
-          <BorderButton onClick={resetFiles}>
-            <Icons.Close /> Cancel
-          </BorderButton>
-          <ActionButton
-            onClick={() => setAutoUpload(true)}
-            EndIcon={<Icons.Upload />}
+        {selectedFiles.length === 1 ? (
+          <Stack sx={{ width: "100%", alignItems: "center" }}>
+            <ActionButton onClick={resetFiles}>Close</ActionButton>
+          </Stack>
+        ) : (
+          <Stack
+            direction={"row"}
+            sx={{ width: "100%", justifyContent: "space-between" }}
           >
-            Upload
-          </ActionButton>
-        </Stack>
+            <BorderButton onClick={resetFiles}>
+              <Icons.Close /> Cancel
+            </BorderButton>
+            <ActionButton
+              onClick={() => setAutoUpload(true)}
+              EndIcon={<Icons.Upload />}
+            >
+              Upload
+            </ActionButton>
+          </Stack>
+        )}
       </BasicModal>
     </Stack>
   );

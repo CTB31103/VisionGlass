@@ -85,6 +85,7 @@ export const Footer = () => {
               { text: "Get A Quote", href: ROUTES.QUOTES },
               { text: "About", href: ROUTES.ABOUT },
               { text: "Contact", href: ROUTES.CONTACT },
+              { text: "Fairs", href: ROUTES.FAIRS },
               { text: "Login", href: ROUTES.LOGIN },
             ]}
           />

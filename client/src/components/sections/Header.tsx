@@ -47,6 +47,7 @@ const PUBLIC_ROUTES: HeaderNavLinksProps["links"] = [
 const SMALL_PUBLIC_ROUTES: HeaderNavLinksProps["links"] = [
   ...PUBLIC_ROUTES,
   { text: "Locations", linkPath: ROUTES.CONTACT, menuOptions: LOCATIONS },
+  { text: "Fairs", linkPath: ROUTES.FAIRS },
 ];
 
 const NON_AUTH_ROUTES: HeaderNavLinksProps["links"] = [

@@ -31,6 +31,7 @@ const CONSTANTS = {
     uploads: {
       path: () =>
         CONSTANTS.env.isProduction() ? "/uploads/public" : "/uploads/test",
+      fairImageName: `fairs-schedule`,
     },
   },
 
