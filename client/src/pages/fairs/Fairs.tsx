@@ -9,7 +9,12 @@ import {
   Uploader,
 } from "@/components";
 import { CONSTANTS, CSS, ROUTES } from "@/Constants";
-import { useApi, useScreenSize, useUploaderState } from "@/hooks";
+import {
+  useApi,
+  useScreenSize,
+  useTimeoutEffect,
+  useUploaderState,
+} from "@/hooks";
 import { useUserStore } from "@/stores";
 import { Spinner } from "@chakra-ui/react";
 import { Link, Stack, Tooltip } from "@mui/material";
@@ -25,9 +30,10 @@ export const Fairs = () => {
   } = useApi();
 
   const [loading, setLoading] = useState(false);
+  const [imageError, setImageError] = useState(false);
+  const [attempts, setAttempts] = useState(0);
 
   const uploader = async (selectedFiles: File[], reset: () => void) => {
-    console.log(`Uploader: ${selectedFiles.length}`);
     if (selectedFiles.length !== 1) return;
 
     const formData = new FormData();
@@ -44,6 +50,17 @@ export const Fairs = () => {
   };
 
   const { inputRef, onFileSelect } = useUploaderState(uploader);
+
+  useTimeoutEffect(
+    () => {
+      if (imageError && attempts < 3) {
+        setImageError(false);
+        setAttempts((prev) => prev + 1);
+      }
+    },
+    [imageError],
+    5000,
+  );
 
   const toUrl = (urlPath: string) =>
     `http${CONSTANTS.api.isHttps() ? "s" : ""}://${CONSTANTS.api.hostname()}/${urlPath[0] === "/" ? urlPath.slice(1) : urlPath}`;
@@ -109,11 +126,21 @@ export const Fairs = () => {
         >
           {loading ? (
             <Spinner size={"xl"} />
+          ) : imageError ? (
+            <Stack sx={{ p: 2 }}>
+              <TBody align="center">
+                We are currently preparing our schedule for the upcoming season,
+                please check back on this page later to see where we'll be next!
+              </TBody>
+            </Stack>
           ) : (
             <img
               style={{ width: "100%" }}
               src={toUrl("/api/media/fairs")}
-              onError={(e) => (e.currentTarget.style = "")}
+              onError={(e) => (
+                (e.currentTarget.style = ""),
+                setImageError(true)
+              )}
               alt="Fairs-Schedule"
             />
           )}

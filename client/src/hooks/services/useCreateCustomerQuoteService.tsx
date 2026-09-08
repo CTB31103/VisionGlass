@@ -14,6 +14,8 @@ import { useApi } from "../api";
 import moment from "moment";
 import {
   capitalize,
+  capitalizeAllWords,
+  damageInfoString,
   fromTimeString,
   toNearestHalfHour,
   toString,
@@ -106,10 +108,14 @@ export const useCreateCustomerQuoteService = (
   const [damageImage, setDamageImage] = useState(availableSideImages[0]);
   const [damageSide, setDamageSide] = useState("");
   const [damageRows, setDamageRows] = useState<number[]>([]);
+  const [damageCardTitle, setDamageCardTitle] = useState(
+    capitalizeAllWords(
+      damageInfoString(damageSide, damageMainLocation, damageRows),
+    ),
+  );
   const damageIsSideWindows =
     damageMainLocation ===
     availableDamageOptions[availableDamageOptions.length - 1].value;
-  const damageCardTitle = `${damageSide.length > 0 ? damageSide + " " : ""}${damageMainLocation}${damageRows.length === 1 ? "<br/> (" + availableRows[damageRows[0] - 1] + ") " : damageRows.length > 1 ? `<br/> (Multiple Rows)` : ""}`;
   const damageCardSmallTitle = damageSide.length > 0 && damageRows.length > 0;
 
   const [payWithInsurance, setPayWithInsurance] = useState(false);
@@ -197,6 +203,14 @@ export const useCreateCustomerQuoteService = (
 
     setEditingCustomer(res.data.customer);
   };
+
+  useEffect(() => {
+    setDamageCardTitle(
+      capitalizeAllWords(
+        damageInfoString(damageSide, damageMainLocation, damageRows),
+      ),
+    );
+  }, [damageSide, damageMainLocation, damageRows]);
 
   useEffect(() => {
     setAvailableItems();

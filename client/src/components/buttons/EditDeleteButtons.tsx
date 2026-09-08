@@ -6,6 +6,7 @@ import type { PropsWithChildren } from "react";
 type EditDeleteButtonsProps = {
   editHref?: string;
   editToolTip?: string;
+  redDelete?: boolean;
   onEdit?: () => void;
   onDelete?: () => void;
 };
@@ -13,6 +14,7 @@ type EditDeleteButtonsProps = {
 export const EditDeleteButtons = ({
   editHref,
   editToolTip,
+  redDelete,
   onEdit,
   onDelete,
 }: EditDeleteButtonsProps) => {
@@ -37,7 +39,7 @@ export const EditDeleteButtons = ({
         </ToolTipOrStack>
       )}
       {onDelete && (
-        <BorderButton onClick={onDelete}>
+        <BorderButton color={redDelete ? "red" : undefined} onClick={onDelete}>
           <Icons.Delete />
         </BorderButton>
       )}

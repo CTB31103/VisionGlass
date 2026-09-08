@@ -4,6 +4,7 @@ import {
   ICustomerQuote,
   IServiceType,
   SYSTEM_EVENTS,
+  UserType,
 } from "../interfaces";
 import {
   AttatchmentModel,
@@ -323,23 +324,73 @@ const _editQuoteSendSystemMessages = async (
   userId: string,
   customerQuoteData: ICustomerQuote,
 ) => {
+  const prevEvents = await CalendarEventModel.find({
+    calendarEventId: { $in: customerQuoteData.calendarEvents },
+  }).session(session);
+
+  const validScheduledStatus: string[] = [
+    CustomerQuoteStatus.SCHEDULED,
+    CustomerQuoteStatus.DONE,
+  ];
+
+  let [hasScheduled, hasDone] = [false, false];
+
+  for (const prevEvent of prevEvents) {
+    if (prevEvent.eventType === SYSTEM_EVENTS.SCHED_CUST) {
+      hasScheduled = true;
+
+      if (validScheduledStatus.includes(customerQuoteData.status)) {
+        if (!customerQuoteData.meetingTime) continue; // Should not be possible
+        if (prevEvent.date === customerQuoteData.meetingTime.from) continue;
+
+        Log.colors.yellow(`Edit scheduled event`);
+
+        // update only if times are different
+        await CalendarEventModel.findOneAndUpdate(
+          { calendarEventId: prevEvent.calendarEventId },
+          {
+            date: customerQuoteData.meetingTime.from,
+            timeBlock: customerQuoteData.meetingTime,
+          },
+        );
+        continue;
+      }
+
+      Log.colors.yellow(`Delete scheduled event`);
+
+      await CalendarEventModel.findOneAndDelete({
+        calendarEventId: prevEvent.calendarEventId,
+      });
+      customerQuoteData.calendarEvents = produce(
+        customerQuoteData.calendarEvents,
+        (draft) => draft.filter((id) => id !== prevEvent.calendarEventId),
+      );
+      continue;
+    }
+
+    if (prevEvent.eventType === SYSTEM_EVENTS.DONE_CUST) {
+      hasDone = true;
+
+      if (customerQuoteData.status === CustomerQuoteStatus.DONE) continue;
+
+      Log.colors.yellow(`Delete done event`);
+
+      await CalendarEventModel.findOneAndDelete({
+        calendarEventId: prevEvent.calendarEventId,
+      });
+      customerQuoteData.calendarEvents = produce(
+        customerQuoteData.calendarEvents,
+        (draft) => draft.filter((id) => id !== prevEvent.calendarEventId),
+      );
+    }
+  }
+
   if (
     customerQuoteData.status === CustomerQuoteStatus.SCHEDULED &&
-    customerQuoteData.meetingTime
+    customerQuoteData.meetingTime &&
+    !hasScheduled
   ) {
-    const prevSysEvent = await CalendarEventModel.findOneAndDelete(
-      {
-        calendarEventId: { $in: customerQuoteData.calendarEvents },
-        eventType: SYSTEM_EVENTS.SCHED_CUST,
-      },
-      { session },
-    );
-    if (prevSysEvent) {
-      customerQuoteData.calendarEvents =
-        customerQuoteData.calendarEvents.filter(
-          (calId) => prevSysEvent.calendarEventId !== calId,
-        );
-    }
+    Log.colors.yellow(`Create scheduled event`);
 
     const scheduledSystemEvent =
       await CalendarEventUtils.createScheduledMessage(
@@ -352,26 +403,17 @@ const _editQuoteSendSystemMessages = async (
         },
       );
 
-    customerQuoteData.calendarEvents.push(scheduledSystemEvent.calendarEventId);
+    customerQuoteData.calendarEvents = [
+      ...customerQuoteData.calendarEvents,
+      scheduledSystemEvent.calendarEventId,
+    ];
   }
 
-  if (customerQuoteData.status === CustomerQuoteStatus.DONE) {
+  if (customerQuoteData.status === CustomerQuoteStatus.DONE && !hasDone) {
     const user = await UserModel.findOne({ userId }).session(session);
     if (!user) throw new Error(`Could not find user`);
 
-    const prevSysEvent = await CalendarEventModel.findOneAndDelete(
-      {
-        calendarEventId: { $in: customerQuoteData.calendarEvents },
-        eventType: SYSTEM_EVENTS.DONE_CUST,
-      },
-      { session },
-    );
-    if (prevSysEvent) {
-      customerQuoteData.calendarEvents =
-        customerQuoteData.calendarEvents.filter(
-          (calId) => prevSysEvent.calendarEventId !== calId,
-        );
-    }
+    Log.colors.yellow(`Create done event`);
 
     const doneSystemEvent = await CalendarEventUtils.createDoneMessage(
       session,
@@ -380,7 +422,10 @@ const _editQuoteSendSystemMessages = async (
       { date: new Date().getTime() },
     );
 
-    customerQuoteData.calendarEvents.push(doneSystemEvent.calendarEventId);
+    customerQuoteData.calendarEvents = [
+      ...customerQuoteData.calendarEvents,
+      doneSystemEvent.calendarEventId,
+    ];
   }
 };
 
@@ -451,11 +496,19 @@ const edit = ControllerFunc(
               createdOn: ogQuote.createdOn,
             };
 
-            await _editQuoteSendSystemMessages(session, userId, ogQuote);
+            await _editQuoteSendSystemMessages(
+              session,
+              userId,
+              customerQuoteData,
+            );
 
             const customerQuote = await CustomerQuoteModel.findOneAndUpdate(
               { customerQuoteId },
-              customerQuoteData,
+              {
+                ...customerQuoteData,
+                address: customerQuoteData.address ?? null,
+                meetingTime: customerQuoteData.meetingTime ?? null,
+              },
               { returnDocument: "after", session },
             );
             if (!customerQuote) throw new Error(`Could not edit customer.`);
@@ -473,7 +526,7 @@ const edit = ControllerFunc(
 const editStatus = ControllerFunc(
   async (req, res) =>
     await SessionController(
-      async ({ session, abort }) =>
+      async ({ session, commit, abort }) =>
         await TryCatch(
           async () => {
             const { customerQuoteId: paramCustomerQuoteId } =
@@ -493,19 +546,26 @@ const editStatus = ControllerFunc(
               }).session(session);
             if (!ogQuote) throw new Error(`Customer could not be found.`);
 
-            const teamMembers = [...ogQuote.teamMembers];
-            if (!teamMembers.includes(userId)) teamMembers.push(userId);
+            Log.colors.purple(`1`);
 
             ogQuote.status = status as CustomerQuoteStatus;
-            ogQuote.teamMembers = teamMembers;
+            Log.colors.purple(`2`);
+            ogQuote.teamMembers = !ogQuote.teamMembers.includes(userId)
+              ? [...ogQuote.teamMembers, userId]
+              : ogQuote.teamMembers;
+
+            Log.colors.purple(`3`);
 
             await _editQuoteSendSystemMessages(session, userId, ogQuote);
+            Log.colors.purple(`3`);
 
             await ogQuote.save({ session });
+            await commit();
 
             res.send({ customer: ogQuote.toCustomerQuote() });
           },
-          (err) => {
+          async (err) => {
+            await abort();
             res.status(500).json({ error: err });
           },
         ),
@@ -631,6 +691,58 @@ const toggleAttatchments = ControllerFunc((req, res) =>
   ),
 );
 
+const deleteQuote = ControllerFunc(
+  async (req, res) =>
+    await SessionController(
+      async ({ session, commit, abort }) =>
+        await TryCatch(
+          async () => {
+            const { role } = Validators.TokenValidators.resLocalsTokenValues(
+              res.locals,
+            );
+            const { customerQuoteId } =
+              Validators.CustomerQuoteValidators.customerQuoteId(req.params);
+
+            if (role !== UserType.ADMIN) throw new Error(`Unauthorized action`);
+
+            const customerQuote = await CustomerQuoteModel.findOne({
+              customerQuoteId,
+            }).session(session);
+            if (!customerQuote) throw new Error(`Could not find customer`);
+
+            const diskPath = ImageUtils.getUploadsFolder();
+            for await (const {
+              attatchmentId: imageName,
+            } of customerQuote.attatchments) {
+              await ImageUtils.deleteFile(ImageUtils.join(diskPath, imageName));
+            }
+            await AttatchmentModel.deleteMany({
+              attachmentId: {
+                $in: customerQuote.attatchments.map(
+                  (attatch) => attatch.attatchmentId,
+                ),
+              },
+            }).session(session);
+
+            await CalendarEventModel.deleteMany({
+              calendarEventId: { $in: customerQuote.calendarEvents },
+            }).session(session);
+
+            await CustomerQuoteModel.deleteOne({ customerQuoteId }).session(
+              session,
+            );
+
+            await commit();
+            res.send({ success: true });
+          },
+          async (err) => {
+            await abort();
+            res.status(500).json({ error: err });
+          },
+        ),
+    ),
+);
+
 export const CustomerQuoteController = {
   create,
   createWithNoTeam,
@@ -640,4 +752,5 @@ export const CustomerQuoteController = {
   editStatus,
   toggleTeamMember,
   toggleAttatchments,
+  deleteQuote,
 };

@@ -11,7 +11,7 @@ import { DEFAULT_PAGINATION_OPTION } from "@/Constants";
 
 export const useCustomerQuotesApi = () => {
   const regFetch = useFetch();
-  const { get, post, put } = useAuthFetch();
+  const { get, post, put, del } = useAuthFetch();
   const { getNewSignal } = useHttpSignal();
 
   const getAllCustomers = async (
@@ -120,6 +120,10 @@ export const useCustomerQuotesApi = () => {
     );
   };
 
+  const deleteCustomer = async (customerQuoteId: string) => {
+    return await del(`/api/customer-quotes/${customerQuoteId}`);
+  };
+
   return {
     getAllCustomers,
     getCustomer,
@@ -131,5 +135,6 @@ export const useCustomerQuotesApi = () => {
     edit,
     toggleTeamMember,
     toggleAttatchments,
+    deleteCustomer,
   };
 };

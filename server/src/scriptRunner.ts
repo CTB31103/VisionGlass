@@ -24,7 +24,7 @@ mongoose
     (async () => {
       // await printDB();
 
-      await clearDB(false);
+      // await clearDB(true);
 
       // await createAdmin();
       // await createTeam();

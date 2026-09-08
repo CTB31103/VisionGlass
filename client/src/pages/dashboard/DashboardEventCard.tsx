@@ -7,13 +7,6 @@ import moment from "moment";
 type DashboardEventCardProps = {
   calendarEvent: ICalendarEvent;
 
-  // title: string;
-  // desc: string;
-
-  // date: Date;
-
-  // startDate?: Date;
-  // endDate?: Date;
   isSystemEvent?: boolean;
 
   divider?: boolean;
@@ -24,12 +17,6 @@ type DashboardEventCardProps = {
 const TIME_FORMAT_STR = "h:mm a";
 
 export const DashboardEventCard = ({
-  // title,
-  // desc,
-  // date,
-  // startDate,
-  // endDate,
-  // isSystemEvent,
   calendarEvent,
   divider,
   onEdit,
@@ -74,7 +61,7 @@ export const DashboardEventCard = ({
           </Stack>
 
           {(onEdit || onDelete) && !isSystemEvent && (
-            <EditDeleteButtons onEdit={onEdit} onDelete={onDelete} />
+            <EditDeleteButtons onEdit={onEdit} onDelete={onDelete} redDelete />
           )}
         </Stack>
 

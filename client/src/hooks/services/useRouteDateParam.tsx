@@ -1,13 +1,13 @@
 import queryString from "query-string";
-import { useEffect } from "react";
 import { useLocation } from "react-router";
+import { useRefreshEffect } from "../utils";
 
 export const useRouteDateParam = (
   cb: (paramDate: Date) => void,
   deps: unknown[] = [],
 ) => {
   const location = useLocation();
-  useEffect(() => {
+  useRefreshEffect(() => {
     if (location.search) {
       const params = queryString.parse(location.search);
 

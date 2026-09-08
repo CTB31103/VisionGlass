@@ -120,6 +120,7 @@ const editUser = (body: any) => {
     lastName: USER_RULES.info.lastName,
     email: USER_RULES.info.email,
     phone: USER_RULES.info.phone,
+    userType: USER_RULES.userType,
     // profilePictureId: USER_RULES.profilePictureId,
   };
 
@@ -132,6 +133,7 @@ const editUser = (body: any) => {
     lastName: body.lastName as string,
     email: body.email as string,
     phone: body.phone as string,
+    userType: body.userType as UserType,
     // profilePictureId: body.profilePictureId as string,
   };
 };

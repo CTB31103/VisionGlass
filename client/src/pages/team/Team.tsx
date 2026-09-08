@@ -1,10 +1,10 @@
 import {
   Filters,
   FullPage,
+  NoDataFound,
   PageHeader,
   PaginationControl,
   SelectInput,
-  TBody,
 } from "@/components";
 import {
   DEFAULT_PAGINATION_LIMIT_OPTIONS,
@@ -19,20 +19,23 @@ import {
   useApi,
   useIsAdminService,
   usePaginatedState,
-  useTimeoutEffect,
+  useRefreshEffect,
   type IPaginationResult,
 } from "@/hooks";
 import { capitalize } from "@/utils";
 
 export const Team = () => {
-  const availableSortBy = ["", "First Name", "Last Name", "Email", "Position"];
-  const availableRoles = ["", ...USER_TYPES];
-
   const {
     snackbar: { errorSnack },
-    userRoutes: { getAllUsers },
+    userRoutes: { getAllUsers, deleteUser },
   } = useApi();
   const isAdmin = useIsAdminService();
+
+  const availableRoles = [
+    "",
+    ...USER_TYPES.slice(isAdmin ? 0 : 1, USER_TYPES.length),
+  ];
+  const availableSortBy = ["", "First Name", "Last Name", "Email", "Position"];
 
   const [loading, setLoading] = useState(false);
 
@@ -83,7 +86,7 @@ export const Team = () => {
   const onSearchUsers = async (
     paginationOptions = DEFAULT_PAGINATION_OPTION,
   ) => {
-    if (search.length === 0) return;
+    if (search.length === 0) return getPageUsers(paginationOptions);
     setLoading(true);
 
     const res = await getAllUsers({
@@ -105,9 +108,21 @@ export const Team = () => {
       ? onSearchUsers(paginationOptions)
       : getPageUsers(paginationOptions);
 
-  useTimeoutEffect(() => {
+  useRefreshEffect(() => {
     if (!loading) getUsersSearchOrAll();
   }, [sortBy, role]);
+
+  const onDelete = async (userId: string) => {
+    setLoading(true);
+
+    const res = await deleteUser(userId);
+    setLoading(false);
+
+    if (res.err || !res.data) return errorSnack(res.err);
+
+    // navigate(ROUTES.TEAM);
+    getUsersSearchOrAll();
+  };
 
   return (
     <FullPage screen>
@@ -150,12 +165,16 @@ export const Team = () => {
         </Filters>
 
         <Stack sx={{ width: "100%" }} spacing={4}>
-          {users.length === 0 ? (
-            <Stack sx={{ width: "100%", alignItems: "center", pt: 8 }}>
-              <TBody>No user was found to match choosen filters.</TBody>
-            </Stack>
+          {loading || users.length === 0 ? (
+            <NoDataFound loading={loading} />
           ) : (
-            users.map((user, i) => <TeamMemberCard key={i} user={user} />)
+            users.map((user, i) => (
+              <TeamMemberCard
+                key={i}
+                user={user}
+                onDelete={() => onDelete(user.userId)}
+              />
+            ))
           )}
         </Stack>
 

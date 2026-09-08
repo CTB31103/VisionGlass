@@ -10,7 +10,12 @@ import {
 } from "@/components";
 import { ROUTES } from "@/Constants";
 import type { ISetState } from "@/hooks";
-import { CustomerQuoteStatus, type ICustomerQuote } from "@/interfaces";
+import {
+  CustomerQuoteStatus,
+  UserType,
+  type ICustomerQuote,
+} from "@/interfaces";
+import { useUserStore } from "@/stores";
 import { toReadableDate, toTimeString } from "@/utils";
 import { Link, Stack } from "@mui/material";
 
@@ -26,6 +31,7 @@ type CustomerInfoProps = {
 
   markHref?: string;
   onMark?: () => void;
+  onDelete?: () => void;
 };
 
 export const CustomerInfo = ({
@@ -37,7 +43,10 @@ export const CustomerInfo = ({
   onSave,
   markHref,
   onMark,
+  onDelete,
 }: CustomerInfoProps) => {
+  const user = useUserStore((state) => state.user);
+
   const hasEmail = customer.customer.email.length > 0;
   const hasPhone = customer.customer.phone.length > 0;
 
@@ -118,6 +127,8 @@ export const CustomerInfo = ({
       <Stack sx={{ position: "absolute", top: 0, right: 0 }}>
         <EditDeleteButtons
           editHref={ROUTES.CUSTOMERS_EDIT + `/${customer.customerQuoteId}`}
+          onDelete={user.userType === UserType.ADMIN ? onDelete : undefined}
+          redDelete
         />
       </Stack>
     </Stack>

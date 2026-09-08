@@ -5,7 +5,7 @@ import { DashboardEvents } from "./DashboardEvents";
 import { useEffect, useState } from "react";
 import { toMidnight, toReadableDate } from "@/utils";
 import type { ICalendarEvent } from "@/interfaces";
-import { useApi, useRouteDateParam, useTimeoutEffect } from "@/hooks";
+import { useApi, useRefreshEffect, useRouteDateParam } from "@/hooks";
 import moment from "moment";
 import { useUserStore } from "@/stores";
 
@@ -126,7 +126,7 @@ export const Dashboard = () => {
     [userId],
   );
 
-  useTimeoutEffect(() => {
+  useRefreshEffect(() => {
     if (paramDate) return;
 
     const weekArr = createWeek(selectedDate);

@@ -1,7 +1,7 @@
 import type { ICustomerQuote } from "@/interfaces";
 import { useState } from "react";
 import { useApi } from "../api";
-import { useTimeoutEffect } from "../utils";
+import { useRefreshEffect } from "../utils";
 
 export const useGetCustomerService = ({
   customerQuoteId,
@@ -39,7 +39,7 @@ export const useGetCustomerService = ({
     cb(res.data.customer);
   };
 
-  useTimeoutEffect(
+  useRefreshEffect(
     () => {
       if (!customerQuoteId || customerQuoteId.length === 0) return;
       getCustomer(customerQuoteId, (customer) => setCustomer(customer));

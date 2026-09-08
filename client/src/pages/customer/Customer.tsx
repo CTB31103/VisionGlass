@@ -3,6 +3,7 @@ import {
   BasicModal,
   Divider,
   FullPage,
+  Icons,
   LoadingPage,
   PageHeader,
 } from "@/components";
@@ -19,7 +20,7 @@ import {
 import { toString } from "@/utils";
 import { Stack } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { CustomerInfo } from "./CustomerInfo";
 import { CustomerVehicleInfo } from "./CustomerVehicleInfo";
 import { CustomerPaymentInfo } from "./CustomerPaymentInfo";
@@ -31,6 +32,7 @@ import { useUserStore } from "@/stores";
 
 export const Customer = () => {
   const params = useParams();
+  const navigate = useNavigate();
 
   const user = useUserStore((state) => state.user);
 
@@ -62,6 +64,7 @@ export const Customer = () => {
   const [showQuotedWarning, setShowQuotedWarning] = useState(false);
   const [showScheduledWarning, setShowScheduledWarning] = useState(false);
   const [showLeaveTeamWarning, setShowLeaveTeamWarning] = useState(false);
+  const [showDeleteWarning, setShowDeleteWarning] = useState(false);
 
   const [disableLeaveTeam, setDisableLeaveTeam] = useState(false);
 
@@ -211,6 +214,19 @@ export const Customer = () => {
     setCustomer(res.data.customer);
   };
 
+  const onDeleteCustomer = async (customer: ICustomerQuote) => {
+    setStateLoading(true);
+
+    const res = await customerQuoteRoutes.deleteCustomer(
+      customer.customerQuoteId,
+    );
+    setStateLoading(false);
+
+    if (res.err || !res.data) return errorSnack(res.err);
+
+    navigate(ROUTES.CUSTOMERS);
+  };
+
   if (loading || deleteCustomerLoading || !customer) return <LoadingPage />;
 
   return (
@@ -229,6 +245,7 @@ export const Customer = () => {
           disableSave={customer.notes === notes}
           onMark={() => onMarkCustomer(customer)}
           onSave={() => onSaveNotes(customer)}
+          onDelete={() => setShowDeleteWarning(true)}
         />
 
         <Divider />
@@ -249,7 +266,6 @@ export const Customer = () => {
           teamMemberIds={customer.teamMembers}
           teamMembers={teamMembers}
           loading={memberLoading}
-          // disableActionBtn={disableLeaveTeam}
           onActionBtn={() =>
             disableLeaveTeam
               ? setShowLeaveTeamWarning(true)
@@ -293,6 +309,15 @@ export const Customer = () => {
           subtitle="Cannot mark as scheduled without a meeting time and car location. Would you like to update this information now?"
           href={ROUTES.CUSTOMERS_EDIT + `/${customer.customerQuoteId}`}
           onClose={() => setShowScheduledWarning(false)}
+        />
+
+        <WarningModal
+          open={showDeleteWarning}
+          subtitle="Deleting this customer will delete all attatchments and dashboard events related to this customer. This action cannot be reveresed. Are you sure you want to continue?"
+          UpdateIcon={Icons.Delete}
+          updateText="Delete"
+          onClose={() => setShowDeleteWarning(false)}
+          onUpdate={() => onDeleteCustomer(customer)}
         />
 
         <BasicModal

@@ -27,7 +27,7 @@ export class User implements IUser {
   username: string;
   @Prop({ type: String })
   password: string;
-  @Prop({ type: String })
+  @Prop({ type: Boolean })
   isRootUser: boolean;
   @Prop({ type: String })
   userType: UserType;

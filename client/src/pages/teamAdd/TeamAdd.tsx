@@ -7,18 +7,17 @@ import {
   ModalCloseCenterButton,
   PageHeader,
   SelectInput,
-  TBody,
   TextInput,
 } from "@/components";
 import { ROUTES } from "@/Constants";
 
-import { useApi, useTimeoutEffect } from "@/hooks";
+import { useApi, useRefreshEffect, useTimeoutEffect } from "@/hooks";
 import { USER_TYPES, UserType, type IUser } from "@/interfaces";
 import { useUserStore } from "@/stores";
 import { capitalize, toString } from "@/utils";
 import { RULES, validation } from "@/validation";
 import { Stack } from "@mui/material";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useLocation, useNavigate, useParams } from "react-router";
 
 type IData = {
@@ -62,7 +61,12 @@ export const TeamAdd = () => {
 
   const [successModalOpen, setSuccessModalOpen] = useState(false);
 
-  const availableRoles = USER_TYPES.map((t) => ({
+  const availableRoles = USER_TYPES.slice(
+    // When creating, only root can make admin, admin can make non admin
+    // When editing,
+    user.isRootUser ? 0 : 1,
+    USER_TYPES.length,
+  ).map((t) => ({
     value: t,
     text: capitalize(t),
   }));
@@ -92,13 +96,19 @@ export const TeamAdd = () => {
     }
   }, [toString(params)]);
 
-  useEffect(() => {
+  useRefreshEffect(() => {
+    if (editingUser?.isRootUser) {
+      navigate(-1);
+      return;
+    }
+
     if (editingUser) {
       setFirstName(editingUser.info.firstName);
       setLastName(editingUser.info.lastName);
       setPhone(editingUser.info.phone);
       setEmail(editingUser.info.email);
       setUsername(editingUser.username);
+      setRole(editingUser.userType);
     }
   }, [editingUser?.userId]);
 
@@ -157,6 +167,17 @@ export const TeamAdd = () => {
   };
 
   if (getUserLoading) return <LoadingPage />;
+
+  const RoleSelect = () => (
+    <SelectInput
+      required
+      disabled={isUserEditing}
+      label="User Role:"
+      items={availableRoles}
+      selectedItem={role}
+      onSelect={setRole}
+    />
+  );
 
   return (
     <FullPage>
@@ -223,28 +244,23 @@ export const TeamAdd = () => {
                 value={tempPwd}
                 setValue={setTmpPwd}
               />
+            ) : /*
+            must be root user or an admin editing another user
+            users cannot edit their own role
+            */
+            user.userId !== editingUser?.userId &&
+              (user.isRootUser ||
+                (user.userType === UserType.ADMIN &&
+                  editingUser?.userType !== UserType.ADMIN)) ? (
+              <RoleSelect />
             ) : (
-              <SelectInput
-                required
-                disabled={isUserEditing}
-                label="User Role:"
-                items={availableRoles}
-                selectedItem={role}
-                onSelect={setRole}
-              />
+              <Stack sx={{ width: "100%" }} />
             )}
           </Stack>
 
           {!isEditing && (
             <Stack sx={{ width: "100%" }} direction={"row"} spacing={2}>
-              <SelectInput
-                required
-                disabled={isUserEditing}
-                label="User Role:"
-                items={availableRoles}
-                selectedItem={role}
-                onSelect={setRole}
-              />
+              <RoleSelect />
 
               <Stack sx={{ width: "100%" }} />
             </Stack>
@@ -276,87 +292,47 @@ export const TeamAdd = () => {
               width: "100%",
               height: "100%",
               alignItems: "center",
-              justifyContent: "center",
             }}
           >
-            <LabledRowText
-              bold="Username:"
-              text={apiResponseUser?.username ?? username}
-            />
-            <LabledRowText
-              bold="First name:"
-              text={apiResponseUser?.info.firstName ?? firstName}
-            />
-            <LabledRowText
-              bold="Last name:"
-              text={apiResponseUser?.info.lastName ?? lastName}
-            />
-            {/* <TBody medium>First: {username}</TBody>
-            <TBody medium>Username: {username}</TBody>
-            <TBody medium>Username: {username}</TBody> */}
-            <TBody medium>Password: {tempPwd}</TBody>
+            <Stack
+              sx={{
+                // width: "75%",
+                height: "100%",
+                alignItems: "start",
+              }}
+            >
+              <LabledRowText
+                bold="Username:"
+                text={apiResponseUser?.username ?? username}
+              />
+              <LabledRowText
+                bold="First name:"
+                text={apiResponseUser?.info.firstName ?? firstName}
+              />
+              <LabledRowText
+                bold="Last name:"
+                text={apiResponseUser?.info.lastName ?? lastName}
+              />
+              <LabledRowText
+                bold="Email:"
+                text={apiResponseUser?.info.email ?? email}
+              />
+              <LabledRowText
+                bold="Phone:"
+                text={apiResponseUser?.info.phone ?? phone}
+              />
+              <LabledRowText
+                bold="Role:"
+                text={capitalize(apiResponseUser?.userType ?? role)}
+              />
+              {!isEditing && <LabledRowText bold="Password:" text={tempPwd} />}
+            </Stack>
           </Stack>
 
           <ModalCloseCenterButton
-            onClick={() => (setSuccessModalOpen(false), navigate(-1))}
+            onClick={() => (setSuccessModalOpen(false), navigate(ROUTES.TEAM))}
           />
         </BasicModal>
-
-        {/* <Modal >
-        <Stack
-          sx={{
-            width: "100%",
-            height: "100%",
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <Paper
-            sx={{
-              width: "60vw",
-              height: "70vh",
-              borderRadius: 5,
-              borderWidth: 1,
-              borderColor: CSS.colors.black,
-            }}
-            elevation={4}
-          >
-            <Stack sx={{ width: "100%", height: "100%", p: 4 }} spacing={2}>
-              <Stack sx={{ width: "100%", alignItems: "center" }}>
-                <THeading bungeeFill>Success</THeading>
-                <TBody>New team member added to the system.</TBody>
-              </Stack>
-
-              <Stack
-                sx={{
-                  width: "100%",
-                  height: "100%",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <TBody medium>Username: {username}</TBody>
-                <TBody medium>Password: {tempPwd}</TBody>
-              </Stack>
-
-              <Stack
-                sx={{
-                  width: "100%",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <ActionButton
-                  onClick={() => (setSuccessModalOpen(false), navigate(-1))}
-                  color="red"
-                >
-                  Close
-                </ActionButton>
-              </Stack>
-            </Stack>
-          </Paper>
-        </Stack>
-      </Modal> */}
       </Stack>
     </FullPage>
   );

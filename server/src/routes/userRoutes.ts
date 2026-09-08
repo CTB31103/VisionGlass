@@ -21,8 +21,6 @@ UserAuthRoutes.get("/", Controllers.UserController.getUsers);
 
 UserAuthRoutes.post("/", Controllers.UserController.createUser);
 
-UserAuthRoutes.get("/search", Controllers.UserController.searchUsers);
-
 UserAuthRoutes.get("/access", Controllers.UserController.userHasAccess);
 
 UserAuthRoutes.get("/logout", Controllers.UserController.logoutUser);
@@ -45,3 +43,5 @@ UserAuthRoutes.put(
 UserAuthRoutes.get("/:userId", Controllers.UserController.getUser);
 
 UserAuthRoutes.put("/:userId", Controllers.UserController.editUser);
+
+UserAuthRoutes.delete("/:userId", Controllers.UserController.deleteUser);

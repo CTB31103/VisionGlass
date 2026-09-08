@@ -33,12 +33,14 @@ const tokenPayload = (payload: any) => {
   const rules = {
     id: "required|string",
     role: "required|string",
+    isRootUser: "required|boolean",
     createdOn: "required|numeric",
   };
 
   const validator = new Validator(payload, rules, {
     required: "Mutated token, please login again",
     string: "Mutated token, please login again",
+    isRootUser: "Mutated token, please login again",
     numeric: "Mutated token, please login again",
   });
   ValidateFunc(validator);
@@ -46,6 +48,7 @@ const tokenPayload = (payload: any) => {
   return {
     id: payload.id,
     role: payload.role,
+    isRootUser: payload.isRootUser,
     createdOn: payload.createdOn,
   };
 };

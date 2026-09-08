@@ -7,6 +7,9 @@ import {
   UserType,
 } from "../interfaces";
 import {
+  AttatchmentModel,
+  CalendarEventModel,
+  CustomerQuoteModel,
   MongoDoc,
   RefreshTokenModel,
   RootFilterQuery,
@@ -52,6 +55,11 @@ const createUser = ControllerFunc((req, res) =>
         async () => {
           const validBody =
             Validators.UserControllerValidators.createUserValidator(req.body);
+
+          const userExists = await UserModel.findOne({
+            username: validBody.username,
+          }).session(session);
+          if (userExists) throw new Error(`User exists with username`);
 
           const createdUser: IUser = {
             userId: HashUtils.uniqueId(),
@@ -111,9 +119,8 @@ const createUser = ControllerFunc((req, res) =>
 const getUsers = ControllerFunc((req, res) =>
   TryCatch(
     async () => {
-      const { isRootUser } = Validators.TokenValidators.resLocalsTokenValues(
-        res.locals,
-      );
+      const { isRootUser, role } =
+        Validators.TokenValidators.resLocalsTokenValues(res.locals);
       const { validData, errorMsg } = validationV2<{
         userId?: string;
         userIds?: string | string[];
@@ -142,6 +149,10 @@ const getUsers = ControllerFunc((req, res) =>
         $and: isRootUser ? [] : [{ isRootUser: false }], // Only the root user can ever see root user information
       };
       let sort: { [key: string]: number } = {};
+
+      if (role !== UserType.ADMIN) {
+        databaseQuery.$and!.push({ userType: { $ne: UserType.ADMIN } });
+      }
 
       if (validData?.userId) {
         databaseQuery.$and!.push({ userId: validData.userId });
@@ -205,6 +216,10 @@ const getUsers = ControllerFunc((req, res) =>
         limit: pageLimit,
         page: pageNumber,
         sort: sort,
+        collation: {
+          locale: "en",
+          strength: 2,
+        },
       });
 
       return res.status(200).json({
@@ -257,7 +272,11 @@ const loginUser = ControllerFunc((req, res) =>
 
       if (validBody.trustSource) {
         const refreshTokenJWT = TokenUtils.signJWTToken(
-          { id: user.userId, role: user.userType, isRootUser: user.isRootUser },
+          {
+            id: user.userId,
+            role: user.userType,
+            isRootUser: user.isRootUser,
+          },
           "long",
         );
         const refreshToken: IRefreshToken = {
@@ -382,18 +401,37 @@ const logoutUser = ControllerFunc((req, res) =>
 const editUser = ControllerFunc((req, res) =>
   TryCatch(
     async () => {
-      const { userId: authorId } =
-        Validators.TokenValidators.resLocalsTokenValues(res.locals);
+      const {
+        userId: authorId,
+        role,
+        isRootUser,
+      } = Validators.TokenValidators.resLocalsTokenValues(res.locals);
       const { userId } = Validators.UserControllerValidators.userId(req.params);
-      const { username, email, firstName, lastName, phone } =
+      const { username, email, firstName, lastName, phone, userType } =
         Validators.UserControllerValidators.editUser(req.body);
+
+      const editingRootUser = await UserModel.findOne({ userId });
+      if (!editingRootUser) throw new Error(`Could not find user`);
+      if (editingRootUser.isRootUser) throw new Error(`User cannot be edited`);
+
+      let canEditUserType = false;
+      // must be root user or an admin editing another user
+      // users cannot edit their own role
+      if (
+        authorId !== userId &&
+        (isRootUser ||
+          (role === UserType.ADMIN &&
+            editingRootUser.userType !== UserType.ADMIN))
+      ) {
+        canEditUserType = true;
+      }
 
       const user: MongoDoc<User> | null = await UserModel.findOneAndUpdate(
         { userId },
         {
           username,
-          // profilePictureId,
           info: { firstName, lastName, email, phone },
+          userType: canEditUserType ? userType : undefined,
         },
         { returnDocument: "after" },
       );
@@ -423,59 +461,6 @@ const loginUserWithAccessToken = ControllerFunc((req, res) =>
       if (!user) throw new Error(`Provided user does not exist`);
 
       res.status(200).json({ user: user.toClientUser() });
-    },
-    (err) => res.status(500).json({ error: err }),
-  ),
-);
-
-const searchUsers = ControllerFunc((req, res) =>
-  TryCatch(
-    async () => {
-      const { isRootUser } = Validators.TokenValidators.resLocalsTokenValues(
-        res.locals,
-      );
-      const { query } = Validators.UserControllerValidators.searchUsers(
-        req.query,
-      );
-
-      const queryFirstWord = query.split(" ")[0];
-      const regexQuery = { $regex: query, $options: "i" };
-
-      const databaseQuery: RootFilterQuery<IUser> = {
-        $and: [],
-      };
-
-      if (!isRootUser) {
-        databaseQuery.$and!.push({
-          isRootUser: false,
-        });
-      }
-
-      databaseQuery.$and!.push({
-        $or: [
-          { "info.firstName": regexQuery },
-          { "info.email": regexQuery },
-          { "info.lastName": regexQuery },
-          { "info.phone": regexQuery },
-          { username: regexQuery },
-          {
-            $and: [
-              { "info.firstName": { $regex: queryFirstWord, $options: "i" } },
-              {
-                "info.lastName": {
-                  $regex: query.replace(queryFirstWord + " ", ""),
-                },
-              },
-            ],
-          },
-        ],
-      });
-
-      const users = (await UserModel.find(databaseQuery)).map((user) =>
-        user.toClientUser(),
-      );
-
-      res.status(200).json({ users });
     },
     (err) => res.status(500).json({ error: err }),
   ),
@@ -600,7 +585,72 @@ const changePassword = ControllerFunc((req, res) =>
   ),
 );
 
+const deleteUser = ControllerFunc(
+  async (req, res) =>
+    await SessionController(
+      async ({ session, commit, abort }) =>
+        await TryCatch(
+          async () => {
+            const { role } = Validators.TokenValidators.resLocalsTokenValues(
+              res.locals,
+            );
+            const { userId } = Validators.UserControllerValidators.userId(
+              req.params,
+            );
+
+            if (role !== UserType.ADMIN) throw new Error(`Unauthorized action`);
+
+            const user = await UserModel.findOne({ userId }).session(session);
+            if (!user) throw new Error(`Could not find user`);
+
+            const updatedCustomerTeams = await CustomerQuoteModel.updateMany(
+              { teamMembers: userId },
+              { $pull: { teamMembers: userId } },
+              { session },
+            );
+            const updatedCustomerAttatchments =
+              await CustomerQuoteModel.updateMany(
+                { "attatchments.userId": userId },
+                { $set: { "attatchments.$[elem].userId": "" } },
+                { session, arrayFilters: [{ "elem.userId": userId }] },
+              );
+
+            Log.colors.yellow(
+              `Found ${updatedCustomerTeams.matchedCount} & Updated ${updatedCustomerTeams.modifiedCount} Customers`,
+            );
+            Log.colors.yellow(
+              `Found ${updatedCustomerAttatchments.matchedCount} & Updated ${updatedCustomerAttatchments.modifiedCount} Customer Attatchments`,
+            );
+            Log.log(``);
+
+            await AttatchmentModel.updateMany(
+              { createdBy: userId },
+              { createdBy: "" },
+              { session },
+            );
+
+            await CalendarEventModel.deleteMany(
+              { creatorId: userId },
+              { session },
+            );
+            await RefreshTokenModel.deleteOne({ userId }, { session });
+            await UserStatisticModel.deleteOne({ userId }, { session });
+            await UserModel.deleteOne({ userId }, { session });
+
+            await commit();
+
+            res.send({ success: true });
+          },
+          async (err) => {
+            await abort();
+            res.status(500).json({ error: err });
+          },
+        ),
+    ),
+);
+
 export const UserController = {
+  deleteUser,
   createUser,
   getUsers,
   getUser,
@@ -609,7 +659,6 @@ export const UserController = {
   logoutUser,
   loginUserWithAccessToken,
   editUser,
-  searchUsers,
   userHasAccess,
   verifyPassword,
   changePassword,

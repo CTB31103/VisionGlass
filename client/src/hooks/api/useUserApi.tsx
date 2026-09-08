@@ -5,7 +5,7 @@ import type { IPaginationOptions, IPaginationResult } from "../types";
 import { DEFAULT_PAGINATION_OPTION } from "@/Constants";
 
 export const useUserApi = () => {
-  const { get, post, put, setCustomHeaders } = useAuthFetch();
+  const { get, post, put, del, setCustomHeaders } = useAuthFetch();
   const { getNewSignal, abortSignal } = useHttpSignal();
 
   const validAccessKey = async () => {
@@ -108,6 +108,10 @@ export const useUserApi = () => {
     );
   };
 
+  const deleteUser = async (userId: string) => {
+    return await del(`/api/users/${userId}`);
+  };
+
   return {
     getAllUsers,
     getUsers,
@@ -126,5 +130,6 @@ export const useUserApi = () => {
 
     abortSignal,
     logout,
+    deleteUser,
   };
 };

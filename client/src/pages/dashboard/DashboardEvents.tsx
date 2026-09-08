@@ -123,7 +123,6 @@ export const DashboardEvents = ({
                 key={dE.calendarEventId}
                 calendarEvent={dE}
                 divider={i !== arr.length - 1}
-                onEdit={() => {}}
                 onDelete={
                   canAlter && onDeleteBtn
                     ? () => onDeleteBtn(dE.calendarEventId)

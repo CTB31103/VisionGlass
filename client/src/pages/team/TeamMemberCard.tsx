@@ -8,7 +8,7 @@ import {
   THeading,
 } from "@/components";
 import { CSS, ROUTES } from "@/Constants";
-import { useIsAdminService } from "@/hooks";
+import { useIsAdminService, useUserRestrictions } from "@/hooks";
 import { UserType, type IUser } from "@/interfaces";
 import { useUserStore } from "@/stores";
 import { Link, Stack } from "@mui/material";
@@ -17,10 +17,17 @@ import { capitalize } from "lodash";
 type TeamMemberCardProps = {
   user: IUser;
   onClick?: () => void;
+  onDelete?: () => void;
 };
 
-export const TeamMemberCard = ({ user, onClick }: TeamMemberCardProps) => {
+export const TeamMemberCard = ({
+  user,
+  onClick,
+  onDelete,
+}: TeamMemberCardProps) => {
   const authUser = useUserStore((state) => state.user);
+
+  const { authorized } = useUserRestrictions(user);
 
   const isAdmin = useIsAdminService();
 
@@ -93,9 +100,15 @@ export const TeamMemberCard = ({ user, onClick }: TeamMemberCardProps) => {
         >
           {(isAdmin || user.userId === authUser.userId) && !user.isRootUser && (
             <EditDeleteButtons
-              editHref={ROUTES.TEAM_EDIT + `/${user.userId}`}
+              editHref={
+                authorized.edit
+                  ? ROUTES.TEAM_EDIT + `/${user.userId}`
+                  : undefined
+              }
               // onEdit={() => {}}
               // onDelete={() => {}}
+              onDelete={authorized.delete ? onDelete : undefined}
+              redDelete
             />
           )}
         </Stack>

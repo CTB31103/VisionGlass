@@ -13,18 +13,24 @@ import {
   THeading,
 } from "@/components";
 import { ROUTES } from "@/Constants";
-import { useApi, useTimeoutEffect } from "@/hooks";
-import type { ICustomerQuote, IUser } from "@/interfaces";
+import {
+  useApi,
+  useRefreshEffect,
+  useTimeoutEffect,
+  useUserRestrictions,
+} from "@/hooks";
+import { type ICustomerQuote, type IUser } from "@/interfaces";
 import { useAccessKeyStore, useUserStore } from "@/stores";
 import { Link, Stack } from "@mui/material";
 import { capitalize } from "lodash";
 import { useState } from "react";
-import { useParams } from "react-router";
+import { useNavigate, useParams } from "react-router";
 import { ProfileCustomersRow } from "./ProfileCustomersRow";
 import queryString from "query-string";
 
 export const Profile = () => {
   const params = useParams();
+  const navigate = useNavigate();
 
   const { user: authUser, logout: logoutState } = useUserStore();
   const { setAccessKey } = useAccessKeyStore();
@@ -39,6 +45,8 @@ export const Profile = () => {
   const [quotesLoading, setQuotesLoading] = useState(false);
 
   const [userProfile, setUserProfile] = useState<IUser | undefined>(undefined);
+  const { isSameUser: isMyProfile, authorized: authUserCan } =
+    useUserRestrictions(userProfile);
 
   const [currentCustomers, setCurrentCustomers] = useState<ICustomerQuote[]>(
     [],
@@ -99,7 +107,7 @@ export const Profile = () => {
     setPrevHasMore(res.data.totalPages > 1);
   };
 
-  useTimeoutEffect(
+  useRefreshEffect(
     () => {
       if (
         params?.userId &&
@@ -132,7 +140,7 @@ export const Profile = () => {
 
   if (loading || !userProfile) return <LoadingPage />;
 
-  const isMyProfile = userProfile.userId === authUser.userId;
+  // const isMyProfile = userProfile.userId === authUser.userId;
   const fullName = `${capitalize(userProfile.info.firstName)} ${capitalize(userProfile.info.lastName)}`;
   const hasEmail = userProfile.info.email.length > 0;
   const hasPhone = userProfile.info.phone.length > 0;
@@ -143,6 +151,17 @@ export const Profile = () => {
     await userRoutes.logout();
     setAccessKey(null);
     logoutState();
+  };
+
+  const onDelete = async () => {
+    setLoading(true);
+
+    const res = await userRoutes.deleteUser(userProfile.userId);
+    setLoading(false);
+
+    if (res.err || !res.data) return errorSnack(res.err);
+
+    navigate(ROUTES.TEAM);
   };
 
   return (
@@ -202,10 +221,12 @@ export const Profile = () => {
             <EditDeleteButtons
               editToolTip="Edit profile"
               editHref={
-                !userProfile.isRootUser
+                authUserCan.edit
                   ? ROUTES.TEAM_EDIT + `/${userProfile.userId}`
                   : undefined
               }
+              onDelete={authUserCan.delete ? onDelete : undefined}
+              redDelete
             />
 
             {isMyProfile && (

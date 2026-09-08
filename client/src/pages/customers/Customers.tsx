@@ -24,6 +24,7 @@ import {
 import {
   useApi,
   usePaginatedState,
+  useRefreshEffect,
   useTimeoutEffect,
   type IPaginationOptions,
   type IPaginationResult,
@@ -78,7 +79,7 @@ export const Customers = () => {
     setTotalQuotes(total);
   };
 
-  const getCustomersByPage = async (
+  const getAllCustomers = async (
     paginationOptions: IPaginationOptions = DEFAULT_PAGINATION_OPTION,
   ) => {
     setLoading(true);
@@ -110,7 +111,7 @@ export const Customers = () => {
     setAllEmployees(res.data.users);
   };
 
-  useTimeoutEffect(
+  useRefreshEffect(
     () => {
       getAllEmployees();
     },
@@ -150,22 +151,33 @@ export const Customers = () => {
     () => {
       if (search.length !== 0) return;
 
-      getCustomersByPage();
+      getAllCustomers();
     },
     [search, status, employee, scheduledDate?.getTime()],
     50,
   );
 
-  const onSearch = async () => {
+  const onSearch = async (
+    paginationOptions: IPaginationOptions = DEFAULT_PAGINATION_OPTION,
+  ) => {
+    if (search.length === 0) return getAllCustomers();
+
     setLoading(true);
 
-    const res = await customerQuoteRoutes.search(search);
+    const res = await customerQuoteRoutes.search(search, paginationOptions);
     setLoading(false);
 
     if (res.err || !res.data) return errorSnack(res.err);
 
     setAPISearchResult(res.data);
   };
+
+  const getCustomersSearchOrAll = async (
+    paginationOptions: IPaginationOptions = DEFAULT_PAGINATION_OPTION,
+  ) =>
+    search.length > 0
+      ? onSearch(paginationOptions)
+      : getAllCustomers(paginationOptions);
 
   return (
     <FullPage screen>
@@ -211,7 +223,7 @@ export const Customers = () => {
               items={[{ value: "", text: "Any" }].concat(
                 allEmployees.map((employee) => ({
                   value: employee.userId,
-                  text: `${employee.info.firstName} ${employee.info.lastName}`,
+                  text: `${capitalize(employee.info.firstName)} ${capitalize(employee.info.lastName)}`.trim(),
                 })),
               )}
             />
@@ -260,19 +272,28 @@ export const Customers = () => {
           onNextPage={
             pageNumber !== totalPages && !loading
               ? () =>
-                  getCustomersByPage({ pageLimit, pageNumber: pageNumber + 1 })
+                  getCustomersSearchOrAll({
+                    pageLimit,
+                    pageNumber: pageNumber + 1,
+                  })
               : undefined
           }
           onPrevPage={
             pageNumber > 1 && !loading
               ? () =>
-                  getCustomersByPage({ pageLimit, pageNumber: pageNumber - 1 })
+                  getCustomersSearchOrAll({
+                    pageLimit,
+                    pageNumber: pageNumber - 1,
+                  })
               : undefined
           }
           pageLimit={{
             value: pageLimit,
             set: (newPageLimit) =>
-              getCustomersByPage({ pageLimit: newPageLimit, pageNumber: 1 }),
+              getCustomersSearchOrAll({
+                pageLimit: newPageLimit,
+                pageNumber: 1,
+              }),
             available: DEFAULT_PAGINATION_LIMIT_OPTIONS,
           }}
         />

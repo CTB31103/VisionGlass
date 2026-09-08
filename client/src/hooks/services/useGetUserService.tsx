@@ -1,7 +1,7 @@
 import type { IUser } from "@/interfaces";
 import { useState } from "react";
 import { useApi } from "../api";
-import { useTimeoutEffect } from "../utils";
+import { useRefreshEffect } from "../utils";
 
 export const useGetUserService = ({
   userId,
@@ -36,7 +36,7 @@ export const useGetUserService = ({
     cb(res.data.user);
   };
 
-  useTimeoutEffect(
+  useRefreshEffect(
     () => {
       if (!userId || userId.length === 0) return;
       getUser(userId, (user) => setUser(user));

@@ -7,26 +7,41 @@ import {
   THeading,
 } from "@/components";
 import { ROUTES } from "@/Constants";
-import { CarDamageLocation, type ICustomerQuote } from "@/interfaces";
-import { capitalize } from "@/utils";
+import { type ICustomerQuote } from "@/interfaces";
+import { capitalize, damageInfoString } from "@/utils";
 import { Link, Stack } from "@mui/material";
+import { useEffect, useState } from "react";
 
 type CustomerVehicleInfoProps = {
   customer: ICustomerQuote;
 };
 
 export const CustomerVehicleInfo = ({ customer }: CustomerVehicleInfoProps) => {
-  const availableRows = ["1st Row", "2nd Row", "3rd Row", "4th Row"];
   const damageMainLocation = customer.damage?.location
     ? customer.damage.location
     : "";
   const damageSide = customer.damage?.windowSide ?? "";
   const damageRows = customer.damage?.rows ?? [];
 
-  const damageCardTitle =
-    damageMainLocation === CarDamageLocation.SIDE
-      ? `${damageSide.length > 0 ? damageSide + " " : ""}${damageMainLocation}${damageRows.length === 1 ? " (" + availableRows[damageRows[0] - 1] + ") " : damageRows.length > 1 ? `<br/> (Multiple Rows)` : ""}`
-      : `${capitalize(damageMainLocation ?? "")} Windshield`;
+  const [damageCardTitle, setDamageCardTitle] = useState(
+    capitalize(
+      damageInfoString(damageSide, damageMainLocation, damageRows, false),
+    ),
+  );
+
+  useEffect(() => {
+    setDamageCardTitle(
+      capitalize(
+        damageInfoString(damageSide, damageMainLocation, damageRows, false),
+      ),
+    );
+  }, [damageSide, damageMainLocation, damageRows]);
+
+  useEffect(() => {
+    console.log(capitalize(damageCardTitle));
+
+    console.log(capitalize(`helo`));
+  }, [damageCardTitle]);
 
   return (
     <Stack direction={"row"} spacing={4} sx={{ alignItems: "start" }}>
@@ -66,7 +81,10 @@ export const CustomerVehicleInfo = ({ customer }: CustomerVehicleInfoProps) => {
             {customer.damage && (
               <Stack sx={{ width: "100%", alignItems: "start" }}>
                 {customer.damage.location && (
-                  <LabledRowText bold="Damage:" text={damageCardTitle} />
+                  <LabledRowText
+                    bold="Damage:"
+                    text={capitalize(damageCardTitle)}
+                  />
                 )}
               </Stack>
             )}

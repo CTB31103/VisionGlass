@@ -33,7 +33,10 @@ const getEvents = ControllerFunc((req, res) =>
         });
       }
 
-      const calendarEvents = await CalendarEventModel.find(mongoQuery);
+      const calendarEvents = await CalendarEventModel.find(mongoQuery).sort({
+        allDay: -1,
+        date: -1,
+      });
 
       res.send({
         calendarEvents: calendarEvents.map((calEvent) =>

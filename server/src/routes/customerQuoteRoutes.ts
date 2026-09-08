@@ -31,3 +31,8 @@ CustomerQuoteRoutes.get(
   "/:customerQuoteId",
   Controllers.CustomerQuoteController.getQuote,
 );
+
+CustomerQuoteRoutes.delete(
+  "/:customerQuoteId",
+  Controllers.CustomerQuoteController.deleteQuote,
+);

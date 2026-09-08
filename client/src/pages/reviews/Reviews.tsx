@@ -13,6 +13,7 @@ import { ReviewCard } from "./ReviewCard";
 import {
   useApi,
   usePaginatedState,
+  useRefreshEffect,
   useTimeoutEffect,
   type IPaginationOptions,
   type IPaginationResult,
@@ -111,7 +112,7 @@ export const Reviews = () => {
     setAPISearchResult(res.data);
   };
 
-  useTimeoutEffect(
+  useRefreshEffect(
     () => {
       if (searchQuery.length !== 0) return;
 

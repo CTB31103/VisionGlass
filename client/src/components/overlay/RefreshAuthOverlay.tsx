@@ -153,7 +153,6 @@ export const RefreshAuthOverlay = () => {
       };
     },
     [pathname],
-
     50,
   );
 

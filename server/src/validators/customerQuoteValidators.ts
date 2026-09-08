@@ -49,7 +49,7 @@ const validateCarInfo = (data: any): ICar => {
         plate: [RULES.common.requiredString, "car plate number"],
         zip: [RULES.common.requiredString, "regerstered zip code"],
       },
-      data,
+      data.plateInfo,
     );
     if (validPlateInfo.errorMsg || !validPlateInfo.validData)
       throw new Error(validPlateInfo.errorMsg ?? "Internal validation error.");

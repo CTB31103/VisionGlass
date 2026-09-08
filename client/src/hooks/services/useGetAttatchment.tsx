@@ -1,7 +1,7 @@
 import type { IAttatchment } from "@/interfaces";
 import { useState } from "react";
 
-import { useTimeoutEffect } from "../utils";
+import { useRefreshEffect } from "../utils";
 import { useApi } from "../api";
 
 export const useGetAttatchment = ({
@@ -42,7 +42,7 @@ export const useGetAttatchment = ({
     if (res.data.attatchments.length > 0) cb(res.data.attatchments[0]);
   };
 
-  useTimeoutEffect(
+  useRefreshEffect(
     () => {
       if (!attatchmentId || attatchmentId.length === 0) return;
       getAttatchment(attatchmentId, (attatchment) =>

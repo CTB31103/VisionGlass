@@ -11,7 +11,7 @@ export const createAdmin = async () => {
       userId: HashUtils.uniqueId(),
       info: {
         firstName: ROOT_USERNAME,
-        lastName: "administrator",
+        lastName: "",
         email: "",
         phone: "",
       },
