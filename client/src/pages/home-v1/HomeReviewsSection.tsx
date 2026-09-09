@@ -130,7 +130,6 @@ export const HomeReviewsSection = () => {
             }
             selected={selected}
             setSelected={(clicked) => {
-              console.log(`Clicked: ${clicked}`);
               if (clicked !== undefined) selectReview(clicked);
             }}
           />
@@ -188,7 +187,6 @@ export const HomeReviewsSection = () => {
             }
             selected={selected > 2 ? selected % 3 : undefined}
             setSelected={(clicked) => {
-              console.log(`Clicked: ${3 + (clicked ?? 0)}`);
               if (clicked !== undefined) selectReview(3 + clicked);
             }}
           />

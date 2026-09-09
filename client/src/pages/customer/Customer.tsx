@@ -11,6 +11,7 @@ import {
   useApi,
   useDeleteCustomerAttatchment,
   useGetCustomerService,
+  useRefreshEffect,
   useScreenSize,
 } from "@/hooks";
 import {
@@ -104,17 +105,17 @@ export const Customer = () => {
     setNotes(customer?.notes ?? "");
   }, [customer?.notes]);
 
-  useEffect(() => {
+  useRefreshEffect(() => {
     if (customer && customer.teamMembers.length > 0) getTeamMembers(customer);
     else setTeamMembers([]);
   }, [toString(customer?.teamMembers)]);
 
-  useEffect(() => {
+  useRefreshEffect(() => {
     if (customer && customer.attatchments.length > 0) getAttatchments(customer);
     else setAttatchments([]);
   }, [toString(customer?.attatchments)]);
 
-  useEffect(() => {
+  useRefreshEffect(() => {
     setDisableLeaveTeam(
       (customer?.attatchments ?? [])
         .map((attatch) => attatch.userId)

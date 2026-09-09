@@ -48,19 +48,13 @@ export const RULES = {
 export const Validator = ValidatorJs;
 
 export const validatorThrowErrors = (
-  data: unknown,
+  _data: unknown,
   validator: ValidatorJs.Validator<unknown>,
-  log = false,
+  _log = false,
 ) => {
   if (validator.passes()) return;
 
   const allErrors = validator.errors.all();
-
-  if (log) {
-    console.log(`Invalid data`, 0);
-    console.log(allErrors);
-    console.log(data);
-  }
 
   for (const key in allErrors) {
     const error = validator.errors.first(key);

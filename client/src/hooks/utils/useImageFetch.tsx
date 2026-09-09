@@ -25,9 +25,6 @@ export const useImageFetch = (
       const blob = await res.blob();
       setImageSrc(URL.createObjectURL(blob));
     } catch (err) {
-      console.log(`Could not get image: ${url}`);
-      console.log(err);
-      console.log(``);
       setImageSrc(url);
     }
   };

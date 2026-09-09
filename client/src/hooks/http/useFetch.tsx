@@ -18,6 +18,11 @@ const DEFAULT_HEADERS = {
 export const useFetch = (props?: { authorization?: string | null }) => {
   const customHeaderRef = useRef<Record<string, string>>({});
 
+  const handleJWTError = (error: string | null) => {
+    if (error !== "jwt expired") return error;
+    return `Authentication error, please refresh the page or login again`;
+  };
+
   const fetchWithParams = async <T,>(
     to: string,
     method: "GET" | "PUT" | "POST" | "DELETE",
@@ -36,9 +41,6 @@ export const useFetch = (props?: { authorization?: string | null }) => {
         bodyToSend =
           isFormData && body instanceof FormData ? body : JSON.stringify(body);
         if (!isFormData) headers["Content-Type"] = "application/json";
-        // headers["Content-Type"] = isFormData
-        //   ? "multipart/form-data"
-        //   : "application/json";
       }
 
       if (props?.authorization) {
@@ -59,7 +61,7 @@ export const useFetch = (props?: { authorization?: string | null }) => {
       if (json.error) {
         return {
           data: null,
-          err: json.error,
+          err: handleJWTError(json.error),
         };
       }
 
@@ -70,12 +72,13 @@ export const useFetch = (props?: { authorization?: string | null }) => {
     } catch (err) {
       return {
         data: null,
-        err:
+        err: handleJWTError(
           typeof err === "string"
             ? err
             : err instanceof Error
               ? err.message
               : "Internal fetch error",
+        ),
       };
     } finally {
       setCustomHeaders({});

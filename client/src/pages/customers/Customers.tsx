@@ -142,14 +142,12 @@ export const Customers = () => {
         const pEmployee = searchParams["employee"];
         setEmployee(pEmployee);
       }
-
-      if (searchParams) console.log(toString(searchParams));
     },
     [toString(location)],
     50,
   );
 
-  useTimeoutEffect(
+  useRefreshEffect(
     () => {
       if (search.length !== 0) return;
 

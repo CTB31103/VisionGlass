@@ -3,7 +3,7 @@ import { useWindowDimensions } from "../utils";
 import { useScreenSizeStore } from "@/stores";
 
 export const useScreenSizeService = () => {
-  const { size, setSize } = useScreenSizeStore();
+  const { setSize } = useScreenSizeStore();
   const { width } = useWindowDimensions();
 
   useEffect(() => {
@@ -15,8 +15,8 @@ export const useScreenSizeService = () => {
     return setSize("xxs");
   }, [width]);
 
-  useEffect(() => {
-    console.log(`Screen Size: ${size}`);
-    console.log(``);
-  }, [size]);
+  // useEffect(() => {
+  //   console.log(`Screen Size: ${size}`);
+  //   console.log(``);
+  // }, [size]);
 };

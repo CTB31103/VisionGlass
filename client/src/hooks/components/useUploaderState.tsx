@@ -45,8 +45,6 @@ export const useUploaderState = (
     setSelectedFiles(filesArr);
     setSomeFileTooLarge(largeCounter);
 
-    console.log(`Large counter: ${largeCounter}`);
-
     if (largeCounter === 0) {
       setAutoUpload(true);
     }

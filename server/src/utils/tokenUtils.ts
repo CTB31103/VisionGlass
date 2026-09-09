@@ -15,7 +15,8 @@ const signJWTToken = (
 ) => {
   const jwtKey = CONSTANTS.auth.jwt.secret();
   const options: jwt.SignOptions = {
-    expiresIn: type === "long" ? "7d" : "1h", // Token expires in 1 hour
+    // expiresIn: type === "long" ? "7d" : "1h", // Token expires in 1 hour
+    expiresIn: type === "long" ? "1 min" : 30, // Token expires in 1 hour
   };
 
   const token = jwt.sign(

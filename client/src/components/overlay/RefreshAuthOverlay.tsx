@@ -1,5 +1,6 @@
 import {
   useAccessKeyStore,
+  useForceRefreshStore,
   useRefreshScreenStore,
   useUserStore,
 } from "@/stores";
@@ -24,34 +25,31 @@ import {
 } from "@/hooks";
 import { useState } from "react";
 
-// const WHITE_LIST = [ROUTES.HOME, ROUTES.ABOUT, ROUTES.CONTACT, ROUTES.QUOTES];
-
-// const AUTH_LIST = [
-//   ROUTES.DASHBOARD,
-//   ROUTES.CUSTOMERS,
-//   ROUTES.TEAM,
-//   ROUTES.REVIEWS,
-// ];
-
 export const RefreshAuthOverlay = () => {
   const { toHome } = useNavigationService();
   const { pathname } = useLocation();
   const { accessKey, setAccessKey } = useAccessKeyStore();
   const { user, setUser, logout } = useUserStore();
+  const { forceRefresh, setForceRefresh } = useForceRefreshStore();
 
   const { open, setOpen } = useRefreshScreenStore();
   const [scope] = useAnimate();
 
+  const [loading, setLoading] = useState(false);
+
   const [_isGuest, setIsGuest] = useState(false);
 
   const {
+    snackbar: [_, errorSnack],
     userRoutes: { loginWithToken, refresh, validAccessKey },
   } = useApi();
   const cookieService = useCookieService();
   const sessionService = useSessionService();
 
   const isPublicRoute = () =>
-    pathname === ROUTES.LOGIN || !ALL_AUTH_ROUTES.includes(pathname);
+    pathname === ROUTES.LOGIN ||
+    !ALL_AUTH_ROUTES.some((route) => pathname.startsWith(route));
+  // !ALL_AUTH_ROUTES.includes(pathname);
 
   const clearBothStorages = (key: string) => (
     cookieService.clearCookie(key),
@@ -66,18 +64,22 @@ export const RefreshAuthOverlay = () => {
   };
 
   const refreshKeys = async () => {
-    console.log(`Auth Request (Refresh)`);
+    // console.log(`Auth Request (Refresh)`);
+    setLoading(true);
     const res = await refresh();
+
+    setLoading(false);
 
     if (res.err || !res.data) {
       unAuthenticateUser();
       setOpen(false);
 
-      console.log(`Refresh failed:`);
-      console.log(``);
+      // console.log(`Refresh failed:`);
+      // console.log(``);
 
       if (isPublicRoute()) return setIsGuest(true);
 
+      errorSnack(`Access denied, please login again`);
       return toHome();
     }
 
@@ -87,26 +89,33 @@ export const RefreshAuthOverlay = () => {
   };
 
   const refreshUserViaAccessToken = async () => {
-    console.log(`Auth Request (Access)`);
+    // console.log(`Auth Request (Access)`);
 
     if (!accessKey) {
-      console.log(`No Access Key - Immediate Refresh`);
+      // console.log(`No Access Key - Immediate Refresh`);
       return await refreshKeys();
     }
 
+    setLoading(true);
     const res = await loginWithToken(accessKey);
 
     if (res.err || !res.data) {
       if (res.err === "jwt expired") return await refreshKeys();
 
+      setLoading(false);
+
       unAuthenticateUser();
 
       setOpen(false);
-      if (!isPublicRoute()) return toHome();
+      if (!isPublicRoute()) {
+        errorSnack(`Access denied, please login again`);
+        return toHome();
+      }
 
       return;
     }
 
+    setLoading(false);
     setUser(res.data.user);
     setAccessKey(accessKey);
     setOpen(false);
@@ -116,7 +125,6 @@ export const RefreshAuthOverlay = () => {
     let timeoutKey = null;
     const publicRoute = isPublicRoute();
     const isAccessKeyValid = await validAccessKey();
-    // const refreshKey = cookieService.getCookie(TOKEN_KEYS.REFRESH_KEY);
 
     const shouldRefreshWithAccess =
       (accessKey && !isAccessKeyValid) || // Has access key but access key is invalid
@@ -143,6 +151,8 @@ export const RefreshAuthOverlay = () => {
 
   useTimeoutEffect(
     () => {
+      // console.log(`Pathname: ${pathname}`);
+      // console.log(``);
       let timeoutKey: number | null = null;
 
       (async () => {
@@ -154,6 +164,24 @@ export const RefreshAuthOverlay = () => {
     },
     [pathname],
     50,
+  );
+
+  useTimeoutEffect(
+    () => {
+      if (loading || !forceRefresh) return;
+
+      let timeoutKey: number | null = null;
+
+      (async () => {
+        timeoutKey = (await authenticate()) || null;
+        setForceRefresh(false);
+      })();
+      return () => {
+        if (timeoutKey) clearTimeout(timeoutKey);
+      };
+    },
+    [forceRefresh],
+    75,
   );
 
   return (

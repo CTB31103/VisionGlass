@@ -17,7 +17,6 @@ import {
   useApi,
   useRefreshEffect,
   useScreenSize,
-  useTimeoutEffect,
   useUserRestrictions,
 } from "@/hooks";
 import { type ICustomerQuote, type IUser } from "@/interfaces";
@@ -125,7 +124,7 @@ export const Profile = () => {
     50,
   );
 
-  useTimeoutEffect(
+  useRefreshEffect(
     () => {
       if (!userProfile) return;
 

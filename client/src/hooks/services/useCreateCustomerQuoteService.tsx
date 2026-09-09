@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useTimeoutEffect } from "../utils";
+import { useRefreshEffect, useTimeoutEffect } from "../utils";
 import { getBrands, getModelsByBrand } from "auto-parts-db";
 import { useRequestCallbackShortForm } from "../components";
 import { IMAGES } from "@/assets";
@@ -385,7 +385,7 @@ export const useCreateCustomerQuoteService = (
     setEndMeetingTime(moment(meetingTime).add(30, "minutes").toDate());
   }, [meetingTime.getTime()]);
 
-  useTimeoutEffect(
+  useRefreshEffect(
     () => {
       if (params.customerQuoteId && isEditingPage) {
         getEditingCustomer(params.customerQuoteId);
