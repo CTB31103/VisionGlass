@@ -10,7 +10,7 @@ import {
   TextInput,
 } from "@/components";
 import { ROUTES } from "@/Constants";
-import { useApi, useRouteDateParam } from "@/hooks";
+import { useApi, useRouteDateParam, useScreenSize } from "@/hooks";
 import {
   fromReadableDate,
   fromTimeString,
@@ -46,6 +46,8 @@ export const DashboardAdd = () => {
     calendarEventRoutes: { createCalendarEvent },
   } = useApi();
 
+  const { lessThanEqualTo } = useScreenSize();
+
   const [loading, setLoading] = useState(false);
   const [successModalOpen, setSuccessModalOpen] = useState(false);
 
@@ -61,6 +63,7 @@ export const DashboardAdd = () => {
   const [urlDate, setUrlDate] = useState<Date | undefined>(undefined);
 
   useRouteDateParam((paramDate) => {
+    if (paramDate.getTime() < toMidnight(new Date()).getTime()) return;
     setFromDate(toNearestHalfHour(paramDate));
     setUrlDate(paramDate);
   });
@@ -175,10 +178,15 @@ export const DashboardAdd = () => {
   );
 
   return (
-    <FullPage screen>
+    <FullPage>
       <Stack
-        sx={{ width: "100%", paddingBlock: 4, paddingInline: 8 }}
-        spacing={4}
+        sx={{
+          width: "100%",
+          paddingBlock: lessThanEqualTo.md ? 6 : 4,
+          paddingInline: lessThanEqualTo.xs ? 2 : 8,
+          pb: lessThanEqualTo.md ? 2 : undefined,
+        }}
+        spacing={lessThanEqualTo.xs ? 4 : 4}
       >
         <PageHeader onGoBack={() => navigate(-1)} text="Add Event" />
 
@@ -190,7 +198,7 @@ export const DashboardAdd = () => {
               value={title}
               setValue={setTitle}
             />
-            <Stack sx={{ width: "100%" }} />
+            {!lessThanEqualTo.md && <Stack sx={{ width: "100%" }} />}
           </Stack>
 
           <TextInput
@@ -202,7 +210,7 @@ export const DashboardAdd = () => {
             rows={4}
           />
 
-          <Stack direction={"row"} spacing={2}>
+          <Stack direction={lessThanEqualTo.xs ? "column" : "row"} spacing={2}>
             <RadioInput
               label="All day event"
               checked={fullDay}

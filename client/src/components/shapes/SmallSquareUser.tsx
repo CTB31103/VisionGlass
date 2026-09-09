@@ -2,7 +2,7 @@ import { Stack } from "@mui/material";
 import { Icons } from "../icons";
 import { TEXT_SIZES } from "../typography";
 import { CSS } from "@/Constants";
-import { useDimensions } from "@/hooks";
+import { useDimensions, useScreenSize } from "@/hooks";
 
 type SmallSquareUserProps = {
   noBorder?: boolean;
@@ -13,12 +13,13 @@ export const SmallSquareUser = ({
   noBorder,
   colorInherit,
 }: SmallSquareUserProps) => {
+  const { lessThanEqualTo } = useScreenSize();
   const [squareRef, squareDims] = useDimensions();
   return (
     <Stack
       ref={squareRef}
       sx={{
-        minWidth: "12vw",
+        minWidth: lessThanEqualTo.xs ? "30vw" : "12vw",
         height: squareDims.width,
 
         alignItems: "center",

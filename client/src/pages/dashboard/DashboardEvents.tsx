@@ -12,10 +12,11 @@ import { DashboardEventCard } from "./DashboardEventCard";
 import { DEFAULT_PAGINATION_LIMIT_OPTIONS, ROUTES } from "@/Constants";
 import { type ICalendarEvent } from "@/interfaces";
 import { Spinner } from "@chakra-ui/react";
-import { useIsAdminService } from "@/hooks";
+import { useIsAdminService, useScreenSize } from "@/hooks";
 import { useUserStore } from "@/stores";
 
 import { usePagination } from "react-use-pagination";
+import { toMidnight } from "@/utils";
 
 type DashboardEventsProps = {
   date: Date;
@@ -31,6 +32,7 @@ export const DashboardEvents = ({
   daysEvents,
   onDeleteBtn,
 }: DashboardEventsProps) => {
+  const { lessThanEqualTo } = useScreenSize();
   const isAdmin = useIsAdminService();
   const user = useUserStore((state) => state.user);
 
@@ -67,14 +69,17 @@ export const DashboardEvents = ({
   return (
     <Stack spacing={4}>
       <Stack
-        direction={"row"}
+        direction={lessThanEqualTo.xs ? "column" : "row"}
         sx={{
           width: "100%",
           alignItems: "end",
           justifyContent: "space-between",
         }}
       >
-        <Stack spacing={-2}>
+        <Stack
+          sx={{ width: lessThanEqualTo.xs ? "100%" : undefined }}
+          spacing={-2}
+        >
           <THeading large bungeeFill>
             Events
           </THeading>
@@ -82,11 +87,13 @@ export const DashboardEvents = ({
           <TBody bold>{mDate.format("MM/DD/YY")}</TBody>
         </Stack>
 
-        <Link href={href}>
-          <ActionButton color="red">
-            Add Event <Icons.Add />
-          </ActionButton>
-        </Link>
+        {date.getTime() >= toMidnight(new Date()).getTime() && (
+          <Link href={href}>
+            <ActionButton color="red">
+              Add Event <Icons.Add />
+            </ActionButton>
+          </Link>
+        )}
       </Stack>
 
       <Stack sx={{ width: "100%" }} spacing={4}>

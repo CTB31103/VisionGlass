@@ -14,6 +14,7 @@ import {
   useApi,
   usePaginatedState,
   useRefreshEffect,
+  useScreenSize,
   useTimeoutEffect,
   type IPaginationOptions,
   type IPaginationResult,
@@ -32,6 +33,9 @@ export const Reviews = () => {
     snackbar: [_, errorSnack],
     reviewRoutes,
   } = useApi();
+
+  const { lessThanEqualTo } = useScreenSize();
+
   const [loading, setLoading] = useState(false);
 
   const {
@@ -131,9 +135,14 @@ export const Reviews = () => {
   }, [from?.getTime(), to?.getTime()]);
 
   return (
-    <FullPage screen>
+    <FullPage>
       <Stack
-        sx={{ width: "100%", paddingBlock: 4, paddingInline: 8 }}
+        sx={{
+          width: "100%",
+          paddingBlock: lessThanEqualTo.md ? 6 : 4,
+          paddingInline: lessThanEqualTo.xs ? 2 : 8,
+          pb: lessThanEqualTo.md ? 2 : undefined,
+        }}
         spacing={4}
       >
         <PageHeader text="Reviews" />

@@ -33,6 +33,7 @@ export const useImageFetch = (
   };
 
   useTimeoutEffect(() => {
+    if (url.length === 0) return;
     getImage();
   }, [url, toString(options)]);
 

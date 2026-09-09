@@ -1,5 +1,5 @@
 import { DateSelectInput, RadioInput, TextInput } from "@/components/inputs";
-import type { UseCreateCustomerQuoteServiceResponse } from "@/hooks";
+import { type UseCreateCustomerQuoteServiceResponse } from "@/hooks";
 import { Stack } from "@mui/material";
 
 type MeetingInfoProps = {

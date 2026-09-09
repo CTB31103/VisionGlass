@@ -103,8 +103,8 @@ export const Fairs = () => {
 
       <Stack
         sx={{
-          paddingInline: 8,
           p: 8,
+          paddingInline: sizeUnder.xs ? 4 : 8,
           alignItems: "center",
           width: "100%",
         }}
@@ -117,8 +117,8 @@ export const Fairs = () => {
             borderRadius: 5,
             overflow: "hidden",
 
-            width: "60vw",
-            maxWidth: "60vw",
+            width: sizeUnder.xs ? undefined : "60vw",
+            maxWidth: sizeUnder.xs ? undefined : "60vw",
             minHeight: "10vh",
             alignItems: "center",
             justifyContent: "center",
@@ -127,7 +127,7 @@ export const Fairs = () => {
           {loading ? (
             <Spinner size={"xl"} />
           ) : imageError ? (
-            <Stack sx={{ p: 2 }}>
+            <Stack sx={{ p: 2, width: "100%" }}>
               <TBody align="center">
                 We are currently preparing our schedule for the upcoming season,
                 please check back on this page later to see where we'll be next!
@@ -153,6 +153,7 @@ export const Fairs = () => {
             <Tooltip title="Only the root admin account may alter the fairs schedule photo">
               <Stack>
                 <ActionButton
+                  autoHeight={sizeUnder.xs}
                   loading={loading}
                   onClick={() => inputRef.current?.click()}
                   color="red"

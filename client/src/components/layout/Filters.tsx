@@ -4,6 +4,7 @@ import { TBody } from "../typography";
 import { SearchBar } from "../inputs";
 import { ActionButton } from "../buttons";
 import { Icons } from "../icons";
+import { useScreenSize } from "@/hooks";
 
 type FiltersProps = {
   searchBar?: string;
@@ -24,6 +25,8 @@ export const Filters = ({
   btnLink,
   onBtnClick,
 }: PropsWithChildren<FiltersProps>) => {
+  const { lessThanEqualTo } = useScreenSize();
+
   return (
     <Stack spacing={2} sx={{ width: "100%" }}>
       {searchBar !== undefined && (
@@ -38,7 +41,7 @@ export const Filters = ({
         <TBody bold>Filters:</TBody>
         <Stack
           spacing={1}
-          direction={"row"}
+          direction={lessThanEqualTo.xs ? "column" : "row"}
           sx={{ width: "100%", justifyContent: "space-between" }}
         >
           {children}

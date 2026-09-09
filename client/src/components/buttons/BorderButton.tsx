@@ -10,7 +10,7 @@ type BorderButtonProps = {
   color?: ButtonColor;
   thin?: boolean;
   lg?: boolean;
-  onClick?: () => void;
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
 };
 
 export const BorderButton = ({

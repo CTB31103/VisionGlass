@@ -7,6 +7,7 @@ import {
   THeading,
 } from "@/components";
 import { ROUTES } from "@/Constants";
+import { useScreenSize } from "@/hooks";
 import { type ICustomerQuote } from "@/interfaces";
 import { capitalize, damageInfoString } from "@/utils";
 import { Link, Stack } from "@mui/material";
@@ -23,6 +24,8 @@ export const CustomerVehicleInfo = ({ customer }: CustomerVehicleInfoProps) => {
   const damageSide = customer.damage?.windowSide ?? "";
   const damageRows = customer.damage?.rows ?? [];
 
+  const { lessThanEqualTo } = useScreenSize();
+
   const [damageCardTitle, setDamageCardTitle] = useState(
     capitalize(
       damageInfoString(damageSide, damageMainLocation, damageRows, false),
@@ -37,28 +40,23 @@ export const CustomerVehicleInfo = ({ customer }: CustomerVehicleInfoProps) => {
     );
   }, [damageSide, damageMainLocation, damageRows]);
 
-  useEffect(() => {
-    console.log(capitalize(damageCardTitle));
-
-    console.log(capitalize(`helo`));
-  }, [damageCardTitle]);
-
   return (
-    <Stack direction={"row"} spacing={4} sx={{ alignItems: "start" }}>
+    <Stack
+      direction={lessThanEqualTo.xs ? "column" : "row"}
+      spacing={4}
+      sx={{ alignItems: lessThanEqualTo.xs ? "center" : "start" }}
+    >
       <LargeSquareIcon Icon={Icons.Car} />
 
-      <Stack spacing={0} sx={{ alignItems: "start" }}>
+      <Stack spacing={0} sx={{ alignItems: "start", width: "100%" }}>
         <THeading>Vehicle Information</THeading>
         {customer.car ? (
           <Stack sx={{ width: "100%", alignItems: "start" }}>
-            <Stack spacing={1} direction={"row"}>
-              <TBody medium bold>
-                Car:
-              </TBody>
-              <TBody medium>
-                {customer.car.year} {customer.car.model} {customer.car.make}
-              </TBody>
-            </Stack>
+            <LabledRowText
+              bold="Car:"
+              text={`${customer.car.year} ${customer.car.model} ${customer.car.make}`}
+            />
+
             {customer.car.plateInfo && (
               <LabledRowText
                 bold="Plate Number:"

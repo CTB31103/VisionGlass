@@ -1,5 +1,6 @@
 import { Stack } from "@mui/material";
 import { TBody } from "./TBody";
+import { useScreenSize } from "@/hooks";
 
 type LabledRowTextProps = {
   bold: string;
@@ -14,8 +15,9 @@ export const LabledRowText = ({
   larger,
   allBold,
 }: LabledRowTextProps) => {
+  const { lessThanEqualTo } = useScreenSize();
   return (
-    <Stack spacing={1} direction={"row"}>
+    <Stack spacing={1} direction={lessThanEqualTo.xs ? "column" : "row"}>
       <TBody medium={!larger} large={larger} bold>
         {bold}
       </TBody>

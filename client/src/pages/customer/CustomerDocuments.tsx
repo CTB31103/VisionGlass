@@ -11,7 +11,7 @@ import {
   Uploader,
 } from "@/components";
 import { CSS, MAX_FILE_SIZE, ONE_MB } from "@/Constants";
-import { useApi, useUploaderState } from "@/hooks";
+import { useApi, useScreenSize, useUploaderState } from "@/hooks";
 import type { IAttatchment, IUser } from "@/interfaces";
 import { Stack } from "@mui/material";
 import { useState } from "react";
@@ -39,6 +39,9 @@ export const CustomerDocuments = ({
     snackbar: [_, errorSnack],
     attatchmentRoutes,
   } = useApi();
+
+  const { lessThanEqualTo } = useScreenSize();
+
   const [loading, setLoading] = useState(false);
 
   const uploadFiles = async (selectedFiles: File[]) => {
@@ -72,14 +75,16 @@ export const CustomerDocuments = ({
   return (
     <Stack spacing={4} sx={{ pb: 4 }}>
       <Stack
-        direction={"row"}
+        direction={lessThanEqualTo.xs ? "column" : "row"}
         sx={{
           position: "relative",
           justifyContent: "space-between",
-          alignItems: "center",
+          alignItems: lessThanEqualTo.xs ? "end" : "center",
         }}
       >
-        <THeading>Associated Documents</THeading>
+        <Stack sx={{ width: lessThanEqualTo.xs ? "100%" : undefined }}>
+          <THeading>Associated Documents</THeading>
+        </Stack>
 
         <ActionButton
           loading={parentLoading || loading}

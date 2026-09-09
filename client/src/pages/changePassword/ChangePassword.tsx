@@ -7,7 +7,12 @@ import {
   ToggleSecureTextInput,
 } from "@/components";
 import { ROUTES } from "@/Constants";
-import { useApi, useBeforeUnload, useTimeoutEffect } from "@/hooks";
+import {
+  useApi,
+  useBeforeUnload,
+  useScreenSize,
+  useTimeoutEffect,
+} from "@/hooks";
 import { leadingZero, toString } from "@/utils";
 import { RULES, validation } from "@/validation";
 import { Stack } from "@mui/material";
@@ -26,6 +31,8 @@ export const ChangePassword = () => {
     snackbar: [_, errorSnack],
     userRoutes,
   } = useApi();
+
+  const { lessThanEqualTo } = useScreenSize();
 
   const [loading, setLoading] = useState(false);
 
@@ -148,8 +155,13 @@ export const ChangePassword = () => {
   return (
     <FullPage>
       <Stack
-        sx={{ width: "100%", paddingBlock: 4, paddingInline: 8 }}
-        spacing={4}
+        sx={{
+          width: "100%",
+          paddingBlock: lessThanEqualTo.md ? 6 : 4,
+          paddingInline: lessThanEqualTo.xs ? 2 : 8,
+          pb: lessThanEqualTo.md ? 2 : undefined,
+        }}
+        spacing={lessThanEqualTo.xs ? 4 : 4}
       >
         <Stack sx={{ width: "100%" }} spacing={2}>
           <PageHeader onGoBack={() => navigate(-1)} text="Change Password" />
@@ -172,7 +184,17 @@ export const ChangePassword = () => {
           }}
         >
           {!pwdMatch ? (
-            <Stack sx={{ width: "50%", alignItems: "end" }} spacing={2}>
+            <Stack
+              sx={{
+                width: lessThanEqualTo.xs
+                  ? "100%"
+                  : lessThanEqualTo.sm
+                    ? "75%"
+                    : "50%",
+                alignItems: lessThanEqualTo.xs ? undefined : "end",
+              }}
+              spacing={2}
+            >
               <ToggleSecureTextInput
                 label="Enter Current Password:"
                 endIcon={<Icons.Password />}
@@ -190,7 +212,13 @@ export const ChangePassword = () => {
               </ActionButton>
             </Stack>
           ) : (
-            <Stack sx={{ width: "50%", alignItems: "end" }} spacing={2}>
+            <Stack
+              sx={{
+                width: lessThanEqualTo.xs ? "100%" : "50%",
+                alignItems: lessThanEqualTo.xs ? undefined : "end",
+              }}
+              spacing={2}
+            >
               <ToggleSecureTextInput
                 label="Enter New Password:"
                 endIcon={<Icons.Password />}

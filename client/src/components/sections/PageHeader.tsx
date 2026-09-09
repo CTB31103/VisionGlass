@@ -3,6 +3,7 @@ import { TEXT_SIZES, THeading } from "../typography";
 import { IconButton } from "../buttons";
 import { Icons } from "../icons";
 import { CSS } from "@/Constants";
+import { useScreenSize } from "@/hooks";
 
 type PageHeaderProps = {
   text: string;
@@ -11,6 +12,7 @@ type PageHeaderProps = {
 };
 
 export const PageHeader = ({ text, backHref, onGoBack }: PageHeaderProps) => {
+  const { lessThanEqualTo } = useScreenSize();
   return (
     <Stack
       sx={{
@@ -20,9 +22,17 @@ export const PageHeader = ({ text, backHref, onGoBack }: PageHeaderProps) => {
       }}
     >
       <Stack
-        sx={{ maxWidth: "80%", alignItems: "center", justifyContent: "center" }}
+        sx={{
+          maxWidth: "80%",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
       >
-        <THeading align="center" bungeeFill large>
+        <THeading
+          align="center"
+          bungeeFill
+          large={!lessThanEqualTo.xs && onGoBack ? true : false}
+        >
           {text}
         </THeading>
       </Stack>

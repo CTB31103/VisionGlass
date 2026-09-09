@@ -4,6 +4,7 @@ import { Icons } from "../icons";
 import { TBody } from "../typography";
 import { SelectInput } from "../inputs";
 import { DEFAULT_PAGINATION_LIMIT_OPTIONS } from "@/Constants";
+import { useScreenSize } from "@/hooks";
 
 type PaginationControlProps = {
   onNextPage?: () => void;
@@ -33,8 +34,12 @@ export const PaginationControl = ({
   totalPage = 0,
   totalCount = 0,
 }: PaginationControlProps) => {
+  const { lessThanEqualTo } = useScreenSize();
   return (
-    <Stack sx={{ position: "relative" }}>
+    <Stack
+      sx={{ position: "relative" }}
+      direction={lessThanEqualTo.xs ? "column-reverse" : undefined}
+    >
       <Stack
         direction={"row"}
         sx={{
@@ -45,7 +50,13 @@ export const PaginationControl = ({
         }}
         spacing={2}
       >
-        <Stack direction={"row"} sx={{ width: "20%", pointerEvents: "all" }}>
+        <Stack
+          direction={"row"}
+          sx={{
+            width: lessThanEqualTo.xs ? "100%" : "20%",
+            pointerEvents: "all",
+          }}
+        >
           <SelectInput
             label="Page Limit:"
             selectedItem={pageLimit.value.toString()}
@@ -56,7 +67,13 @@ export const PaginationControl = ({
           />
         </Stack>
 
-        <Stack direction={"row"} sx={{ width: "15%", justifyContent: "end" }}>
+        <Stack
+          direction={"row"}
+          sx={{
+            minWidth: "20%",
+            justifyContent: "end",
+          }}
+        >
           <TBody>
             {totalCount < pageLimit.value * page
               ? totalCount
@@ -68,24 +85,33 @@ export const PaginationControl = ({
 
       <Stack
         direction={"row"}
-        sx={{
-          position: "absolute",
-          width: "100%",
-          height: "100%",
-          top: 0,
-          left: 0,
+        sx={
+          lessThanEqualTo.xs
+            ? {
+                width: "100%",
+                justifyContent: "center",
+                alignItems: "center",
+              }
+            : {
+                position: "absolute",
+                width: "100%",
+                height: "100%",
+                top: 0,
+                left: 0,
 
-          justifyContent: "center",
-          alignItems: "center",
+                justifyContent: "center",
+                alignItems: "center",
 
-          pointerEvents: "none",
-        }}
+                pointerEvents: "none",
+              }
+        }
       >
         <Stack
           direction={"row"}
           sx={{
-            justifyContent: "center",
+            justifyContent: lessThanEqualTo.xs ? "space-between" : "center",
             alignItems: "center",
+            width: "100%",
 
             pointerEvents: "all",
           }}

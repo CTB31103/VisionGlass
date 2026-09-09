@@ -1,5 +1,5 @@
 import { CSS } from "@/Constants";
-import { useDimensions } from "@/hooks";
+import { useDimensions, useScreenSize } from "@/hooks";
 import { Stack } from "@mui/material";
 
 import { TEXT_SIZES } from "../typography";
@@ -15,12 +15,13 @@ export const LargeSquareIcon = ({
   onClick,
 }: LargeSquareIconProps) => {
   const [squareRef, squareDims] = useDimensions();
+  const { lessThanEqualTo } = useScreenSize();
 
   return (
     <Stack
       ref={squareRef}
       sx={{
-        minWidth: "20vw",
+        minWidth: lessThanEqualTo.xs ? "50vw" : "20vw",
         height: squareDims.width,
 
         alignItems: "center",

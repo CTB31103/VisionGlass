@@ -5,7 +5,12 @@ import { DashboardEvents } from "./DashboardEvents";
 import { useEffect, useState } from "react";
 import { toMidnight, toReadableDate } from "@/utils";
 import type { ICalendarEvent } from "@/interfaces";
-import { useApi, useRefreshEffect, useRouteDateParam } from "@/hooks";
+import {
+  useApi,
+  useRefreshEffect,
+  useRouteDateParam,
+  useScreenSize,
+} from "@/hooks";
 import moment from "moment";
 import { useUserStore } from "@/stores";
 
@@ -15,6 +20,8 @@ export const Dashboard = () => {
     snackbar: [_, errorSnack],
     calendarEventRoutes,
   } = useApi();
+
+  const { lessThanEqualTo } = useScreenSize();
 
   const [loading, setLoading] = useState(true);
 
@@ -145,10 +152,15 @@ export const Dashboard = () => {
   }, [toReadableDate(selectedDate)]);
 
   return (
-    <FullPage screen>
+    <FullPage>
       <Stack
-        sx={{ width: "100%", paddingBlock: 4, paddingInline: 8 }}
-        spacing={4}
+        sx={{
+          width: "100%",
+          paddingBlock: lessThanEqualTo.md ? 6 : 4,
+          paddingInline: lessThanEqualTo.xs ? 2 : 8,
+          pb: lessThanEqualTo.md ? 2 : undefined,
+        }}
+        spacing={lessThanEqualTo.xs ? 4 : 4}
       >
         <PageHeader text="Dashboard" />
 
@@ -174,3 +186,8 @@ export const Dashboard = () => {
     </FullPage>
   );
 };
+
+/**
+ *
+ *
+ * */

@@ -11,7 +11,12 @@ import {
 } from "@/components";
 import { ROUTES } from "@/Constants";
 
-import { useApi, useRefreshEffect, useTimeoutEffect } from "@/hooks";
+import {
+  useApi,
+  useRefreshEffect,
+  useScreenSize,
+  useTimeoutEffect,
+} from "@/hooks";
 import { USER_TYPES, UserType, type IUser } from "@/interfaces";
 import { useUserStore } from "@/stores";
 import { capitalize, toString } from "@/utils";
@@ -38,6 +43,7 @@ export const TeamAdd = () => {
     snackbar: [_, errorSnack],
     userRoutes: { createUser, getUser, editUser },
   } = useApi();
+  const { lessThanEqualTo } = useScreenSize();
   const { user } = useUserStore();
 
   const [loading, setLoading] = useState(false);
@@ -181,7 +187,15 @@ export const TeamAdd = () => {
 
   return (
     <FullPage>
-      <Stack sx={{ width: "100%", pt: 4, pb: 8, paddingInline: 8 }} spacing={4}>
+      <Stack
+        sx={{
+          width: "100%",
+          paddingBlock: lessThanEqualTo.md ? 6 : 4,
+          paddingInline: lessThanEqualTo.xs ? 2 : 8,
+          pb: lessThanEqualTo.md ? 2 : undefined,
+        }}
+        spacing={4}
+      >
         <PageHeader
           onGoBack={() => navigate(-1)}
           text={
@@ -192,7 +206,11 @@ export const TeamAdd = () => {
         />
 
         <Stack sx={{ width: "100%" }} spacing={2}>
-          <Stack sx={{ width: "100%" }} direction={"row"} spacing={2}>
+          <Stack
+            sx={{ width: "100%" }}
+            direction={lessThanEqualTo.xs ? "column" : "row"}
+            spacing={2}
+          >
             <TextInput
               required
               disabled={isUserEditing}
@@ -210,7 +228,11 @@ export const TeamAdd = () => {
             />
           </Stack>
 
-          <Stack sx={{ width: "100%" }} direction={"row"} spacing={2}>
+          <Stack
+            sx={{ width: "100%" }}
+            direction={lessThanEqualTo.xs ? "column" : "row"}
+            spacing={2}
+          >
             <TextInput
               required
               label="Phone:"
@@ -227,7 +249,11 @@ export const TeamAdd = () => {
             />
           </Stack>
 
-          <Stack sx={{ width: "100%" }} direction={"row"} spacing={2}>
+          <Stack
+            sx={{ width: "100%" }}
+            direction={lessThanEqualTo.xs ? "column" : "row"}
+            spacing={2}
+          >
             <TextInput
               required
               label="Username:"
@@ -259,7 +285,11 @@ export const TeamAdd = () => {
           </Stack>
 
           {!isEditing && (
-            <Stack sx={{ width: "100%" }} direction={"row"} spacing={2}>
+            <Stack
+              sx={{ width: "100%" }}
+              direction={lessThanEqualTo.xs ? "column" : "row"}
+              spacing={2}
+            >
               <RoleSelect />
 
               <Stack sx={{ width: "100%" }} />

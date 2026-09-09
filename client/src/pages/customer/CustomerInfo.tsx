@@ -9,7 +9,7 @@ import {
   THeading,
 } from "@/components";
 import { ROUTES } from "@/Constants";
-import type { ISetState } from "@/hooks";
+import { useScreenSize, type ISetState } from "@/hooks";
 import {
   CustomerQuoteStatus,
   UserType,
@@ -46,6 +46,7 @@ export const CustomerInfo = ({
   onDelete,
 }: CustomerInfoProps) => {
   const user = useUserStore((state) => state.user);
+  const { lessThanEqualTo } = useScreenSize();
 
   const hasEmail = customer.customer.email.length > 0;
   const hasPhone = customer.customer.phone.length > 0;
@@ -60,11 +61,35 @@ export const CustomerInfo = ({
 
   return (
     <Stack
-      direction={"row"}
+      direction={lessThanEqualTo.xs ? "column" : "row"}
       spacing={4}
-      sx={{ alignItems: "start", position: "relative" }}
+      sx={{
+        alignItems: lessThanEqualTo.xs ? "center" : "start",
+        position: "relative",
+      }}
     >
-      <Stack spacing={2} sx={{ alignItems: "center" }}>
+      <Stack
+        spacing={2}
+        sx={{
+          width: lessThanEqualTo.xs ? "100%" : undefined,
+          alignItems: "center",
+        }}
+      >
+        {lessThanEqualTo.xs && (
+          <Stack
+            direction={"row"}
+            sx={{ width: "100%", justifyContent: "space-between" }}
+          >
+            <EditDeleteButtons
+              editHref={ROUTES.CUSTOMERS_EDIT + `/${customer.customerQuoteId}`}
+            />
+            <EditDeleteButtons
+              onDelete={user.userType === UserType.ADMIN ? onDelete : undefined}
+              redDelete
+            />
+          </Stack>
+        )}
+
         <LargeUserImage />
 
         {customer.status !== CustomerQuoteStatus.DONE && (
@@ -78,9 +103,31 @@ export const CustomerInfo = ({
 
       <Stack spacing={2} sx={{ alignItems: "start", width: "100%" }}>
         <Stack spacing={0} sx={{ width: "100%", alignItems: "start" }}>
-          <THeading>
-            {customer.customer.firstName} {customer.customer.lastName}
-          </THeading>
+          <Stack
+            direction={"row"}
+            sx={{
+              width: "100%",
+              alignItems: "end",
+              justifyContent: "space-between",
+            }}
+            spacing={2}
+          >
+            <THeading>
+              {customer.customer.firstName} {customer.customer.lastName}
+            </THeading>
+
+            {!lessThanEqualTo.xs && (
+              <EditDeleteButtons
+                editHref={
+                  ROUTES.CUSTOMERS_EDIT + `/${customer.customerQuoteId}`
+                }
+                onDelete={
+                  user.userType === UserType.ADMIN ? onDelete : undefined
+                }
+                redDelete
+              />
+            )}
+          </Stack>
           {(customer.status === CustomerQuoteStatus.SCHEDULED ||
             customer.status === CustomerQuoteStatus.DONE) &&
             customer.meetingTime && (
@@ -122,14 +169,6 @@ export const CustomerInfo = ({
             Save
           </ActionButton>
         </Stack>
-      </Stack>
-
-      <Stack sx={{ position: "absolute", top: 0, right: 0 }}>
-        <EditDeleteButtons
-          editHref={ROUTES.CUSTOMERS_EDIT + `/${customer.customerQuoteId}`}
-          onDelete={user.userType === UserType.ADMIN ? onDelete : undefined}
-          redDelete
-        />
       </Stack>
     </Stack>
   );

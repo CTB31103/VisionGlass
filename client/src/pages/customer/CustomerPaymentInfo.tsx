@@ -1,4 +1,5 @@
 import { Icons, LabledRowText, LargeSquareIcon, THeading } from "@/components";
+import { useScreenSize } from "@/hooks";
 import type { ICustomerQuote } from "@/interfaces";
 import { capitalize } from "@/utils";
 import { Stack } from "@mui/material";
@@ -8,12 +9,18 @@ type CustomerPaymentInfoProps = {
 };
 
 export const CustomerPaymentInfo = ({ customer }: CustomerPaymentInfoProps) => {
+  const { lessThanEqualTo } = useScreenSize();
+
   if (!customer.paymentInfo) return null;
   return (
-    <Stack direction={"row"} spacing={4} sx={{ alignItems: "start" }}>
+    <Stack
+      direction={lessThanEqualTo.xs ? "column" : "row"}
+      spacing={4}
+      sx={{ alignItems: lessThanEqualTo.xs ? "center" : "start" }}
+    >
       <LargeSquareIcon Icon={Icons.Sales} />
 
-      <Stack spacing={1}>
+      <Stack spacing={1} sx={{ width: "100%" }}>
         <THeading>Payment Information</THeading>
 
         <LabledRowText

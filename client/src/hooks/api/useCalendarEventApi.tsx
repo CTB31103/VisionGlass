@@ -26,8 +26,11 @@ export const useCalendarEventApi = () => {
 
   const createCalendarEvent = async (
     data: Omit<
-      Omit<Omit<ICalendarEvent, "calendarEventId">, "creatorId">,
-      "visibleUserIds"
+      Omit<
+        Omit<Omit<ICalendarEvent, "calendarEventId">, "creatorId">,
+        "visibleUserIds"
+      >,
+      "eventType"
     >,
   ) => {
     return await post<{ calendarEvent: ICalendarEvent }>(

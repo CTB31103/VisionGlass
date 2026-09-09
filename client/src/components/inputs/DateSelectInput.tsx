@@ -4,13 +4,14 @@ import { SelectInput } from "./SelectInput";
 import {
   fromReadableDate,
   fromTimeString,
+  toMidnight,
   toNearestHalfHour,
   toNearestHour,
   toReadableDate,
   toTimeString,
 } from "@/utils";
 import moment from "moment";
-import type { ISetState } from "@/hooks";
+import { useScreenSize, type ISetState } from "@/hooks";
 
 type StartEndDate = {
   label?: string;
@@ -57,6 +58,8 @@ export const DateSelectInput = ({
     availTimes ?? [],
   );
 
+  const { lessThanEqualTo } = useScreenSize();
+
   const toNearest = halfHour ? toNearestHalfHour : toNearestHour;
 
   const createDates = () => {
@@ -64,11 +67,23 @@ export const DateSelectInput = ({
     const [loopBackFor, loopForwardFor] = monthRange;
 
     const dates = [];
+
+    if (date.getTime() < toMidnight(today.toDate()).getTime()) {
+      dates.push(date);
+    }
+
     for (let i = Math.abs(loopBackFor) * 31; i !== 0; i--) {
       dates.push(moment(today).subtract(i, "days").toDate());
     }
     for (let i = 0; i < Math.abs(loopForwardFor) * 31; i++) {
       dates.push(moment(today).add(i, "days").toDate());
+    }
+
+    if (
+      date.getTime() >
+      toMidnight(moment(dates[dates.length - 1]).add(1, "day")).getTime()
+    ) {
+      dates.push(date);
     }
 
     setAvailableDates(dates);
@@ -123,7 +138,7 @@ export const DateSelectInput = ({
       )}
 
       {(start || end) && availableTimes.length > 0 && (
-        <Stack direction={"row"} spacing={2}>
+        <Stack direction={lessThanEqualTo.xs ? "column" : "row"} spacing={2}>
           {start && (
             <SelectInput
               required

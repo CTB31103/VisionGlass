@@ -2,7 +2,7 @@ import { CSS } from "@/Constants";
 import { Stack } from "@mui/material";
 import { Icons } from "../icons";
 import { TEXT_SIZES } from "../typography";
-import { useDimensions } from "@/hooks";
+import { useDimensions, useScreenSize } from "@/hooks";
 
 type LargeUserImageProps = {
   onUserPhotoClick?: () => void;
@@ -10,12 +10,12 @@ type LargeUserImageProps = {
 
 export const LargeUserImage = ({ onUserPhotoClick }: LargeUserImageProps) => {
   const [squareRef, squareDims] = useDimensions();
-
+  const { lessThanEqualTo } = useScreenSize();
   return (
     <Stack
       ref={squareRef}
       sx={{
-        minWidth: "20vw",
+        minWidth: lessThanEqualTo.xs ? "50vw" : "20vw",
         height: squareDims.width,
 
         alignItems: "center",

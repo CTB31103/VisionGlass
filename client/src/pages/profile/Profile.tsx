@@ -16,6 +16,7 @@ import { ROUTES } from "@/Constants";
 import {
   useApi,
   useRefreshEffect,
+  useScreenSize,
   useTimeoutEffect,
   useUserRestrictions,
 } from "@/hooks";
@@ -40,6 +41,7 @@ export const Profile = () => {
     userRoutes,
     customerQuoteRoutes,
   } = useApi();
+  const { lessThanEqualTo } = useScreenSize();
 
   const [loading, setLoading] = useState(false);
   const [quotesLoading, setQuotesLoading] = useState(false);
@@ -140,7 +142,6 @@ export const Profile = () => {
 
   if (loading || !userProfile) return <LoadingPage />;
 
-  // const isMyProfile = userProfile.userId === authUser.userId;
   const fullName = `${capitalize(userProfile.info.firstName)} ${capitalize(userProfile.info.lastName)}`;
   const hasEmail = userProfile.info.email.length > 0;
   const hasPhone = userProfile.info.phone.length > 0;
@@ -167,7 +168,12 @@ export const Profile = () => {
   return (
     <FullPage screen>
       <Stack
-        sx={{ width: "100%", paddingBlock: 4, paddingInline: 8 }}
+        sx={{
+          width: "100%",
+          paddingBlock: lessThanEqualTo.md ? 6 : 4,
+          paddingInline: lessThanEqualTo.xs ? 2 : 8,
+          pb: lessThanEqualTo.md ? 2 : undefined,
+        }}
         spacing={4}
       >
         <PageHeader
@@ -176,24 +182,55 @@ export const Profile = () => {
         />
 
         <Stack
-          direction={"row"}
-          spacing={4}
+          direction={lessThanEqualTo.xs ? "column" : "row"}
+          spacing={lessThanEqualTo.xs ? 2 : 4}
           sx={{
             position: "relative",
-            alignItems: "start",
+            alignItems: lessThanEqualTo.xs ? "center" : "start",
             width: "100%",
           }}
         >
+          {lessThanEqualTo.xs && (
+            <Stack
+              direction={"row"}
+              sx={{ width: "100%", justifyContent: "space-between" }}
+            >
+              {authUserCan.edit ? (
+                <EditDeleteButtons
+                  editToolTip="Edit profile"
+                  editHref={
+                    authUserCan.edit
+                      ? ROUTES.TEAM_EDIT + `/${userProfile.userId}`
+                      : undefined
+                  }
+                />
+              ) : (
+                <Stack sx={{ width: "100%" }} />
+              )}
+
+              <EditDeleteButtons
+                onDelete={authUserCan.delete ? onDelete : undefined}
+                redDelete
+              />
+            </Stack>
+          )}
+
           <LargeUserImage onUserPhotoClick={onUserPhotoClick} />
 
           <Stack
             spacing={0}
             sx={{
-              alignItems: "end",
+              alignItems: lessThanEqualTo.xs ? "center" : "end",
               justifyContent: "space-between",
             }}
           >
-            <Stack spacing={0} sx={{ width: "100%", alignItems: "start" }}>
+            <Stack
+              spacing={0}
+              sx={{
+                width: "100%",
+                alignItems: lessThanEqualTo.xs ? "center" : "start",
+              }}
+            >
               <THeading>{userProfile.username}</THeading>
               <TBody medium>{fullName.trim()}</TBody>
               {hasEmail && (
@@ -209,41 +246,54 @@ export const Profile = () => {
           </Stack>
 
           <Stack
-            sx={{
-              position: "absolute",
-              top: 0,
-              right: 0,
-              height: "100%",
-              alignItems: "end",
-              justifyContent: "space-between",
-            }}
+            sx={
+              lessThanEqualTo.xs
+                ? {}
+                : {
+                    position: "absolute",
+                    top: 0,
+                    right: 0,
+                    height: "100%",
+                    alignItems: "end",
+                    justifyContent: "space-between",
+                  }
+            }
           >
-            <EditDeleteButtons
-              editToolTip="Edit profile"
-              editHref={
-                authUserCan.edit
-                  ? ROUTES.TEAM_EDIT + `/${userProfile.userId}`
-                  : undefined
-              }
-              onDelete={authUserCan.delete ? onDelete : undefined}
-              redDelete
-            />
+            {!lessThanEqualTo.xs && (
+              <EditDeleteButtons
+                editToolTip="Edit profile"
+                editHref={
+                  authUserCan.edit
+                    ? ROUTES.TEAM_EDIT + `/${userProfile.userId}`
+                    : undefined
+                }
+                onDelete={authUserCan.delete ? onDelete : undefined}
+                redDelete
+              />
+            )}
 
             {isMyProfile && (
-              <Stack direction={"row"} spacing={2}>
+              <Stack
+                direction={lessThanEqualTo.xs ? "column" : "row"}
+                spacing={2}
+              >
                 <Link
                   underline="none"
                   color="inherit"
                   href={ROUTES.PROFILE_PWD(userProfile.userId)}
                 >
-                  <BorderButton color="blue">
+                  <BorderButton fullWidth={lessThanEqualTo.xs} color="blue">
                     <Icons.Password />
                     Change Password
                   </BorderButton>
                 </Link>
 
                 <Link underline="none" color="inherit" href={ROUTES.HOME}>
-                  <BorderButton onClick={onLogout} color="red">
+                  <BorderButton
+                    fullWidth={lessThanEqualTo.xs}
+                    onClick={onLogout}
+                    color="red"
+                  >
                     <Icons.Logout sx={{ fontSize: TEXT_SIZES.medium2 }} />{" "}
                     Logout
                   </BorderButton>

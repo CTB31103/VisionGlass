@@ -3,6 +3,7 @@ import { DashboardDateCard } from "./DashboardDateCard";
 import { BorderButton, Icons, THeading } from "@/components";
 import { toMidnight } from "@/utils";
 import moment from "moment";
+import { useScreenSize } from "@/hooks";
 
 type DashboardCalendarProps = {
   date: Date;
@@ -21,6 +22,7 @@ export const DashboardCalendar = ({
   week,
   moveCalendar,
 }: DashboardCalendarProps) => {
+  const { lessThanEqualTo } = useScreenSize();
   const mStart = week.length > 0 ? moment(week[0]) : undefined;
   const mEnd = week.length > 0 ? moment(week[week.length - 1]) : undefined;
   return (
@@ -41,11 +43,20 @@ export const DashboardCalendar = ({
         sx={{
           width: "100%",
           height: "min-content",
+          overflowX: lessThanEqualTo.xs ? "scroll" : undefined,
+          pb: lessThanEqualTo.xs ? 2 : undefined,
         }}
         spacing={2}
       >
         {week.map((day, i) => (
-          <Stack key={i} sx={{ height: "max-content", flex: 1 }}>
+          <Stack
+            key={i}
+            sx={{
+              height: "max-content",
+              flex: 1,
+              minWidth: lessThanEqualTo.xs ? "25vw" : undefined,
+            }}
+          >
             <DashboardDateCard
               date={day}
               expanded={eventDates.length > 0}

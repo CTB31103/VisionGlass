@@ -4,6 +4,7 @@ import {
   NoDataFound,
   THeading,
 } from "@/components";
+import { useScreenSize } from "@/hooks";
 import type { ICustomerQuote } from "@/interfaces";
 import { Link, Stack } from "@mui/material";
 
@@ -20,13 +21,20 @@ export const ProfileCustomersRow = ({
   href,
   noDataMessage,
 }: ProfileCustomersRowProps) => {
+  const { lessThanEqualTo } = useScreenSize();
   return (
     <Stack sx={{ width: "100%" }} spacing={4}>
       <Stack
-        sx={{ width: "100%", justifyContent: "space-between" }}
-        direction={"row"}
+        direction={lessThanEqualTo.xs ? "column" : "row"}
+        sx={{
+          width: "100%",
+          alignItems: "end",
+          justifyContent: "space-between",
+        }}
       >
-        <THeading bungeeFill>{title}</THeading>
+        <Stack sx={{ width: lessThanEqualTo.xs ? "100%" : undefined }}>
+          <THeading bungeeFill>{title}</THeading>
+        </Stack>
 
         {href && (
           <Link href={href}>

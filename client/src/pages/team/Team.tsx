@@ -20,6 +20,7 @@ import {
   useIsAdminService,
   usePaginatedState,
   useRefreshEffect,
+  useScreenSize,
   type IPaginationResult,
 } from "@/hooks";
 import { capitalize } from "@/utils";
@@ -30,6 +31,8 @@ export const Team = () => {
     userRoutes: { getAllUsers, deleteUser },
   } = useApi();
   const isAdmin = useIsAdminService();
+
+  const { lessThanEqualTo } = useScreenSize();
 
   const availableRoles = [
     "",
@@ -125,12 +128,13 @@ export const Team = () => {
   };
 
   return (
-    <FullPage screen>
+    <FullPage>
       <Stack
         sx={{
           width: "100%",
-          paddingBlock: 4,
-          paddingInline: 8,
+          paddingBlock: lessThanEqualTo.md ? 6 : 4,
+          paddingInline: lessThanEqualTo.xs ? 2 : 8,
+          pb: lessThanEqualTo.md ? 2 : undefined,
         }}
         spacing={4}
       >

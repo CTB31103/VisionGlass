@@ -6,6 +6,7 @@ import {
   THeading,
 } from "@/components";
 import { CSS } from "@/Constants";
+
 import { UserType, type CustomerQuoteStatus, type IUser } from "@/interfaces";
 import { Link, Stack } from "@mui/material";
 
@@ -52,7 +53,7 @@ export const CustomerItem = ({
             <THeading bold>{title}</THeading>
             <QuoteStatusCircle status={status} />
             {employees && (
-              <Stack direction={"row"}>
+              <Stack direction={"row"} spacing={1}>
                 {employees.map((employee, i) => (
                   <MyChip
                     key={i}

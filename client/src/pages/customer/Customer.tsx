@@ -11,6 +11,7 @@ import {
   useApi,
   useDeleteCustomerAttatchment,
   useGetCustomerService,
+  useScreenSize,
 } from "@/hooks";
 import {
   type IAttatchment,
@@ -42,6 +43,8 @@ export const Customer = () => {
     userRoutes,
     attatchmentRoutes,
   } = useApi();
+
+  const { lessThanEqualTo } = useScreenSize();
 
   const {
     customer,
@@ -232,7 +235,12 @@ export const Customer = () => {
   return (
     <FullPage screen>
       <Stack
-        sx={{ width: "100%", paddingBlock: 4, paddingInline: 8 }}
+        sx={{
+          width: "100%",
+          paddingBlock: lessThanEqualTo.md ? 6 : 4,
+          paddingInline: lessThanEqualTo.xs ? 2 : 8,
+          pb: lessThanEqualTo.md ? 2 : undefined,
+        }}
         spacing={4}
       >
         <PageHeader backHref={ROUTES.CUSTOMERS} text="Customer" />

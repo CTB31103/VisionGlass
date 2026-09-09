@@ -13,3 +13,4 @@ export * from "./useBeforeUnload";
 export * from "./useImageFetch";
 export * from "./useRefreshEffect";
 export * from "./useUserRestrictions";
+export * from "./useAuthImage";

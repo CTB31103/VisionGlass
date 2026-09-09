@@ -4,17 +4,19 @@ import {
   BorderButton,
   CustomerQuoteForms,
   FullPage,
+  LabledRowText,
   PageHeader,
-  TBody,
   TitleWithSubtitle,
 } from "@/components";
 import { ROUTES } from "@/Constants";
-import { useCreateCustomerQuoteService } from "@/hooks";
+import { useCreateCustomerQuoteService, useScreenSize } from "@/hooks";
 import { Link, Stack } from "@mui/material";
 import { useNavigate } from "react-router";
 
 export const CustomerAdd = () => {
   const navigate = useNavigate();
+
+  const { lessThanEqualTo } = useScreenSize();
 
   const {
     contactInfo,
@@ -34,7 +36,12 @@ export const CustomerAdd = () => {
   return (
     <FullPage screen>
       <Stack
-        sx={{ width: "100%", paddingBlock: 4, paddingInline: 8 }}
+        sx={{
+          width: "100%",
+          paddingBlock: lessThanEqualTo.md ? 6 : 4,
+          paddingInline: lessThanEqualTo.xs ? 2 : 8,
+          pb: lessThanEqualTo.md ? 2 : undefined,
+        }}
         spacing={4}
       >
         <PageHeader
@@ -103,27 +110,22 @@ export const CustomerAdd = () => {
               justifyContent: "center",
               height: "100%",
             }}
-            direction={"row"}
-            spacing={4}
+            direction={lessThanEqualTo.md ? "column" : "row"}
+            spacing={lessThanEqualTo.md ? 1 : 4}
           >
-            <Stack spacing={1}>
-              <Stack direction={"row"} spacing={1}>
-                <TBody bold>Customer:</TBody>
-                <TBody>
-                  {contactInfo.firstName} {contactInfo.lastName}
-                </TBody>
-              </Stack>
-              <Stack direction={"row"} spacing={1}>
-                <TBody bold>Phone:</TBody>
-                <TBody>{contactInfo.phone}</TBody>
-              </Stack>
+            <Stack spacing={1} sx={{}}>
+              <LabledRowText
+                bold="Customer:"
+                text={`${contactInfo.firstName} ${contactInfo.lastName}`}
+              />
+              <LabledRowText bold="Phone:" text={`${contactInfo.phone}`} />
             </Stack>
 
-            <Stack>
-              <Stack direction={"row"} spacing={1}>
-                <TBody bold>Service Price:</TBody>
-                <TBody>${paymentOptions.servicePrice.toFixed(2)}</TBody>
-              </Stack>
+            <Stack sx={{}}>
+              <LabledRowText
+                bold="Service Price:"
+                text={`$${paymentOptions.servicePrice.toFixed(2)}`}
+              />
             </Stack>
           </Stack>
           <Stack

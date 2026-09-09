@@ -1,6 +1,8 @@
 import { type PropsWithChildren, type ReactNode } from "react";
 import { FullPage } from "./FullPage";
 import { Card, Center, Container, Heading } from "@chakra-ui/react";
+import { useScreenSize } from "@/hooks";
+import clsx from "clsx";
 
 export const FormPage = ({
   children,
@@ -12,10 +14,18 @@ export const FormPage = ({
   minW?: number | string;
   footer?: ReactNode;
 }>) => {
+  const { lessThanEqualTo } = useScreenSize();
   return (
-    <FullPage screen className="p-20! flex">
+    <FullPage
+      screen
+      className={clsx("flex", lessThanEqualTo.xs ? "" : "p-20!")}
+    >
       <Center className="flex-1 ">
-        <Container fluid maxW={"calc(100vw - 160px)"} minW={minW ?? "50vw"}>
+        <Container
+          fluid
+          maxW={"calc(100vw - 160px)"}
+          minW={minW ?? (lessThanEqualTo.xs ? "100%" : "50vw")}
+        >
           <Card.Root size={"sm"}>
             {title && (
               <Card.Header>

@@ -5,6 +5,7 @@ import {
   THeading,
 } from "@/components";
 import { ROUTES } from "@/Constants";
+import { useScreenSize } from "@/hooks";
 import type { IUser } from "@/interfaces";
 import { useUserStore } from "@/stores";
 import { Stack } from "@mui/material";
@@ -25,13 +26,19 @@ export const CustomerMembers = ({
   onActionBtn,
 }: CustomerMembersProps) => {
   const user = useUserStore((state) => state.user);
+  const { lessThanEqualTo } = useScreenSize();
   return (
     <Stack spacing={2}>
       <Stack
-        direction={"row"}
-        sx={{ justifyContent: "space-between", alignItems: "center" }}
+        direction={lessThanEqualTo.xs ? "column" : "row"}
+        sx={{
+          justifyContent: "space-between",
+          alignItems: lessThanEqualTo.xs ? "end" : "center",
+        }}
       >
-        <THeading>Associated Team Members</THeading>
+        <Stack sx={{ width: lessThanEqualTo.xs ? "100%" : undefined }}>
+          <THeading>Associated Team Members</THeading>
+        </Stack>
 
         <ActionButton loading={loading} onClick={onActionBtn} color="red">
           {teamMemberIds.includes(user.userId) ? "Leave" : "Join"}

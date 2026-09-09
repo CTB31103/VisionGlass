@@ -25,6 +25,7 @@ import {
   useApi,
   usePaginatedState,
   useRefreshEffect,
+  useScreenSize,
   useTimeoutEffect,
   type IPaginationOptions,
   type IPaginationResult,
@@ -40,6 +41,8 @@ export const Customers = () => {
     customerQuoteRoutes,
     userRoutes,
   } = useApi();
+
+  const { lessThanEqualTo } = useScreenSize();
 
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
@@ -141,7 +144,6 @@ export const Customers = () => {
       }
 
       if (searchParams) console.log(toString(searchParams));
-      console.log(``);
     },
     [toString(location)],
     50,
@@ -180,9 +182,14 @@ export const Customers = () => {
       : getAllCustomers(paginationOptions);
 
   return (
-    <FullPage screen>
+    <FullPage>
       <Stack
-        sx={{ width: "100%", paddingBlock: 4, paddingInline: 8 }}
+        sx={{
+          width: "100%",
+          paddingBlock: lessThanEqualTo.md ? 6 : 4,
+          paddingInline: lessThanEqualTo.xs ? 2 : 8,
+          pb: lessThanEqualTo.md ? 2 : undefined,
+        }}
         spacing={4}
       >
         <PageHeader text="Customers" />

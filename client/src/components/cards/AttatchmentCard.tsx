@@ -1,12 +1,11 @@
-import { CONSTANTS, CSS, ROUTES, TOKEN_KEYS } from "@/Constants";
-import { useHoverable, useImageFetch } from "@/hooks";
+import { CSS, ROUTES } from "@/Constants";
+import { useAuthImage, useHoverable } from "@/hooks";
 import type { IAttatchment, IUser } from "@/interfaces";
 import { Link, Stack } from "@mui/material";
 import { IconButton } from "../buttons";
 import { Icons } from "../icons";
 import { TBody, TEXT_SIZES } from "../typography";
-import { useAccessKeyStore } from "@/stores";
-import { useEffect, useState } from "react";
+
 import clsx from "clsx";
 
 type AttatchmentCardProps = {
@@ -26,26 +25,10 @@ export const AttatchmentCard = ({
 
   onDelete,
 }: AttatchmentCardProps) => {
-  const accessKey = useAccessKeyStore((state) => state.accessKey);
   const { isHovered, register } = useHoverable();
   const { isHovered: isIconHovered, register: registerIcon } = useHoverable();
 
-  const [headers, setHeaders] = useState<Record<string, string>>({});
-  const imageSrc = useImageFetch(
-    CONSTANTS.api.image(attatchment.attachmentId),
-    { headers },
-  );
-
-  useEffect(() => {
-    setHeaders(() => {
-      const headers: Record<string, string> = {};
-
-      headers[TOKEN_KEYS.API_KEY] = CONSTANTS.api.key();
-      headers["Authorization"] = `Bearer ${accessKey}`;
-
-      return headers;
-    });
-  }, [accessKey]);
+  const imageSrc = useAuthImage(attatchment.attachmentId);
 
   return (
     <Stack {...register}>

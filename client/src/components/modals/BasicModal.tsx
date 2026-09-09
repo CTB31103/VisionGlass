@@ -2,6 +2,7 @@ import { Modal, Paper, Stack } from "@mui/material";
 import { type PropsWithChildren } from "react";
 import { TBody, THeading } from "../typography";
 import { CSS } from "@/Constants";
+import { useScreenSize } from "@/hooks";
 
 type BasicModalProps = {
   open: boolean;
@@ -24,6 +25,7 @@ export const BasicModal = ({
   shrink,
   shrinkHeight,
 }: PropsWithChildren<BasicModalProps>) => {
+  const { lessThanEqualTo } = useScreenSize();
   return (
     <Modal open={open} onClose={onClose}>
       <Stack
@@ -36,7 +38,11 @@ export const BasicModal = ({
       >
         <Paper
           sx={{
-            width: shrink ? "40vw" : "60vw",
+            width: lessThanEqualTo.xs
+              ? "calc(100% - 10vw)"
+              : shrink
+                ? "40vw"
+                : "60vw",
             height: shrink || shrinkHeight ? undefined : "70vh",
             borderRadius: 5,
             borderWidth: 1,
