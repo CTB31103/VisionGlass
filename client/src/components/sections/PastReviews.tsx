@@ -1,9 +1,8 @@
 import { usePastReviews, useScreenSize } from "@/hooks";
-import { Icons } from "../icons";
 import { TBody, THeading } from "../typography";
 import { StarRow } from "./StarRow";
 import { CSS } from "@/Constants";
-import { IconButton, Stack } from "@mui/material";
+import { Stack } from "@mui/material";
 import { PlayButtons } from "../buttons";
 
 export const PastReviews = () => {

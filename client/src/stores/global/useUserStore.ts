@@ -20,6 +20,7 @@ const DEFAULT_USER: IUser = {
     email: "",
     phone: "",
   },
+  isRootUser: false,
 };
 
 export const useUserStore = create<IUserStore>()(

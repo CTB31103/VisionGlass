@@ -7,11 +7,13 @@ import Middleware from "./middleware";
 import path from "path";
 import { Routes } from "./routes";
 import cors from "cors";
+import { connectDB } from "./connectDb";
+import { createAdmin } from "./scripts";
 
 dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 const app: Application = express();
-const port = 3000; // The port your express server will be running on.
+const port = CONSTANTS.network.port(); // The port your express server will be running on.
 
 // Enable URL-encoded form data parsing
 app.use(express.urlencoded({ extended: true }));
@@ -20,7 +22,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json()); // Middleware to parse JSON bodies
 app.use(
   cors({
-    origin: "http://localhost:5173", // 👈 Put your exact React app URL here
+    origin: CONSTANTS.network.clientUrl(), // 👈 Put your exact React app URL here
     credentials: true, // 👈 CRITICAL: Allows cookies to pass through CORS
   }),
 );
@@ -36,18 +38,17 @@ app.use("/api", Routes.APIKeyNeededRoutes);
 app.all("/:all_other", (req, res) => res.status(404).send("Not Found"));
 
 // Start the server
-const mongoUri =
-  CONSTANTS.database.mongo.uri +
-  CONSTANTS.database.mongo.db +
-  "?directConnection=true&serverSelectionTimeoutMS=2000&replicaSet=rs0";
-mongoose
-  .connect(mongoUri, { timeoutMS: 15000 })
-  .then(() => {
-    Log.colors.green(`Connected to MongoDB at ${mongoUri}`);
+if (process.env.NODE_ENV !== "test") {
+  (async () => {
+    const connected = await connectDB();
+    if (!connected) return;
+
+    await createAdmin();
+
     app.listen(port, () => {
-      Log.colors.greenSpace(`Server is running on http://localhost:${port}`);
+      Log.colors.greenSpace(
+        `Server is running on ${CONSTANTS.network.apiUrl()}`,
+      );
     });
-  })
-  .catch((err) => {
-    Log.colors.redSpace("Failed to connect to MongoDB:", err);
-  });
+  })();
+}

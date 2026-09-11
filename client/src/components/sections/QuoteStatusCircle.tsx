@@ -1,4 +1,4 @@
-import { numStrToNum, useDimensions } from "@/hooks";
+import { useDimensions } from "@/hooks";
 import { capitalize, quoteStatusToColor } from "@/utils";
 import { Stack } from "@mui/material";
 import { TBody } from "../typography";
@@ -9,7 +9,7 @@ export const QuoteStatusCircle = ({
 }: {
   status: ICustomerQuote["status"];
 }) => {
-  const [circleRef, circleDims] = useDimensions();
+  const [circleRef] = useDimensions();
   const circleColor = quoteStatusToColor(status);
 
   return (
@@ -17,9 +17,6 @@ export const QuoteStatusCircle = ({
       <Stack
         ref={circleRef}
         sx={{
-          // width: Math.min(numStrToNum(circleDims.height), 20),
-          // height: "50%",
-
           width: 15,
           height: 15,
 

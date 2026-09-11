@@ -1,5 +1,4 @@
-import React from "react";
-import { Icons, type IconType } from "../icons";
+import { type IconType } from "../icons";
 import { Stack } from "@mui/material";
 import { CSS } from "@/Constants";
 import { TBody } from "./TBody";

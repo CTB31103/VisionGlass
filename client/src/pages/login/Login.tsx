@@ -66,7 +66,7 @@ export const Login = () => {
           >
             <BorderButton>Sign Up</BorderButton>
 
-            <ActionButton color="blue" onClick={submit}>
+            <ActionButton color="red" onClick={submit}>
               Login
             </ActionButton>
           </Flex>

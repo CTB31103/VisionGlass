@@ -12,10 +12,7 @@ import {
 import { Log } from "./utils";
 import { exit } from "node:process";
 
-const mongoUri =
-  CONSTANTS.database.mongo.uri +
-  CONSTANTS.database.mongo.db +
-  "?directConnection=true&serverSelectionTimeoutMS=2000&replicaSet=rs0";
+const mongoUri = CONSTANTS.network.mongoUrl();
 mongoose
   .connect(mongoUri, { timeoutMS: 15000 })
   .then((mongo) => {

@@ -1,24 +1,29 @@
+import { Log } from "./utils";
+
 const CONSTANTS = {
   env: {
-    isProduction: () => process.env.NODE_ENV === "production",
+    isProduction: () => process.env.NODE_ENV === "prod",
     isDevelopment: () => process.env.NODE_ENV === "dev",
     dirName: () => __dirname,
-
-    network: {
-      hostname: () => process.env.HOST_NAME,
-      https: () => process.env.HTTPS === "true",
+  },
+  network: {
+    apiUrl: () => process.env.API_URL || ``,
+    clientUrl: () => process.env.CLIENT_URL || ``,
+    mongoUrl: () => {
+      const mongoEnvUrl = process.env.MONGO_URL || ``;
+      const replSetName = process.env.MONGO_REPL_NAME || ``;
+      const ending = `directConnection=true&serverSelectionTimeoutMS=2000${replSetName.length > 0 ? `&replicaSet=${replSetName}` : ""}`;
+      if (mongoEnvUrl.length === 0)
+        return `mongo://127.0.0.1:27017/vision_glass?` + ending;
+      const lastLetter = mongoEnvUrl[mongoEnvUrl.length - 1];
+      if (lastLetter === "?" || lastLetter === "&") return mongoEnvUrl + ending;
+      return mongoEnvUrl + "?" + ending;
     },
+    port: () => process.env.PORT || 3000,
   },
   server: {
-    port: 3000,
     headerAPIKey: "vag-api-key",
     apiAccessKey: () => process.env.SERVER_API_KEY || "default_api_key",
-  },
-  database: {
-    mongo: {
-      uri: "mongodb://127.0.0.1:27017/",
-      db: "vision_auto_glass",
-    },
   },
   auth: {
     jwt: {

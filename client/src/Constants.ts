@@ -1,13 +1,19 @@
 export const CONSTANTS = {
   api: {
-    hostname: () => import.meta.env.VITE_API_HOSTNAME as string,
-    isHttps: () => import.meta.env.VITE_HTTPS === "true",
-    key: () => import.meta.env.VITE_API_KEY as string,
+    url: () => {
+      const url =
+        (import.meta.env.VITE_API_URL as string | undefined) ||
+        `http://localhost:1000`;
+      if (url.length > 0 && url[url.length - 1] === "/")
+        return url.slice(0, url.length - 1);
+      return url;
+    },
+    key: () => import.meta.env.VITE_SERVER_API_KEY || "",
 
     recaptcha: () => import.meta.env.VITE_GOOGLE_CAPTCHA_SITE_KEY || "",
 
     image: (imageName: string) =>
-      `http://${import.meta.env.VITE_API_HOSTNAME as string}/api/media/serve/${imageName}`,
+      `${CONSTANTS.api.url()}/api/media/serve/${imageName}`,
     fairImageName: `fairs-schedule.webp`,
   },
 };

@@ -1,0 +1,24 @@
+
+ARG NODE_VERSION=sha256:aadf416b2cdce311a8811ba3f0608a61b77dbf997500e2eafe781b51f6a0b019
+FROM node@${NODE_VERSION} AS runner
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm install --legacy-peer-deps
+COPY . .
+
+# Set env variables
+# ARG PORT
+# ENV PORT=${PORT}
+
+# ARG VITE_API_URL
+# ENV VITE_API_URL=${VITE_API_URL}
+
+# Ensure the "node" user owns the application files
+RUN chown -R node:node /app
+# Switch to the built-in non-root "node" user
+USER node
+
+EXPOSE ${PORT}
+CMD ["sh", "-c", "npm run dev -- --host 0.0.0.0 --port $PORT"]

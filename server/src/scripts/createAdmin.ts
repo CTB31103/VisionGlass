@@ -6,6 +6,8 @@ import { UserType } from "../interfaces";
 export const ROOT_USERNAME = "root";
 
 export const createAdmin = async () => {
+  const adminExists = await UserModel.findOne({ username: "root" });
+  if (adminExists) return;
   await UserModel.create([
     {
       userId: HashUtils.uniqueId(),
@@ -21,8 +23,6 @@ export const createAdmin = async () => {
       isRootUser: true,
     },
   ]);
-  Log.colors.green(`Admin account created`);
-  Log.log(``);
 };
 
 export const getAdmin = async (session?: ISession) => {

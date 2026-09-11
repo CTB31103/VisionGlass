@@ -15,6 +15,7 @@ import { useScreenSize, useTextSizingService } from "@/hooks";
 export const Home = () => {
   const { lessThanEqualTo: sizeUnder } = useScreenSize();
   const TextSize = useTextSizingService();
+
   return (
     <FullPage screen className="relative">
       <HeroImageWithForm src={IMAGES.WindshieldReplacement}>

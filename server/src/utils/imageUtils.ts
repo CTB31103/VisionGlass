@@ -68,7 +68,7 @@ const createReadStream = (filePath: string) => {
 };
 
 const toClientUrl = (fileName: string) =>
-  `http${CONSTANTS.env.network.https() ? "s" : ""}://${CONSTANTS.env.network.hostname()}/api/media/serve/${fileName}`;
+  `${CONSTANTS.network.apiUrl()}/api/media/serve/${fileName}`;
 
 export const ImageUtils = {
   init,

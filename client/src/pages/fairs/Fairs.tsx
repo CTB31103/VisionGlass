@@ -63,7 +63,7 @@ export const Fairs = () => {
   );
 
   const toUrl = (urlPath: string) =>
-    `http${CONSTANTS.api.isHttps() ? "s" : ""}://${CONSTANTS.api.hostname()}/${urlPath[0] === "/" ? urlPath.slice(1) : urlPath}`;
+    `${CONSTANTS.api.url()}/${urlPath[0] === "/" ? urlPath.slice(1) : urlPath}`;
 
   return (
     <FullPage screen>

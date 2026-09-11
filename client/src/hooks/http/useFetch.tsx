@@ -30,7 +30,7 @@ export const useFetch = (props?: { authorization?: string | null }) => {
     customHeaders: Record<string, string> = {},
     { signal, isFormData }: RequestOptions = {},
   ): Promise<APIResponse<T>> => {
-    const url = `http${CONSTANTS.api.isHttps() ? "s" : ""}://${CONSTANTS.api.hostname()}/${to[0] === "/" ? to.slice(1) : to}`;
+    const url = `${CONSTANTS.api.url()}/${to[0] === "/" ? to.slice(1) : to}`;
 
     const abortSignal = signal ?? new AbortController().signal;
     const headers = { ...DEFAULT_HEADERS, ...customHeaders };

@@ -1,0 +1,197 @@
+services:
+  # ===========================
+  # Front End
+  # ===========================
+  prod-ui:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+      target: runner
+      args:
+        - PORT=${PROD_FE_PORT}
+        - VITE_API_URL=http://localhost:${PROD_BE_PORT}
+        - VITE_SERVER_API_KEY=${SERVER_API_KEY}
+        - VITE_GOOGLE_CAPTCHA_SITE_KEY=${VITE_GOOGLE_CAPTCHA_SITE_KEY}
+        - VITE_GOOGLE_CAPTCHA_SECRET_KEY=${VITE_GOOGLE_CAPTCHA_SECRET_KEY}
+    ports:
+      - "${PROD_FE_PORT}:${PROD_FE_PORT}"
+    profiles: [prod]
+  dev-ui:
+    build:
+      context: ./client
+      dockerfile: Dockerfile.dev
+    ports:
+      - "${DEV_FE_PORT}:${DEV_FE_PORT}"
+    env_file:
+      - .env
+      - ./client/.env
+    environment:
+      - PORT=${DEV_FE_PORT}
+      - VITE_API_URL=http://localhost:${DEV_BE_PORT}
+    profiles: [dev]
+    stdin_open: true
+    tty: true
+    develop:
+      watch:
+        - action: sync
+          path: ./client/src
+          target: ./app/src
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: ./client/package.json
+          target: /app/package.json
+        - action: rebuild
+          path: ./client/vite.config.ts
+          target: /app/vite.config.ts
+  # ===========================
+  # Back End
+  # ===========================
+  prod-server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    ports:
+      - "${PROD_BE_PORT}:${PROD_BE_PORT}"
+    env_file:
+      - .env
+      - ./server/.env
+    environment:
+      - PORT=${PROD_BE_PORT}
+      - NODE_ENV=${COMPOSE_PROFILES}
+      - API_URL=http://localhost:${PROD_BE_PORT}
+      - CLIENT_URL=http://localhost:${PROD_FE_PORT}
+      - MONGO_URL=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb1:${MONGO_PORT}/${MONGO_DATABASE_NAME}?authSource=admin&
+    depends_on:
+      - mongodb-primary
+      - mongodb-secondary-1
+      - mongodb-secondary-2
+      - mongodb-setup
+    profiles: [prod]
+  dev-server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile.dev
+    ports:
+      - "${DEV_BE_PORT}:${DEV_BE_PORT}"
+    env_file:
+      - .env
+      - ./server/.env
+    environment:
+      - PORT=${DEV_BE_PORT}
+      - NODE_ENV=${COMPOSE_PROFILES}
+      - API_URL=http://localhost:${DEV_BE_PORT}
+      - CLIENT_URL=http://localhost:${DEV_FE_PORT}
+      - MONGO_URL=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb1:${MONGO_PORT}/${MONGO_DATABASE_NAME}?authSource=admin&
+    depends_on:
+      - mongodb-primary
+      - mongodb-secondary-1
+      - mongodb-secondary-2
+      - mongodb-setup
+    profiles: [dev]
+    stdin_open: true
+    tty: true
+    develop:
+      watch:
+        - action: sync
+          path: ./server/src
+          target: ./app/src
+          ignore:
+            - node_modules/
+        - action: rebuild
+          path: ./server/package.json
+          target: /app/package.json
+  # ===========================
+  # Database
+  # ===========================
+  mongodb-primary:
+    image: mongodb/mongodb-community-server${MONGO_IMAGE_VERSION}
+    restart: always
+    container_name: mongodb1
+    hostname: mongodb1
+    command: --replSet ${MONGO_REPL_NAME}
+    networks:
+      mongodb_network:
+      default:
+    expose:
+      - ${MONGO_PORT}
+    volumes:
+      - ./mongodb/data/mongodb1:/data/db
+      - ./mongodb/scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro # IMPORTANT for server to connect to db
+
+  mongodb-secondary-1:
+    image: mongodb/mongodb-community-server${MONGO_IMAGE_VERSION}
+    restart: always
+    container_name: mongodb2
+    hostname: mongodb2
+    command: --replSet ${MONGO_REPL_NAME}
+    networks:
+      mongodb_network:
+    expose:
+      - ${MONGO_PORT}
+    volumes:
+      - ./mongodb/data/mongodb2:/data/db
+
+  mongodb-secondary-2:
+    image: mongodb/mongodb-community-server${MONGO_IMAGE_VERSION}
+    restart: always
+    container_name: mongodb3
+    hostname: mongodb3
+    command: --replSet ${MONGO_REPL_NAME}
+    networks:
+      mongodb_network:
+    expose:
+      - ${MONGO_PORT}
+    environment:
+      DB: ${MONGO_DATABASE_NAME}
+    env_file:
+      - .env
+    volumes:
+      - ./mongodb/data/mongodb3:/data/db
+      - ./mongodb/scripts:/scripts
+    entrypoint: ["sh", "-c", "sh /scripts/mongo_backup_scheduler.sh"]
+
+  mongodb-setup:
+    image: mongodb/mongodb-community-server${MONGO_IMAGE_VERSION}
+    restart: "no"
+    depends_on:
+      - mongodb-primary
+      - mongodb-secondary-1
+      - mongodb-secondary-2
+    networks:
+      mongodb_network:
+    volumes:
+      - ./mongodb/scripts:/scripts
+    environment:
+      DB: ${MONGO_DATABASE_NAME}
+    env_file:
+      - .env
+    entrypoint: ["sh", "-c", "sh /scripts/mongo_setup.sh"]
+
+networks:
+  mongodb_network:
+    driver: bridge
+
+# ===========================
+# Start Commands
+# ===========================
+
+# docker compose build --no-cache && docker compose up
+# docker compose build prod-ui --no-cache && docker compose up prod-ui
+# docker compose build dev-ui --no-cache && docker compose up dev-ui --watch
+# docker compose build prod-server --no-cache && docker compose up prod-server
+# docker compose build dev-server --no-cache && docker compose up dev-server --watch
+# docker compose build mongodb-primary --no-cache && docker compose up mongodb-primary -d
+
+# docker compose down
+# docker compose down prod-ui
+# docker compose down dev-ui
+# docker compose down prod-server
+# docker compose down dev-server
+# docker compose down mongodb-primary -v
+
+# docker compose logs -f prod-ui
+# docker compose logs -f dev-ui
+# docker compose logs -f prod-server
+# docker compose logs -f dev-server
+# docker compose logs -f mongodb-primary
