@@ -2,8 +2,10 @@ import { Log } from "./utils";
 
 const CONSTANTS = {
   env: {
-    isProduction: () => process.env.NODE_ENV === "prod",
-    isDevelopment: () => process.env.NODE_ENV === "dev",
+    isProduction: () =>
+      process.env.NODE_ENV === "prod" || process.env.NODE_ENV === "prod-full",
+    isDevelopment: () =>
+      process.env.NODE_ENV === "dev" || process.env.NODE_ENV === "dev",
     dirName: () => __dirname,
   },
   network: {

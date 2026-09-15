@@ -43,8 +43,6 @@ if (process.env.NODE_ENV !== "test") {
     const connected = await connectDB();
     if (!connected) return;
 
-    await createAdmin();
-
     app.listen(port, () => {
       Log.colors.greenSpace(
         `Server is running on ${CONSTANTS.network.apiUrl()}`,

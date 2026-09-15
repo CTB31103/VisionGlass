@@ -85,10 +85,14 @@ export const AttatchmentCard = ({
                 }}
               >
                 <Stack
-                  className="transition-[scale] duration-150"
+                  className="transition-[scale] duration-150 pointer-events-[all]"
                   sx={{ scale: isIconHovered ? 1.15 : 1 }}
                   {...registerIcon}
-                  onClick={onDelete}
+                  onClick={(e) => (
+                    e.stopPropagation(),
+                    e.preventDefault(),
+                    onDelete()
+                  )}
                 >
                   <IconButton
                     fontSize={TEXT_SIZES.large}

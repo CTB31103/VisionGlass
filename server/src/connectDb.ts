@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import CONSTANTS from "./constants";
 import { Log } from "./utils";
+import { createAdmin } from "./scripts";
 
 const SECOND = 1000;
 
@@ -12,6 +13,7 @@ export const connectDB = async () => {
 
     try {
       await mongoose.connect(mongoUri, { timeoutMS: 15 * SECOND });
+      await createAdmin();
       Log.colors.green(`Connected to mongodb:`);
       attempts = 0;
       return true;

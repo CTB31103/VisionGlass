@@ -56,6 +56,17 @@ export const useFetch = (props?: { authorization?: string | null }) => {
         signal: abortSignal,
         credentials: "include",
       });
+
+      if (
+        !(res.headers.get("content-type") || "").includes("application/json")
+      ) {
+        const text = await res.text();
+        return {
+          data: null,
+          err: !res.ok ? `Internal service error` : text,
+        };
+      }
+
       const json = await res.json();
 
       if (json.error) {

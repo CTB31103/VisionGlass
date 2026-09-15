@@ -1,4 +1,48 @@
 services:
+  cloudflare:
+    image: cloudflare/cloudflared${CLOUDFLARE_VERSION}
+    command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TOKEN}
+    restart: unless-stopped
+    profiles: [prod, prod-host, prod-app-host]
+  # ===========================
+  # NGINX & ACME SSL
+  # ===========================
+  # nginx:
+  #   container_name: nginx
+  #   hostname: nginx
+  #   image: nginxproxy/nginx-proxy${NGINX_VERSION}
+  #   restart: unless-stopped
+  #   ports:
+  #     - 80:80
+  #     - 443:443
+  #   volumes:
+  #     - /var/run/docker.sock:/tmp/docker.sock:ro
+  #     - nginx-html:/usr/share/nginx/html
+  #     - nginx-certs:/etc/nginx/certs:ro
+  #     - nginx-vhost:/etc/nginx/vhost.d
+  #     - ./nginx/forward-api.conf:/etc/nginx/vhost.d/${DOMAIN_NAME}
+  #   logging:
+  #     options:
+  #       max-size: "10m"
+  #       max-file: "3"
+  #   profiles: [prod, prod-host, prod-app-host]
+  # acme:
+  #   image: nginxproxy/acme-companion${ACME_VERSION}
+  #   container_name: acme
+  #   environment:
+  #     - DEFAULT_EMAIL=${SSL_EMAIL}
+  #   volumes_from:
+  #     - nginx
+  #   volumes:
+  #     - nginx-certs:/etc/nginx/certs:rw
+  #     - acme:/etc/acme.sh
+  #     - /var/run/docker.sock:/var/run/docker.sock:ro
+  #   restart: unless-stopped
+  #   # depends_on:
+  #   #   prod-ui:
+  #   #     condition: service_healthy
+  #   #     required: false
+  #   profiles: [prod, prod-host, prod-app-host]
   # ===========================
   # Front End
   # ===========================
@@ -9,13 +53,21 @@ services:
       target: runner
       args:
         - PORT=${PROD_FE_PORT}
-        - VITE_API_URL=http://localhost:${PROD_BE_PORT}
+        - VITE_API_URL=https://${DOMAIN_NAME}
         - VITE_SERVER_API_KEY=${SERVER_API_KEY}
         - VITE_GOOGLE_CAPTCHA_SITE_KEY=${VITE_GOOGLE_CAPTCHA_SITE_KEY}
         - VITE_GOOGLE_CAPTCHA_SECRET_KEY=${VITE_GOOGLE_CAPTCHA_SECRET_KEY}
     ports:
       - "${PROD_FE_PORT}:${PROD_FE_PORT}"
-    profiles: [prod]
+    # environment:
+    # - VIRTUAL_HOST=${DOMAIN_NAME}
+    # - VIRTUAL_PORT=${PROD_FE_PORT}
+    depends_on:
+      - cloudflare
+    #   nginx:
+    #     condition: service_healthy
+    #     required: false
+    profiles: [prod, prod-app, prod-app-host]
   dev-ui:
     build:
       context: ./client
@@ -28,6 +80,8 @@ services:
     environment:
       - PORT=${DEV_FE_PORT}
       - VITE_API_URL=http://localhost:${DEV_BE_PORT}
+      - HOST=0.0.0.0
+      - WDS_SOCKET_PORT=0
     profiles: [dev]
     stdin_open: true
     tty: true
@@ -58,16 +112,14 @@ services:
       - ./server/.env
     environment:
       - PORT=${PROD_BE_PORT}
-      - NODE_ENV=${COMPOSE_PROFILES}
-      - API_URL=http://localhost:${PROD_BE_PORT}
-      - CLIENT_URL=http://localhost:${PROD_FE_PORT}
+      - NODE_ENV=prod
+      - API_URL=https://${DOMAIN_NAME}/api
+      - CLIENT_URL=https://${DOMAIN_NAME}
       - MONGO_URL=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb1:${MONGO_PORT}/${MONGO_DATABASE_NAME}?authSource=admin&
-    depends_on:
-      - mongodb-primary
-      - mongodb-secondary-1
-      - mongodb-secondary-2
-      - mongodb-setup
-    profiles: [prod]
+    depends_on: [prod-ui]
+    volumes:
+      - ./server/src/uploads/public:/app/dist/uploads/public
+    profiles: [prod, prod-app, prod-app-host]
   dev-server:
     build:
       context: ./server
@@ -79,15 +131,12 @@ services:
       - ./server/.env
     environment:
       - PORT=${DEV_BE_PORT}
-      - NODE_ENV=${COMPOSE_PROFILES}
+      - NODE_ENV=dev
       - API_URL=http://localhost:${DEV_BE_PORT}
       - CLIENT_URL=http://localhost:${DEV_FE_PORT}
       - MONGO_URL=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb1:${MONGO_PORT}/${MONGO_DATABASE_NAME}?authSource=admin&
-    depends_on:
-      - mongodb-primary
-      - mongodb-secondary-1
-      - mongodb-secondary-2
-      - mongodb-setup
+    volumes:
+      - ./server/src/uploads/test:/app/src/uploads/test
     profiles: [dev]
     stdin_open: true
     tty: true
@@ -118,7 +167,7 @@ services:
     volumes:
       - ./mongodb/data/mongodb1:/data/db
       - ./mongodb/scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro # IMPORTANT for server to connect to db
-
+    profiles: ["prod", "dev", prod-db, dev-db, "db"]
   mongodb-secondary-1:
     image: mongodb/mongodb-community-server${MONGO_IMAGE_VERSION}
     restart: always
@@ -131,7 +180,7 @@ services:
       - ${MONGO_PORT}
     volumes:
       - ./mongodb/data/mongodb2:/data/db
-
+    profiles: ["prod", "dev", prod-db, dev-db, "db"]
   mongodb-secondary-2:
     image: mongodb/mongodb-community-server${MONGO_IMAGE_VERSION}
     restart: always
@@ -150,7 +199,7 @@ services:
       - ./mongodb/data/mongodb3:/data/db
       - ./mongodb/scripts:/scripts
     entrypoint: ["sh", "-c", "sh /scripts/mongo_backup_scheduler.sh"]
-
+    profiles: ["prod", "dev", prod-db, dev-db, "db"]
   mongodb-setup:
     image: mongodb/mongodb-community-server${MONGO_IMAGE_VERSION}
     restart: "no"
@@ -167,8 +216,16 @@ services:
     env_file:
       - .env
     entrypoint: ["sh", "-c", "sh /scripts/mongo_setup.sh"]
+    profiles: ["prod", "dev", prod-db, dev-db, "db"]
+
+volumes:
+  nginx-html:
+  nginx-certs:
+  nginx-vhost:
+  acme:
 
 networks:
+  # prod_network:
   mongodb_network:
     driver: bridge
 
