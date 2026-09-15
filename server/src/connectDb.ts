@@ -24,7 +24,7 @@ export const connectDB = async () => {
       Log.colors.yellow(err);
       Log.colors.redSpace(`Could not connect to mongodb at: ${mongoUri}`);
 
-      attempts -= 1;
+      attempts += 1;
       await new Promise((res) => setTimeout(res, 10 * SECOND));
     }
   }
