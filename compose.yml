@@ -21,7 +21,9 @@ services:
     ports:
       - "${PROD_FE_PORT}:${PROD_FE_PORT}"
     depends_on:
-      - cloudflare
+      cloudflare:
+        condition: service_healthy
+        required: false
     profiles: [prod, prod-app, prod-app-host]
   dev-ui:
     build:

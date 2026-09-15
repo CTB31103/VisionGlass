@@ -1,3 +1,0 @@
-services:
-  prod-ui:
-    depends_on: []
