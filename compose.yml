@@ -4,6 +4,7 @@ services:
     command: tunnel --no-autoupdate run --token ${CLOUDFLARE_TOKEN}
     restart: unless-stopped
     profiles: [prod, prod-host, prod-app-host]
+    networks: [web-network]
   # ===========================
   # Front End
   # ===========================
@@ -25,6 +26,7 @@ services:
         condition: service_healthy
         required: false
     profiles: [prod, prod-app, prod-app-host]
+    networks: [web-network]
   dev-ui:
     build:
       context: ./client
@@ -41,6 +43,7 @@ services:
     profiles: [dev]
     stdin_open: true
     tty: true
+    networks: [web-network]
     develop:
       watch:
         - action: sync
@@ -75,6 +78,7 @@ services:
     volumes:
       - ./server/src/uploads/public:/app/dist/uploads/public
     profiles: [prod, prod-app, prod-app-host]
+    networks: [web-network]
   dev-server:
     build:
       context: ./server
@@ -95,6 +99,7 @@ services:
     profiles: [dev]
     stdin_open: true
     tty: true
+    networks: [web-network]
     develop:
       watch:
         - action: sync
@@ -114,9 +119,7 @@ services:
     container_name: mongodb1
     hostname: mongodb1
     command: --replSet ${MONGO_REPL_NAME}
-    networks:
-      mongodb_network:
-      default:
+    networks: [mongodb_network, web-network]
     expose:
       - ${MONGO_PORT}
     volumes:
@@ -180,7 +183,8 @@ volumes:
   acme:
 
 networks:
-  # prod_network:
+  web-network:
+    driver: bridge
   mongodb_network:
     driver: bridge
 
