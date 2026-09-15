@@ -6,9 +6,9 @@ import { createAdmin } from "./scripts";
 const SECOND = 1000;
 
 export const connectDB = async () => {
-  const MAX_ATTEMPTS = 10;
-  let attempts = MAX_ATTEMPTS;
-  while (attempts > 0) {
+  const MAX_ATTEMPTS = 100;
+  let attempts = 0;
+  while (attempts < MAX_ATTEMPTS) {
     const mongoUri = CONSTANTS.network.mongoUrl();
 
     try {
@@ -18,7 +18,10 @@ export const connectDB = async () => {
       attempts = 0;
       return true;
     } catch (err) {
-      Log.colors.yellow(`Attempts left to connect to database: ${attempts}`);
+      Log.colors.yellow(
+        `Attempts left to connect to database: ${attempts}/${MAX_ATTEMPTS}`,
+      );
+      Log.colors.yellow(err);
       Log.colors.redSpace(`Could not connect to mongodb at: ${mongoUri}`);
 
       attempts -= 1;

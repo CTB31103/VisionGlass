@@ -77,7 +77,13 @@ services:
       - API_URL=https://${DOMAIN_NAME}/api
       - CLIENT_URL=https://${DOMAIN_NAME}
       - MONGO_URL=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb1:${MONGO_PORT}/${MONGO_DATABASE_NAME}?authSource=admin&
-    depends_on: [prod-ui]
+    depends_on:
+      prod-ui:
+        condition: service_started
+        required: true
+      mongodb-setup:
+        condition: service_completed_successfully
+        required: false
     volumes:
       - ./server/src/uploads/public:/app/dist/uploads/public
     profiles: [prod, prod-app, prod-app-host]
