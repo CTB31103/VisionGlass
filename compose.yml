@@ -5,45 +5,6 @@ services:
     restart: unless-stopped
     profiles: [prod, prod-host, prod-app-host]
   # ===========================
-  # NGINX & ACME SSL
-  # ===========================
-  # nginx:
-  #   container_name: nginx
-  #   hostname: nginx
-  #   image: nginxproxy/nginx-proxy${NGINX_VERSION}
-  #   restart: unless-stopped
-  #   ports:
-  #     - 80:80
-  #     - 443:443
-  #   volumes:
-  #     - /var/run/docker.sock:/tmp/docker.sock:ro
-  #     - nginx-html:/usr/share/nginx/html
-  #     - nginx-certs:/etc/nginx/certs:ro
-  #     - nginx-vhost:/etc/nginx/vhost.d
-  #     - ./nginx/forward-api.conf:/etc/nginx/vhost.d/${DOMAIN_NAME}
-  #   logging:
-  #     options:
-  #       max-size: "10m"
-  #       max-file: "3"
-  #   profiles: [prod, prod-host, prod-app-host]
-  # acme:
-  #   image: nginxproxy/acme-companion${ACME_VERSION}
-  #   container_name: acme
-  #   environment:
-  #     - DEFAULT_EMAIL=${SSL_EMAIL}
-  #   volumes_from:
-  #     - nginx
-  #   volumes:
-  #     - nginx-certs:/etc/nginx/certs:rw
-  #     - acme:/etc/acme.sh
-  #     - /var/run/docker.sock:/var/run/docker.sock:ro
-  #   restart: unless-stopped
-  #   # depends_on:
-  #   #   prod-ui:
-  #   #     condition: service_healthy
-  #   #     required: false
-  #   profiles: [prod, prod-host, prod-app-host]
-  # ===========================
   # Front End
   # ===========================
   prod-ui:
@@ -59,14 +20,8 @@ services:
         - VITE_GOOGLE_CAPTCHA_SECRET_KEY=${VITE_GOOGLE_CAPTCHA_SECRET_KEY}
     ports:
       - "${PROD_FE_PORT}:${PROD_FE_PORT}"
-    # environment:
-    # - VIRTUAL_HOST=${DOMAIN_NAME}
-    # - VIRTUAL_PORT=${PROD_FE_PORT}
     depends_on:
       - cloudflare
-    #   nginx:
-    #     condition: service_healthy
-    #     required: false
     profiles: [prod, prod-app, prod-app-host]
   dev-ui:
     build:
@@ -76,7 +31,6 @@ services:
       - "${DEV_FE_PORT}:${DEV_FE_PORT}"
     env_file:
       - .env
-      - ./client/.env
     environment:
       - PORT=${DEV_FE_PORT}
       - VITE_API_URL=http://localhost:${DEV_BE_PORT}
@@ -109,7 +63,6 @@ services:
       - "${PROD_BE_PORT}:${PROD_BE_PORT}"
     env_file:
       - .env
-      - ./server/.env
     environment:
       - PORT=${PROD_BE_PORT}
       - NODE_ENV=prod

@@ -27,8 +27,7 @@ reports/
 # =========================================
 # Environment and config files (sensitive)
 # =========================================
-*.env*
-!.env.example  # Allow example env file if needed
+.env*
 *.log
 logs/
  
