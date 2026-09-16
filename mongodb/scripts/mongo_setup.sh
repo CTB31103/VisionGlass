@@ -1,6 +1,10 @@
 #!/bin/bash
 sleep 10
 
+keep_running="true"
+counter=1
+
+connect() {
 echo SETUP.sh time now: `date +"%T" `
 mongosh --host mongodb1:$MONGO_PORT <<EOF
  var cfg = {
@@ -30,3 +34,20 @@ mongosh --host mongodb1:$MONGO_PORT <<EOF
  db.getMongo().setReadPref('nearest');
  db.getMongo().setSecondaryOk();
 EOF
+}
+
+while [ $keep_running = "true" ]; do
+  echo "Attempting connection $counter times"
+
+  if connect; then
+    echo "Connected database!"
+    keep_running="false"
+  else
+    echo "Could not connect :("
+    echo ""
+    ((counter++))
+    sleep 10
+  fi
+done
+
+
