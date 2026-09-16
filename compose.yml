@@ -176,11 +176,6 @@ services:
     restart: "no"
     container_name: mongodb-setup
     hostname: mongodb-setup
-    # build:
-    #   context: ./mongodb
-    #   dockerfile: Dockerfile
-    #   args:
-    #     - MONGO_IMAGE_VERSION=${MONGO_IMAGE_VERSION}
     depends_on:
       - mongodb-primary
       - mongodb-secondary-1

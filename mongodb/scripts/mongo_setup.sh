@@ -6,7 +6,7 @@ counter=1
 
 connect() {
 echo SETUP.sh time now: `date +"%T" `
-mongosh --host mongodb1:$MONGO_PORT <<EOF
+mongosh --host mongodb1:$MONGO_PORT -u $MONGO_INITDB_ROOT_USERNAME -p $MONGO_INITDB_ROOT_PASSWORD --authenticationDatabase admin <<EOF
  var cfg = {
    "_id": "$MONGO_REPL_NAME",
    "version": 1,
@@ -45,7 +45,7 @@ while [ $keep_running = "true" ]; do
   else
     echo "Could not connect :("
     echo ""
-    ((counter++))
+    counter=$((counter + 1))
     sleep 10
   fi
 done
