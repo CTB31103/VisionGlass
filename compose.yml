@@ -76,12 +76,12 @@ services:
       - NODE_ENV=prod
       - API_URL=https://${DOMAIN_NAME}/api
       - CLIENT_URL=https://${DOMAIN_NAME}
-      - MONGO_URL=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb1:${MONGO_PORT}/${MONGO_DATABASE_NAME}?authSource=admin&
+      - MONGO_URL=mongodb://primary:${MONGO_PORT}/${MONGO_DATABASE_NAME}?authSource=admin&
     depends_on:
       prod-ui:
         condition: service_started
         required: true
-      mongodb-setup:
+      setup-replica:
         condition: service_completed_successfully
         required: false
     volumes:
@@ -103,7 +103,7 @@ services:
       - NODE_ENV=dev
       - API_URL=http://localhost:${DEV_BE_PORT}
       - CLIENT_URL=http://localhost:${DEV_FE_PORT}
-      - MONGO_URL=mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@mongodb1:${MONGO_PORT}/${MONGO_DATABASE_NAME}?authSource=admin&
+      - MONGO_URL=mongodb://primary:${MONGO_PORT}/${MONGO_DATABASE_NAME}?authSource=admin&
     volumes:
       - ./server/src/uploads/test:/app/src/uploads/test
     profiles: [dev]
@@ -124,83 +124,63 @@ services:
   # ===========================
   # Database
   # ===========================
-  mongodb-primary:
-    image: mongodb/mongodb-community-server${MONGO_IMAGE_VERSION}
-    restart: always
-    container_name: mongodb1
-    hostname: mongodb1
-    command: --replSet ${MONGO_REPL_NAME}
+  primary:
+    hostname: primary
+    container_name: primary
+    build: ./mongodb/primary
+    volumes:
+      - ./mongodb/data/primary:/data/db
+    depends_on:
+      - secondary-1
+      - secondary-2
+    ports:
+      - 20718:27017
     networks:
       mongodb_network:
       web-network:
-    expose:
-      - ${MONGO_PORT}
-    volumes:
-      - ./mongodb/data/mongodb1:/data/db
-      - ./mongodb/scripts/mongo-init.js:/docker-entrypoint-initdb.d/mongo-init.js:ro # IMPORTANT for server to connect to db
-    profiles: ["prod", "dev", prod-db, dev-db, "db"]
-  mongodb-secondary-1:
-    image: mongodb/mongodb-community-server${MONGO_IMAGE_VERSION}
-    restart: always
-    container_name: mongodb2
-    hostname: mongodb2
-    command: --replSet ${MONGO_REPL_NAME}
-    networks:
-      mongodb_network:
-    expose:
-      - ${MONGO_PORT}
-    volumes:
-      - ./mongodb/data/mongodb2:/data/db
-    profiles: ["prod", "dev", prod-db, dev-db, "db"]
-  mongodb-secondary-2:
-    image: mongodb/mongodb-community-server${MONGO_IMAGE_VERSION}
-    restart: always
-    container_name: mongodb3
-    hostname: mongodb3
-    command: --replSet ${MONGO_REPL_NAME}
-    networks:
-      mongodb_network:
-    expose:
-      - ${MONGO_PORT}
-    environment:
-      DB: ${MONGO_DATABASE_NAME}
-    env_file:
-      - .env
-    volumes:
-      - ./mongodb/data/mongodb3:/data/db
-      - ./mongodb/scripts:/scripts
-    entrypoint: ["sh", "-c", "sh /scripts/mongo_backup_scheduler.sh"]
-    profiles: ["prod", "dev", prod-db, dev-db, "db"]
-  mongodb-setup:
-    image: mongodb/mongodb-community-server${MONGO_IMAGE_VERSION}
-    restart: "no"
-    container_name: mongodb-setup
-    hostname: mongodb-setup
-    depends_on:
-      - mongodb-primary
-      - mongodb-secondary-1
-      - mongodb-secondary-2
-    networks:
-      mongodb_network:
-    volumes:
-      - ./mongodb/scripts:/scripts
-    environment:
-      DB: ${MONGO_DATABASE_NAME}
-    env_file:
-      - .env
-    entrypoint:
-      [
-        "sh",
-        "-c",
-        "sed -i 's/\r$//' /scripts/mongo_setup.sh && sh /scripts/mongo_setup.sh",
-      ]
     profiles: ["prod", "dev", prod-db, dev-db, "db"]
 
-volumes:
-  nginx-html:
-  nginx-certs:
-  nginx-vhost:
-  acme:
+  secondary-1:
+    image: mongo:4
+    hostname: secondary-1
+    container_name: secondary-1
+    command: --replSet rs0 --oplogSize 128
+    ports:
+      - 20719:27017
+    volumes:
+      - ./mongodb/data/secondary-1:/data/db
+    networks:
+      mongodb_network:
+    profiles: ["prod", "dev", prod-db, dev-db, "db"]
+
+  secondary-2:
+    image: mongo:4
+    hostname: secondary-2
+    container_name: secondary-2
+    command: --replSet rs0 --oplogSize 128
+    ports:
+      - 20720:27017
+    volumes:
+      - ./mongodb/data/secondary-2:/data/db
+    networks:
+      mongodb_network:
+    profiles: ["prod", "dev", prod-db, dev-db, "db"]
+
+  setup-replica:
+    hostname: setup-replica
+    container_name: setup-replica
+    build: ./mongodb/setup
+    depends_on:
+      - primary
+    networks:
+      mongodb_network:
+    profiles: ["prod", "dev", prod-db, dev-db, "db"]
+
+# volumes:
+#   nginx-html:
+#   nginx-certs:
+#   nginx-vhost:
+#   acme:
 
 networks:
   web-network:
