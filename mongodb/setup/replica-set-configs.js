@@ -24,3 +24,10 @@ rs.reconfig(cfg, { force: true });
 rs.secondaryOk();
 db.getMongo().setReadPref("nearest");
 db.getMongo().setSecondaryOk();
+
+// db = db.getSiblingDB("admin");
+// db.createUser({
+//   user: "root",
+//   pwd: "password",
+//   roles: [{ role: "dbOwner", db: "admin" }],
+// });

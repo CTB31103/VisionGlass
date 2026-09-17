@@ -31,5 +31,31 @@ done
 echo "DB 'secondary-2' ready!"
 echo 
 
-# sleep 10 | echo "sleeping"
-mongo mongodb://primary:27017 replica-set-configs.js
+mongo --host mongodb://primary:$MONGO_PORT  <<EOF
+cfg = {
+  _id: $MONGO_REPL_NAME,
+  members: [
+    {
+      _id: 0,
+      host: "primary:$MONGO_PORT",
+      priority: 2,
+    },
+    {
+      _id: 1,
+      host: "secondary-1:$MONGO_PORT",
+      priority: 1,
+    },
+    {
+      _id: 2,
+      host: "secondary-2:$MONGO_PORT",
+      priority: 0,
+    },
+  ],
+};
+
+rs.initiate(cfg, { force: true });
+rs.reconfig(cfg, { force: true });
+rs.secondaryOk();
+db.getMongo().setReadPref("nearest");
+db.getMongo().setSecondaryOk();
+EOF

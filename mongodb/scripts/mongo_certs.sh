@@ -16,6 +16,6 @@ echo ""
 
 
 echo "Dropping privileges to mongod..."
-gosu -v
-exec gosu mongod "$@"
+# gosu -v
+# exec gosu mongod "$@"
 # exec su-exec mongod "$@"

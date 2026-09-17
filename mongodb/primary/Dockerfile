@@ -1,7 +1,5 @@
-FROM mongo:4
+ARG MONGO_IMAGE_VERSION
+FROM mongo${MONGO_IMAGE_VERSION}
 
-COPY mongo.conf /
-
-
-EXPOSE 27017
-CMD ["mongod", "--config", "/mongo.conf"]
+EXPOSE $MONGO_PORT
+CMD ["mongod"]

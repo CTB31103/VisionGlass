@@ -40,6 +40,7 @@ services:
     environment:
       - PORT=${DEV_FE_PORT}
       - VITE_API_URL=http://localhost:${DEV_BE_PORT}
+      - VITE_SERVER_API_KEY=${SERVER_API_KEY}
       - HOST=0.0.0.0
       - WDS_SOCKET_PORT=0
     profiles: [dev]
@@ -97,7 +98,6 @@ services:
       - "${DEV_BE_PORT}:${DEV_BE_PORT}"
     env_file:
       - .env
-      - ./server/.env
     environment:
       - PORT=${DEV_BE_PORT}
       - NODE_ENV=dev
@@ -127,87 +127,65 @@ services:
   primary:
     hostname: primary
     container_name: primary
-    build: ./mongodb/primary
+    build:
+      context: ./mongodb/primary
+      args:
+        - MONGO_IMAGE_VERSION=${MONGO_IMAGE_VERSION}
     volumes:
       - ./mongodb/data/primary:/data/db
     depends_on:
       - secondary-1
       - secondary-2
-    ports:
-      - 20718:27017
+    environment:
+      - MONGO_REPL_NAME=${MONGO_REPL_NAME}
+      - MONGO_PORT=${MONGO_PORT}
+    command: ["--oplogSize", "1024", "--replSet", "${MONGO_REPL_NAME}"]
     networks:
       mongodb_network:
       web-network:
     profiles: ["prod", "dev", prod-db, dev-db, "db"]
-
   secondary-1:
-    image: mongo:4
+    image: mongo${MONGO_IMAGE_VERSION}
     hostname: secondary-1
     container_name: secondary-1
-    command: --replSet rs0 --oplogSize 128
-    ports:
-      - 20719:27017
+    command: --replSet ${MONGO_REPL_NAME} --oplogSize 128
+    environment:
+      - MONGO_REPL_NAME=${MONGO_REPL_NAME}
     volumes:
       - ./mongodb/data/secondary-1:/data/db
     networks:
       mongodb_network:
     profiles: ["prod", "dev", prod-db, dev-db, "db"]
-
   secondary-2:
-    image: mongo:4
+    image: mongo${MONGO_IMAGE_VERSION}
     hostname: secondary-2
     container_name: secondary-2
-    command: --replSet rs0 --oplogSize 128
-    ports:
-      - 20720:27017
+    command: --replSet ${MONGO_REPL_NAME} --oplogSize 128
+    environment:
+      - MONGO_REPL_NAME=${MONGO_REPL_NAME}
     volumes:
       - ./mongodb/data/secondary-2:/data/db
     networks:
       mongodb_network:
     profiles: ["prod", "dev", prod-db, dev-db, "db"]
-
   setup-replica:
     hostname: setup-replica
     container_name: setup-replica
-    build: ./mongodb/setup
+    build:
+      context: ./mongodb/setup
+      args:
+        - MONGO_IMAGE_VERSION=${MONGO_IMAGE_VERSION}
     depends_on:
       - primary
+    environment:
+      - MONGO_REPL_NAME=${MONGO_REPL_NAME}
+      - MONGO_PORT=${MONGO_PORT}
     networks:
       mongodb_network:
     profiles: ["prod", "dev", prod-db, dev-db, "db"]
-
-# volumes:
-#   nginx-html:
-#   nginx-certs:
-#   nginx-vhost:
-#   acme:
 
 networks:
   web-network:
     driver: bridge
   mongodb_network:
     driver: bridge
-
-# ===========================
-# Start Commands
-# ===========================
-
-# docker compose build --no-cache && docker compose up
-# docker compose build prod-ui --no-cache && docker compose up prod-ui
-# docker compose build dev-ui --no-cache && docker compose up dev-ui --watch
-# docker compose build prod-server --no-cache && docker compose up prod-server
-# docker compose build dev-server --no-cache && docker compose up dev-server --watch
-# docker compose build mongodb-primary --no-cache && docker compose up mongodb-primary -d
-
-# docker compose down
-# docker compose down prod-ui
-# docker compose down dev-ui
-# docker compose down prod-server
-# docker compose down dev-server
-# docker compose down mongodb-primary -v
-
-# docker compose logs -f prod-ui
-# docker compose logs -f dev-ui
-# docker compose logs -f prod-server
-# docker compose logs -f dev-server
-# docker compose logs -f mongodb-primary
