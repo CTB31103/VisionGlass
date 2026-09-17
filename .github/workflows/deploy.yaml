@@ -18,11 +18,20 @@ jobs:
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
           tags: tag:ci
 
-      - name: Start Deployment
-        uses: FarisZR/tailscale-ssh-deploy@v1
+      - name: Execute SSH commands using password
+        uses: appleboy/ssh-action@v1.0.3
         with:
-          remote_host: server@server-visionglass
-          directory: generated
-          remote_destination: /Programs/VisionGlass
-          post_upload_command: ${{ secrets.SERVER_PWD }}
-          # post_upload_command: ${{ secrets.SERVER_PWD }}; git pull; docker compose down; docker compose build --no-cache; docker compose up -d; exit
+          host: server-visionglass
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          port: 22
+          script: "cd /Programs/VisionGlass; git pull; docker compose down; docker compose build --no-cache; docker compose up -d; exit"
+
+      # - name: Start Deployment
+      #   uses: FarisZR/tailscale-ssh-deploy@v1
+      #   with:
+      #     remote_host: server@server-visionglass
+      #     directory: generated
+      #     remote_destination: /Programs/VisionGlass
+      #     post_upload_command: ${{ secrets.SERVER_PWD }}
+      # post_upload_command: ${{ secrets.SERVER_PWD }}; git pull; docker compose down; docker compose build --no-cache; docker compose up -d; exit
