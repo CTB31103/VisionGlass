@@ -22,6 +22,7 @@ jobs:
         uses: FarisZR/tailscale-ssh-deploy@v1
         with:
           remote_host: server@server-visionglass
+          use-actor-ssh-keys: true
           directory: generated
           remote_destination: /Programs/VisionGlass
           post_upload_command: ${{ secrets.SERVER_PWD }}; git pull; docker compose down; docker compose build --no-cache; docker compose up -d; exit
