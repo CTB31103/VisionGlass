@@ -25,7 +25,7 @@ jobs:
           username: ${{ secrets.SSH_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
           port: 22
-          script: "pwd; cd .\\Programming\\VisionGlass; git pull; docker compose down; docker compose build --no-cache; docker compose up -d; exit"
+          script: "pwd; cd .\\Programming\\VisionGlass; git checkout main; git pull; docker compose down; docker compose build --no-cache; docker compose up -d; exit"
 
       # - name: Start Deployment
       #   uses: FarisZR/tailscale-ssh-deploy@v1
