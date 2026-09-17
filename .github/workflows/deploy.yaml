@@ -21,7 +21,7 @@ jobs:
       - name: Execute SSH commands using password
         uses: appleboy/ssh-action@v1.0.3
         with:
-          host: server-visionglass
+          host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USERNAME }}
           password: ${{ secrets.SSH_PASSWORD }}
           port: 22
