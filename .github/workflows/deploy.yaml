@@ -1,33 +1,27 @@
-# name: VisionGlass - CI/CD
+name: VisionGlass - CI/CD
 
-# on:
-#   push:
-#     branches:
-#       - main
+on:
+  push:
+    branches:
+      - main
 
-# jobs:
-- name: Setup Tailscale
-  uses: tailscale/github-action@v2
-  environment: prod
-  on:
-    push:
-      branches:
-        - main
-  with:
-    hostname: Github-actions
-    oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-    oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
-    tags: tag:ci
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: prod
+    steps:
+      - name: Setup Tailscale
+        uses: tailscale/github-action@v2
+        with:
+          hostname: Github-actions
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
 
-- name: Start Deployment
-  uses: FarisZR/tailscale-ssh-deploy@v1
-  environment: prod
-  on:
-    push:
-      branches:
-        - main
-  with:
-    remote_host: server@server-visionglass
-    directory: generated
-    remote_destination: /Programs/VisionGlass
-    post_upload_command: git pull; docker compose down; docker compose build --no-cache; docker compose up -d; exit
+      - name: Start Deployment
+        uses: FarisZR/tailscale-ssh-deploy@v1
+        with:
+          remote_host: server@server-visionglass
+          directory: generated
+          remote_destination: /Programs/VisionGlass
+          post_upload_command: git pull; docker compose down; docker compose build --no-cache; docker compose up -d; exit
